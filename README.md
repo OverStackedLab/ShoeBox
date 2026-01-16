@@ -14,12 +14,81 @@ yarn install
 yarn start
 ```
 
-To make things work on your local simulator, or on your phone, you need first to [run `eas build`](https://github.com/infinitered/ignite/blob/master/docs/expo/EAS.md). We have many shortcuts on `package.json` to make it easier:
+To make things work on your local simulator, or on your phone, you need first to [run `eas build`](https://github.com/infinitered/ignite/blob/master/docs/expo/EAS.md). We have many shortcuts on `package.json` to make it easier.
+
+## Available Commands
+
+### 🚀 Development
 
 ```bash
-yarn build:ios:sim # build for ios simulator
-yarn build:ios:device # build for ios device
-yarn build:ios:prod # build for ios device
+yarn start              # Start Expo dev server with dev client
+yarn ios                # Run app on iOS device/simulator
+yarn android            # Run app on Android device/emulator
+yarn web                # Start web development server
+```
+
+### 🔨 Building
+
+**iOS Builds (Local)**
+
+```bash
+yarn build:ios:sim      # Build for iOS simulator (development)
+yarn build:ios:device   # Build for iOS device (development)
+yarn build:ios:preview  # Build iOS preview version
+yarn build:ios:prod     # Build iOS production version
+```
+
+**Android Builds (Local)**
+
+```bash
+yarn build:android:sim      # Build for Android emulator (development)
+yarn build:android:device   # Build for Android device (development)
+yarn build:android:preview  # Build Android preview version
+yarn build:android:prod     # Build Android production version
+```
+
+**Other**
+
+```bash
+yarn prebuild:clean     # Clean and regenerate native directories
+```
+
+### ✅ Code Quality
+
+```bash
+yarn compile            # Type-check TypeScript without emitting files
+yarn lint               # Run ESLint and auto-fix issues
+yarn lint:check         # Run ESLint without auto-fixing
+```
+
+### 🧪 Testing
+
+```bash
+yarn test               # Run Jest tests
+yarn test:watch         # Run Jest in watch mode
+yarn test:maestro       # Run Maestro E2E tests
+```
+
+### 📦 Dependencies & Analysis
+
+```bash
+yarn align-deps         # Align dependencies with Expo SDK versions
+yarn depcruise          # Analyze dependency structure
+yarn depcruise:graph    # Generate visual dependency graph (SVG & PNG)
+```
+
+### 🌐 Web
+
+```bash
+yarn bundle:web         # Export web app for production
+yarn serve:web          # Serve the built web app from dist folder
+```
+
+### 🛠️ Android Debugging
+
+```bash
+yarn adb                # Configure ADB reverse proxy for Metro bundler
+                        # Maps ports: 9090, 3000, 9001, 8081
 ```
 
 ### `./assets`

@@ -1706,6 +1706,18 @@
   resolved "https://registry.yarnpkg.com/@humanwhocodes/retry/-/retry-0.4.3.tgz#c2b9d2e374ee62c586d3adbea87199b1d7a7a6ba"
   integrity sha512-bV0Tgo9K4hfPCek+aMAn81RppFKv2ySDQeMoSZuvTASywNTnVJCArCZE2FWqpvIatKu7VMRLWlR1EazvVhDyhQ==
 
+"@infinitered/react-native-mlkit-core@5.0.0":
+  version "5.0.0"
+  resolved "https://registry.yarnpkg.com/@infinitered/react-native-mlkit-core/-/react-native-mlkit-core-5.0.0.tgz#70ee455b2c345aef6a74243eb0369f61a2940c8c"
+  integrity sha512-nss4q75/u8zMF4nhgsaO/MgBSO6WHfMAEE11yx7r7/LGTP12pRu6lOKgT8cGgVrmpsVlKjv7f4USeT2/wTMGVw==
+
+"@infinitered/react-native-mlkit-document-scanner@^5.0.0":
+  version "5.0.0"
+  resolved "https://registry.yarnpkg.com/@infinitered/react-native-mlkit-document-scanner/-/react-native-mlkit-document-scanner-5.0.0.tgz#199d5dc9f95754f5636827e56851c0d85b907b7f"
+  integrity sha512-sZEtUMK4QNpMpqz/3a1Xzt+Nh2GGKBxCMD0Bg7MNAvw2rPCvkekCMSkwvHn363OMLyoKkzrJ84FbFmy78VEgXQ==
+  dependencies:
+    "@infinitered/react-native-mlkit-core" "5.0.0"
+
 "@isaacs/balanced-match@^4.0.1":
   version "4.0.1"
   resolved "https://registry.yarnpkg.com/@isaacs/balanced-match/-/balanced-match-4.0.1.tgz#3081dadbc3460661b751e7591d7faea5df39dd29"

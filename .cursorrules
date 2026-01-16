@@ -1,0 +1,36 @@
+# Expo/React Native Commit Message Generator
+
+When I ask you to generate a commit message:
+
+1. Run the following git commands in parallel:
+   - `git status` to see all staged and untracked files
+   - `git diff --staged` to see staged changes
+   - `git log -10 --pretty=format:"%h - %s"` to understand commit message style
+
+2. Analyze the staged changes and determine:
+   - The nature of the changes (feature, fix, config, refactor, etc.)
+   - The primary purpose and impact
+   - Any related files or systems affected
+
+3. Draft a commit message following this format:
+   - First line: Clear, concise summary (50-72 chars) starting with a verb
+   - Blank line
+   - Body: 1-2 sentences explaining the "why" and key details
+   - Use present tense, imperative mood (e.g., "Add", "Update", "Fix")
+   - For Expo/React Native projects, mention platform-specific changes (iOS, Android, web)
+
+4. Present the commit message in a code block and ask: "Would you like me to commit these changes with this message?"
+
+5. WAIT for my confirmation before running `git commit`
+
+6. Only after I confirm, execute the commit using:
+   ```bash
+   git commit -m "$(cat <<'EOF'
+   [commit message here]
+   EOF
+   )"
+   ```
+
+7. After committing, show `git status` to confirm success
+
+IMPORTANT: Never commit automatically. Always show the message and wait for explicit confirmation.

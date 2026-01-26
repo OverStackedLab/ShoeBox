@@ -1086,6 +1086,11 @@
   resolved "https://registry.yarnpkg.com/@bcoe/v8-coverage/-/v8-coverage-0.2.3.tgz#75a2e8b51cb758a7553d6804a5932d7aace75c39"
   integrity sha512-0hYQ8SB4Db5zvZB4axdMHGwEaQjkZzFjQiN9LVYvIFB2nSUHW9tYpxWriPrWDASIxiaXax83REcLxuSdnGPZtw==
 
+"@dariyd/react-native-document-scanner@^2.0.17":
+  version "2.0.17"
+  resolved "https://registry.yarnpkg.com/@dariyd/react-native-document-scanner/-/react-native-document-scanner-2.0.17.tgz#a056fd69642a6619f2be3a540f7171e1f334a6dc"
+  integrity sha512-4u89lDIUtTv+46lsgXMkmlpAW6ImBVHvzYw7QiFby+7Y8DTANUSCBDJYBz4KGvwrdfNoK/xO0/A/YZ8p6U+Jow==
+
 "@egjs/hammerjs@^2.0.17":
   version "2.0.17"
   resolved "https://registry.yarnpkg.com/@egjs/hammerjs/-/hammerjs-2.0.17.tgz#5dc02af75a6a06e4c2db0202cae38c9263895124"

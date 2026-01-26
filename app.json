@@ -39,8 +39,10 @@
       ]
     },
     "infoPlist": {
-      "ITSAppUsesNonExemptEncryption": false
-    }
+      "ITSAppUsesNonExemptEncryption": false,
+      "NSCameraUsageDescription": "We need camera access to scan documents"
+    },
+    "appleTeamId": "H465RAQ7RY"
   },
   "web": {
     "favicon": "./assets/images/app-icon-web-favicon.png",

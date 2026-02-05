@@ -14,6 +14,7 @@ import { useAppTheme } from "@/theme/context"
 import type { ThemedStyle } from "@/theme/types"
 
 import type { DemoTabParamList } from "./navigationTypes"
+import { DemoShowroomScreen } from "@/screens/DemoShowroomScreen/DemoShowroomScreen"
 
 const Tab = createBottomTabNavigator<DemoTabParamList>()
 
@@ -61,7 +62,7 @@ export function TabNavigator() {
 
         <Tab.Screen
           name="DemoCommunity"
-          component={DemoCommunityScreen}
+          component={DemoShowroomScreen}
           options={{
             tabBarLabel: translate("demoNavigator:communityTab"),
             tabBarIcon: ({ focused }) => (

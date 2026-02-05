@@ -1,5 +1,6 @@
-import { createBottomTabNavigator } from "@react-navigation/bottom-tabs"
 import { TextStyle, ViewStyle } from "react-native"
+import { Ionicons } from "@expo/vector-icons"
+import { createBottomTabNavigator } from "@react-navigation/bottom-tabs"
 import { useSafeAreaInsets } from "react-native-safe-area-context"
 
 import { Icon } from "@/components/Icon"
@@ -8,7 +9,7 @@ import { translate } from "@/i18n/translate"
 import { DemoCommunityScreen } from "@/screens/DemoCommunityScreen"
 import { DemoDebugScreen } from "@/screens/DemoDebugScreen"
 import { DemoPodcastListScreen } from "@/screens/DemoPodcastListScreen"
-import { DocumentScanner } from "@/screens/DocumentScannerScreen"
+import { HomeScreen } from "@/screens/HomeScreen"
 import { useAppTheme } from "@/theme/context"
 import type { ThemedStyle } from "@/theme/types"
 
@@ -21,9 +22,9 @@ const Tab = createBottomTabNavigator<DemoTabParamList>()
  * Each tab is a stack navigator with its own set of screens.
  *
  * More info: https://reactnavigation.org/docs/bottom-tab-navigator/
- * @returns {JSX.Element} The rendered `DemoNavigator`.
+ * @returns {JSX.Element} The rendered `TabNavigator`.
  */
-export function DemoNavigator() {
+export function TabNavigator() {
   const { bottom } = useSafeAreaInsets()
   const {
     themed,
@@ -44,13 +45,13 @@ export function DemoNavigator() {
         }}
       >
         <Tab.Screen
-          name="DemoShowroom"
-          component={DocumentScanner}
+          name="Home"
+          component={HomeScreen}
           options={{
             tabBarLabel: translate("demoNavigator:componentsTab"),
             tabBarIcon: ({ focused }) => (
-              <Icon
-                icon="components"
+              <Ionicons
+                name={focused ? "home" : "home-outline"}
                 color={focused ? colors.tint : colors.tintInactive}
                 size={30}
               />

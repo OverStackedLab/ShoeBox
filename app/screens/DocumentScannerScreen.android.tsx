@@ -8,12 +8,12 @@ import {
 import { Button } from "@/components/Button"
 import { Screen } from "@/components/Screen"
 import { Text } from "@/components/Text"
-import type { AppStackScreenProps } from "@/navigators/navigationTypes"
+import type { DemoTabScreenProps } from "@/navigators/navigationTypes"
 import { useAppTheme } from "@/theme/context"
 import type { ThemedStyle } from "@/theme/types"
 import { useHeader } from "@/utils/useHeader"
 
-interface DocumentScannerProps extends AppStackScreenProps<"Scanner"> {}
+interface DocumentScannerProps extends DemoTabScreenProps<"Home"> {}
 
 export const DocumentScanner: FC<DocumentScannerProps> = function DocumentScanner(_props) {
   const { themed } = useAppTheme()

@@ -9,10 +9,10 @@ import { ComponentProps } from "react"
 
 // Demo Tab Navigator types
 export type DemoTabParamList = {
+  Home: undefined
   DemoCommunity: undefined
-  DemoShowroom: { queryIndex?: string; itemIndex?: string }
-  DemoDebug: undefined
   DemoPodcastList: undefined
+  DemoDebug: undefined
 }
 
 // App Stack Navigator types

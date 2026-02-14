@@ -27,7 +27,8 @@
   "ios": {
     "icon": "./assets/images/app-icon-ios.png",
     "supportsTablet": true,
-    "bundleIdentifier": "com.overstacked.shoebox"
+    "bundleIdentifier": "com.overstacked.shoebox",
+    "appleTeamId": "H465RAQ7RY"
   },
   "web": {
     "favicon": "./assets/images/app-icon-web-favicon.png",

@@ -1,13 +1,14 @@
 import { TextStyle, ViewStyle } from "react-native"
+import { MaterialCommunityIcons } from "@expo/vector-icons"
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs"
 import { useSafeAreaInsets } from "react-native-safe-area-context"
 
 import { Icon } from "@/components/Icon"
-import { EpisodeProvider } from "@/context/EpisodeContext"
+
 import { translate } from "@/i18n/translate"
 import { DemoCommunityScreen } from "@/screens/DemoCommunityScreen"
 import { DemoDebugScreen } from "@/screens/DemoDebugScreen"
-import { DemoPodcastListScreen } from "@/screens/DemoPodcastListScreen"
+import { AnalyticsScreen } from "@/screens/AnalyticsScreen"
 import { DemoShowroomScreen } from "@/screens/DemoShowroomScreen/DemoShowroomScreen"
 import { useAppTheme } from "@/theme/context"
 import type { ThemedStyle } from "@/theme/types"
@@ -31,13 +32,12 @@ export function DemoNavigator() {
   } = useAppTheme()
 
   return (
-    <EpisodeProvider>
-      <Tab.Navigator
+    <Tab.Navigator
         screenOptions={{
           headerShown: false,
           tabBarHideOnKeyboard: true,
           tabBarStyle: themed([$tabBar, { height: bottom + 70 }]),
-          tabBarActiveTintColor: colors.text,
+          tabBarActiveTintColor: "#90c853",
           tabBarInactiveTintColor: colors.text,
           tabBarLabelStyle: themed($tabBarLabel),
           tabBarItemStyle: themed($tabBarItem),
@@ -51,7 +51,7 @@ export function DemoNavigator() {
             tabBarIcon: ({ focused }) => (
               <Icon
                 icon="components"
-                color={focused ? colors.tint : colors.tintInactive}
+                color={focused ? "#90c853" : colors.tintInactive}
                 size={30}
               />
             ),
@@ -66,7 +66,7 @@ export function DemoNavigator() {
             tabBarIcon: ({ focused }) => (
               <Icon
                 icon="community"
-                color={focused ? colors.tint : colors.tintInactive}
+                color={focused ? "#90c853" : colors.tintInactive}
                 size={30}
               />
             ),
@@ -74,13 +74,17 @@ export function DemoNavigator() {
         />
 
         <Tab.Screen
-          name="DemoPodcastList"
-          component={DemoPodcastListScreen}
+          name="Analytics"
+          component={AnalyticsScreen}
           options={{
-            tabBarAccessibilityLabel: translate("demoNavigator:podcastListTab"),
-            tabBarLabel: translate("demoNavigator:podcastListTab"),
+            tabBarAccessibilityLabel: "Analytics",
+            tabBarLabel: "Analytics",
             tabBarIcon: ({ focused }) => (
-              <Icon icon="podcast" color={focused ? colors.tint : colors.tintInactive} size={30} />
+              <MaterialCommunityIcons
+                name="google-analytics"
+                color={focused ? "#90c853" : colors.tintInactive}
+                size={30}
+              />
             ),
           }}
         />
@@ -95,8 +99,7 @@ export function DemoNavigator() {
             ),
           }}
         />
-      </Tab.Navigator>
-    </EpisodeProvider>
+    </Tab.Navigator>
   )
 }
 

@@ -30,7 +30,7 @@ import { Switch } from "@/components/Toggle/Switch"
 import { useEpisodes, useEpisode } from "@/context/EpisodeContext"
 import { isRTL } from "@/i18n"
 import { translate } from "@/i18n/translate"
-import { DemoTabScreenProps } from "@/navigators/navigationTypes"
+import type { AppStackScreenProps } from "@/navigators/navigationTypes"
 import type { EpisodeItem } from "@/services/api/types"
 import { useAppTheme } from "@/theme/context"
 import { $styles } from "@/theme/styles"
@@ -46,7 +46,7 @@ const rnrImage3 = require("@assets/images/demo/rnr-image-3.png")
 
 const rnrImages = [rnrImage1, rnrImage2, rnrImage3]
 
-export const DemoPodcastListScreen: FC<DemoTabScreenProps<"DemoPodcastList">> = (_props) => {
+export const DemoPodcastListScreen: FC<AppStackScreenProps<"Home">> = (_props) => {
   const { themed } = useAppTheme()
   const {
     totalEpisodes,

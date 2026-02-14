@@ -6,7 +6,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context"
 import { AnalyticsScreen } from "@/screens/AnalyticsScreen"
 import { DemoCommunityScreen } from "@/screens/DemoCommunityScreen"
 import { DemoDebugScreen } from "@/screens/DemoDebugScreen"
-import { DemoShowroomScreen } from "@/screens/DemoShowroomScreen/DemoShowroomScreen"
+import { HomeScreen } from "@/screens/HomeScreen"
 import { useAppTheme } from "@/theme/context"
 import type { ThemedStyle } from "@/theme/types"
 
@@ -42,7 +42,7 @@ export function DemoNavigator() {
     >
       <Tab.Screen
         name="DemoShowroom"
-        component={DemoShowroomScreen}
+        component={HomeScreen}
         options={{
           tabBarLabel: "Home",
           tabBarIcon: ({ focused }) => (

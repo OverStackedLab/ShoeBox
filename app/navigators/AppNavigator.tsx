@@ -12,6 +12,7 @@ import { useAuth } from "@/context/AuthContext"
 import { ErrorBoundary } from "@/screens/ErrorScreen/ErrorBoundary"
 import { HomeScreen } from "@/screens/HomeScreen"
 import { LoginScreen } from "@/screens/LoginScreen"
+import { ReceiptDetailScreen } from "@/screens/ReceiptDetailScreen"
 import { WelcomeScreen } from "@/screens/WelcomeScreen"
 import { useAppTheme } from "@/theme/context"
 
@@ -53,6 +54,8 @@ const AppStack = () => {
           <Stack.Screen name="Home" component={HomeScreen} />
 
           <Stack.Screen name="Demo" component={DemoNavigator} />
+
+          <Stack.Screen name="ReceiptDetail" component={ReceiptDetailScreen} />
         </>
       ) : (
         <>

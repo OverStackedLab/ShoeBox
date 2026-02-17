@@ -1,6 +1,6 @@
 import { FC } from "react"
 import { Dimensions, TextStyle, TouchableOpacity, View, ViewStyle } from "react-native"
-import { MaterialCommunityIcons } from "@expo/vector-icons"
+import { AntDesign, MaterialCommunityIcons } from "@expo/vector-icons"
 import { BarChart } from "react-native-chart-kit"
 
 import { Card } from "@/components/Card"
@@ -15,7 +15,7 @@ import type { ThemedStyle } from "@/theme/types"
 const SCREEN_PADDING = 24
 const CHART_WIDTH = Dimensions.get("window").width - SCREEN_PADDING * 2
 const ACCENT_ORANGE = "#E8981E"
-const SCAN_BUTTON_SIZE = 120
+const SCAN_BUTTON_SIZE = 220
 
 interface ExpenseItem {
   id: string
@@ -85,7 +85,7 @@ export const HomeScreen: FC<HomeScreenProps> = function HomeScreen() {
           <View style={$scanCardContent}>
             <View style={themed($scanButtonRing)}>
               <TouchableOpacity style={$scanButton} activeOpacity={0.8}>
-                <MaterialCommunityIcons name="qrcode-scan" size={40} color="#FFFFFF" />
+                <AntDesign name="scan" size={100} color="#FFFFFF" />
               </TouchableOpacity>
             </View>
             <Text text="Scan Receipt" weight="medium" size="sm" style={themed($scanLabel)} />
@@ -194,9 +194,7 @@ const $headerTitle: TextStyle = {
 
 const $scanCard: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
   backgroundColor: colors.background,
-  borderRadius: 16,
-  borderWidth: 1,
-  borderColor: colors.border,
+  borderWidth: 0,
   paddingVertical: spacing.lg,
   marginBottom: spacing.md,
   alignItems: "center",
@@ -214,7 +212,7 @@ const $scanButtonRing: ThemedStyle<ViewStyle> = ({ colors }) => ({
   width: SCAN_BUTTON_SIZE + 16,
   height: SCAN_BUTTON_SIZE + 16,
   borderRadius: (SCAN_BUTTON_SIZE + 16) / 2,
-  borderWidth: 3,
+  borderWidth: 1,
   borderColor: colors.border,
   alignItems: "center",
   justifyContent: "center",

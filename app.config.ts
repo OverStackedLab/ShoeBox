@@ -36,6 +36,19 @@ module.exports = ({ config }: ConfigContext): Partial<ExpoConfig> => {
         ],
       },
     },
-    plugins: [...existingPlugins],
+    plugins: [
+      ...existingPlugins,
+      [
+        "expo-build-properties",
+        {
+          ios: {
+            infoPlist: {
+              NSCameraUsageDescription:
+                "ShoeBox needs camera access to scan receipts and documents.",
+            },
+          },
+        },
+      ],
+    ],
   }
 }

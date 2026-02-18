@@ -21,7 +21,10 @@ export type AppStackParamList = {
   Login: undefined
   Home: undefined
   Demo: NavigatorScreenParams<DemoTabParamList>
-  ReceiptDetail: { receiptId: string }
+  ReceiptDetail: {
+    receiptId: string
+    scannedImages?: Array<{ uri: string; width: number; height: number }>
+  }
   // 🔥 Your screens go here
   // IGNITE_GENERATOR_ANCHOR_APP_STACK_PARAM_LIST
 }

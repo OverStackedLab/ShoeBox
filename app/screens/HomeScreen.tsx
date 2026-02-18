@@ -1,7 +1,10 @@
 import { FC } from "react"
 import { Dimensions, TextStyle, TouchableOpacity, View, ViewStyle } from "react-native"
+import * as Device from "expo-device"
+import { launchScanner } from "@dariyd/react-native-document-scanner"
 import { AntDesign, MaterialCommunityIcons } from "@expo/vector-icons"
 import { BarChart } from "react-native-chart-kit"
+import { toast } from "sonner-native"
 
 import { Card } from "@/components/Card"
 import { Header } from "@/components/Header"
@@ -56,11 +59,44 @@ const monthlySpendingData = {
 
 interface HomeScreenProps extends DemoTabScreenProps<"DemoShowroom"> {}
 
-export const HomeScreen: FC<HomeScreenProps> = function HomeScreen() {
+export const HomeScreen: FC<HomeScreenProps> = function HomeScreen({ navigation }) {
   const {
     themed,
     theme: { colors },
   } = useAppTheme()
+
+  const handleScanReceipt = async () => {
+    if (!Device.isDevice) {
+      toast.warning("Document scanning requires a physical device.")
+      return
+    }
+
+    try {
+      const result = await launchScanner({ quality: 0.8 })
+
+      if (result.didCancel) return
+
+      if (result.error) {
+        toast.error(result.errorMessage ?? "Something went wrong.")
+        return
+      }
+
+      if (result.images?.length) {
+        const scannedImages = result.images.map((img) => ({
+          uri: img.uri,
+          width: img.width,
+          height: img.height,
+        }))
+
+        navigation.getParent()?.navigate("ReceiptDetail", {
+          receiptId: Date.now().toString(),
+          scannedImages,
+        })
+      }
+    } catch {
+      toast.error("Failed to launch the document scanner.")
+    }
+  }
 
   return (
     <Screen
@@ -84,7 +120,7 @@ export const HomeScreen: FC<HomeScreenProps> = function HomeScreen() {
         ContentComponent={
           <View style={$scanCardContent}>
             <View style={themed($scanButtonRing)}>
-              <TouchableOpacity style={$scanButton} activeOpacity={0.8}>
+              <TouchableOpacity style={$scanButton} activeOpacity={0.8} onPress={handleScanReceipt}>
                 <AntDesign name="scan" size={100} color="#FFFFFF" />
               </TouchableOpacity>
             </View>

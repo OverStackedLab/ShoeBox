@@ -11,9 +11,7 @@
   },
   "newArchEnabled": true,
   "jsEngine": "hermes",
-  "assetBundlePatterns": [
-    "**/*"
-  ],
+  "assetBundlePatterns": ["**/*"],
   "android": {
     "icon": "./assets/images/app-icon-android-legacy.png",
     "package": "com.overstacked.shoebox",
@@ -28,7 +26,10 @@
     "icon": "./assets/images/app-icon-ios.png",
     "supportsTablet": true,
     "bundleIdentifier": "com.overstacked.shoebox",
-    "appleTeamId": "H465RAQ7RY"
+    "appleTeamId": "H465RAQ7RY",
+    "infoPlist": {
+      "NSCameraUsageDescription": "ShoeBox needs camera access to scan receipts and documents."
+    }
   },
   "web": {
     "favicon": "./assets/images/app-icon-web-favicon.png",

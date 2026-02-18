@@ -19,10 +19,13 @@ if (__DEV__) {
 import "./utils/gestureHandler"
 
 import { useEffect, useState } from "react"
+import { Pressable, ViewStyle } from "react-native"
 import { useFonts } from "expo-font"
 import * as Linking from "expo-linking"
+import { GestureHandlerRootView } from "react-native-gesture-handler"
 import { KeyboardProvider } from "react-native-keyboard-controller"
 import { initialWindowMetrics, SafeAreaProvider } from "react-native-safe-area-context"
+import { toast, Toaster } from "sonner-native"
 
 import { AuthProvider } from "./context/AuthContext"
 import { initI18n } from "./i18n"
@@ -34,6 +37,9 @@ import { loadDateFnsLocale } from "./utils/formatDate"
 import * as storage from "./utils/storage"
 
 export const NAVIGATION_PERSISTENCE_KEY = "NAVIGATION_STATE"
+
+const $rootView: ViewStyle = { flex: 1 }
+const $toastWrapper: ViewStyle = { width: "100%" }
 
 // Web linking configuration
 const prefix = Linking.createURL("/")
@@ -94,18 +100,31 @@ export function App() {
 
   // otherwise, we're ready to render the app
   return (
-    <SafeAreaProvider initialMetrics={initialWindowMetrics}>
-      <KeyboardProvider>
-        <AuthProvider>
-          <ThemeProvider>
-            <AppNavigator
-              linking={linking}
-              initialState={initialNavigationState}
-              onStateChange={onNavigationStateChange}
-            />
-          </ThemeProvider>
-        </AuthProvider>
-      </KeyboardProvider>
-    </SafeAreaProvider>
+    <GestureHandlerRootView style={$rootView}>
+      <SafeAreaProvider initialMetrics={initialWindowMetrics}>
+        <KeyboardProvider>
+          <AuthProvider>
+            <ThemeProvider>
+              <AppNavigator
+                linking={linking}
+                initialState={initialNavigationState}
+                onStateChange={onNavigationStateChange}
+              />
+              <Toaster
+                ToastWrapper={({ toastId, children, style, ...props }) => (
+                  <Pressable
+                    {...props}
+                    style={[style, $toastWrapper]}
+                    onPress={() => toast.dismiss(toastId)}
+                  >
+                    {children}
+                  </Pressable>
+                )}
+              />
+            </ThemeProvider>
+          </AuthProvider>
+        </KeyboardProvider>
+      </SafeAreaProvider>
+    </GestureHandlerRootView>
   )
 }

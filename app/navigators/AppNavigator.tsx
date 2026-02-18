@@ -16,7 +16,7 @@ import { ReceiptDetailScreen } from "@/screens/ReceiptDetailScreen"
 import { WelcomeScreen } from "@/screens/WelcomeScreen"
 import { useAppTheme } from "@/theme/context"
 
-import { DemoNavigator } from "./DemoNavigator"
+import { TabNavigator } from "./TabNavigator"
 import type { AppStackParamList, NavigationProps } from "./navigationTypes"
 import { navigationRef, useBackButtonHandler } from "./navigationUtilities"
 
@@ -53,7 +53,7 @@ const AppStack = () => {
 
           <Stack.Screen name="Home" component={HomeScreen} />
 
-          <Stack.Screen name="Demo" component={DemoNavigator} />
+          <Stack.Screen name="Demo" component={TabNavigator} />
 
           <Stack.Screen name="ReceiptDetail" component={ReceiptDetailScreen} />
         </>

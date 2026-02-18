@@ -1338,6 +1338,11 @@
     "@eslint/core" "^0.17.0"
     levn "^0.4.1"
 
+"@expo-google-fonts/roboto@^0.4.2":
+  version "0.4.2"
+  resolved "https://registry.yarnpkg.com/@expo-google-fonts/roboto/-/roboto-0.4.2.tgz#170311c2cba3d15b939cfdf67a9b222bdc0f7177"
+  integrity sha512-7QRe4LNFzLIaPCTp9PZE3Cfa92L0vxqACZMTuMOzOQxYiGC9kUfQulKh6CLqxTpn3HHbXO1NHyENblXJvRo0Sg==
+
 "@expo-google-fonts/space-grotesk@^0.4.0":
   version "0.4.1"
   resolved "https://registry.yarnpkg.com/@expo-google-fonts/space-grotesk/-/space-grotesk-0.4.1.tgz#cb1f58e17e9bc91d2b87270d37cb26cd6b6773ac"

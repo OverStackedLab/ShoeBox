@@ -3,6 +3,12 @@
 
 import { Platform } from "react-native"
 import {
+  Roboto_300Light as robotoLight,
+  Roboto_400Regular as robotoRegular,
+  Roboto_500Medium as robotoMedium,
+  Roboto_700Bold as robotoBold,
+} from "@expo-google-fonts/roboto"
+import {
   SpaceGrotesk_300Light as spaceGroteskLight,
   SpaceGrotesk_400Regular as spaceGroteskRegular,
   SpaceGrotesk_500Medium as spaceGroteskMedium,
@@ -11,6 +17,10 @@ import {
 } from "@expo-google-fonts/space-grotesk"
 
 export const customFontsToLoad = {
+  robotoLight,
+  robotoRegular,
+  robotoMedium,
+  robotoBold,
   spaceGroteskLight,
   spaceGroteskRegular,
   spaceGroteskMedium,
@@ -19,6 +29,14 @@ export const customFontsToLoad = {
 }
 
 const fonts = {
+  roboto: {
+    // Cross-platform Google font.
+    light: "robotoLight",
+    normal: "robotoRegular",
+    medium: "robotoMedium",
+    semiBold: "robotoMedium",
+    bold: "robotoBold",
+  },
   spaceGrotesk: {
     // Cross-platform Google font.
     light: "spaceGroteskLight",
@@ -59,7 +77,7 @@ export const typography = {
   /**
    * The primary font. Used in most places.
    */
-  primary: fonts.spaceGrotesk,
+  primary: fonts.roboto,
   /**
    * An alternate font used for perhaps titles and stuff.
    */

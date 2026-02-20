@@ -3,6 +3,7 @@ import { LayoutAnimation, TextStyle, View, ViewStyle } from "react-native"
 import * as Application from "expo-application"
 import { MaterialCommunityIcons } from "@expo/vector-icons"
 
+import { Button } from "@/components/Button"
 import { Card } from "@/components/Card"
 import { Header } from "@/components/Header"
 import { ListItem } from "@/components/ListItem"
@@ -62,8 +63,8 @@ export const ProfileScreen: FC<ProfileScreenProps> = function ProfileScreen() {
       />
 
       {/* Settings */}
+      <Text text="Settings" size="sm" weight="bold" uppercase style={themed($sectionHeading)} />
       <Card
-        heading="Settings"
         style={themed($card)}
         ContentComponent={
           <ListItem
@@ -79,30 +80,9 @@ export const ProfileScreen: FC<ProfileScreenProps> = function ProfileScreen() {
         }
       />
 
-      {/* Account */}
-      <Card
-        heading="Account"
-        style={themed($card)}
-        ContentComponent={
-          <ListItem
-            text="Sign Out"
-            textStyle={$signOutText}
-            onPress={logout}
-            LeftComponent={
-              <MaterialCommunityIcons
-                name="door-open"
-                size={20}
-                color={colors.error}
-                style={$leftIcon}
-              />
-            }
-          />
-        }
-      />
-
       {/* App Info */}
+      <Text text="App Info" size="sm" weight="semiBold" uppercase style={themed($sectionHeading)} />
       <Card
-        heading="App Info"
         style={themed($card)}
         ContentComponent={
           <>
@@ -130,6 +110,16 @@ export const ProfileScreen: FC<ProfileScreenProps> = function ProfileScreen() {
           </>
         }
       />
+
+      {/* Account */}
+      <Text text="Account" size="sm" weight="semiBold" uppercase style={themed($sectionHeading)} />
+      <Button
+        preset="filled"
+        text="Sign Out"
+        onPress={logout}
+        style={$signOutButton}
+        textStyle={$signOutText}
+      />
     </Screen>
   )
 }
@@ -140,11 +130,12 @@ const $container: ThemedStyle<ViewStyle> = ({ spacing }) => ({
 })
 
 const $card: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
-  borderRadius: 16,
+  borderRadius: 8,
   borderWidth: 1,
   borderColor: colors.border,
-  padding: spacing.md,
-  marginBottom: spacing.md,
+  paddingHorizontal: spacing.md,
+  paddingVertical: spacing.xxs,
+  marginBottom: spacing.xs,
   shadowOpacity: 0,
   elevation: 0,
   minHeight: 0,
@@ -178,11 +169,8 @@ const $rightRow: ViewStyle = {
 
 const $rightText: ThemedStyle<TextStyle> = ({ colors }) => ({
   color: colors.textDim,
+  alignSelf: "center",
 })
-
-const $signOutText: TextStyle = {
-  color: "#E8340A",
-}
 
 const $userInfoCard: ThemedStyle<ViewStyle> = ({ colors }) => ({
   borderWidth: 0,
@@ -195,7 +183,18 @@ const $noEmailRow: ViewStyle = {
   gap: 4,
 }
 
-const $leftIcon: ViewStyle = {
-  alignSelf: "center",
-  marginEnd: 12,
+const $signOutButton: ViewStyle = {
+  borderRadius: 8,
+  backgroundColor: "#E8981E",
 }
+
+const $signOutText: TextStyle = {
+  color: "#FFFFFF",
+}
+
+const $sectionHeading: ThemedStyle<TextStyle> = ({ colors, spacing }) => ({
+  color: colors.textDim,
+  marginTop: spacing.lg,
+  marginBottom: spacing.xs,
+  marginLeft: spacing.xs,
+})

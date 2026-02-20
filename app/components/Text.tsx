@@ -44,6 +44,10 @@ export interface TextProps extends RNTextProps {
    */
   size?: Sizes
   /**
+   * If true, renders text in uppercase.
+   */
+  uppercase?: boolean
+  /**
    * Children components.
    */
   children?: ReactNode
@@ -57,7 +61,7 @@ export interface TextProps extends RNTextProps {
  * @returns {JSX.Element} The rendered `Text` component.
  */
 export const Text = forwardRef(function Text(props: TextProps, ref: ForwardedRef<RNText>) {
-  const { weight, size, tx, txOptions, text, children, style: $styleOverride, ...rest } = props
+  const { weight, size, tx, txOptions, text, children, uppercase, style: $styleOverride, ...rest } = props
   const { themed } = useAppTheme()
 
   const i18nText = tx && translate(tx, txOptions)
@@ -69,6 +73,7 @@ export const Text = forwardRef(function Text(props: TextProps, ref: ForwardedRef
     themed($presets[preset]),
     weight && $fontWeightStyles[weight],
     size && $sizeStyles[size],
+    uppercase && $uppercaseStyle,
     $styleOverride,
   ]
 
@@ -113,4 +118,5 @@ const $presets: Record<Presets, ThemedStyleArray<TextStyle>> = {
   formLabel: [$baseStyle, { ...$fontWeightStyles.medium }],
   formHelper: [$baseStyle, { ...$sizeStyles.sm, ...$fontWeightStyles.normal }],
 }
+const $uppercaseStyle: TextStyle = { textTransform: "uppercase" }
 const $rtlStyle: TextStyle = isRTL ? { writingDirection: "rtl" } : {}

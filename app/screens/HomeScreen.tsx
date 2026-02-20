@@ -88,7 +88,7 @@ export const HomeScreen: FC<HomeScreenProps> = function HomeScreen({ navigation 
           height: img.height,
         }))
 
-        navigation.getParent()?.navigate("ReceiptDetail", {
+        navigation.navigate("ReceiptDetail", {
           receiptId: Date.now().toString(),
           scannedImages,
         })

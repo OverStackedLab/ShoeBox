@@ -47,7 +47,6 @@ export const LoginScreen: FC<LoginScreenProps> = () => {
     // If successful, reset the fields and set the token.
     setIsSubmitted(false)
     setAuthPassword("")
-    setAuthEmail("")
 
     // We'll mock this with a fake token.
     setAuthToken(String(Date.now()))

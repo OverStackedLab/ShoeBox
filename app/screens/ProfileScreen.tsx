@@ -24,8 +24,6 @@ export const ProfileScreen: FC<ProfileScreenProps> = function ProfileScreen() {
   } = useAppTheme()
   const { authEmail, logout } = useAuth()
 
-  const avatarInitial = authEmail?.[0]?.toUpperCase() ?? "?"
-
   const themeLabel =
     themeContext === "light" ? "Light" : themeContext === "dark" ? "Dark" : "System"
 
@@ -46,13 +44,19 @@ export const ProfileScreen: FC<ProfileScreenProps> = function ProfileScreen() {
 
       {/* User Info */}
       <Card
-        style={themed($card)}
+        style={[themed($card), themed($userInfoCard)]}
         ContentComponent={
           <View style={$userInfo}>
-            <View style={[$avatar, { backgroundColor: colors.tint }]}>
-              <Text text={avatarInitial} weight="bold" size="xl" style={$avatarInitial} />
+            <View style={$avatar}>
+              <MaterialCommunityIcons name="account" size={90} color="#FFFFFF" />
             </View>
-            <Text text={authEmail ?? "No email"} size="sm" style={themed($email)} />
+            {authEmail ? (
+              <Text text={authEmail} size="sm" style={themed($email)} />
+            ) : (
+              <View style={$noEmailRow}>
+                <Text text="email@domain.com" size="sm" style={themed($email)} />
+              </View>
+            )}
           </View>
         }
       />
@@ -136,7 +140,6 @@ const $container: ThemedStyle<ViewStyle> = ({ spacing }) => ({
 })
 
 const $card: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
-  backgroundColor: colors.background,
   borderRadius: 16,
   borderWidth: 1,
   borderColor: colors.border,
@@ -154,15 +157,12 @@ const $userInfo: ViewStyle = {
 }
 
 const $avatar: ViewStyle = {
-  width: 72,
-  height: 72,
-  borderRadius: 36,
+  width: 120,
+  height: 120,
+  borderRadius: 60,
   alignItems: "center",
   justifyContent: "center",
-}
-
-const $avatarInitial: TextStyle = {
-  color: "#FFFFFF",
+  backgroundColor: "#E8981E",
 }
 
 const $email: ThemedStyle<TextStyle> = ({ colors }) => ({
@@ -182,6 +182,17 @@ const $rightText: ThemedStyle<TextStyle> = ({ colors }) => ({
 
 const $signOutText: TextStyle = {
   color: "#E8340A",
+}
+
+const $userInfoCard: ThemedStyle<ViewStyle> = ({ colors }) => ({
+  borderWidth: 0,
+  backgroundColor: colors.background,
+})
+
+const $noEmailRow: ViewStyle = {
+  flexDirection: "row",
+  alignItems: "center",
+  gap: 4,
 }
 
 const $leftIcon: ViewStyle = {

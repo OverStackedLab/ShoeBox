@@ -4,9 +4,9 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs"
 import { useSafeAreaInsets } from "react-native-safe-area-context"
 
 import { AnalyticsScreen } from "@/screens/AnalyticsScreen"
-import { DemoCommunityScreen } from "@/screens/DemoCommunityScreen"
 import { HomeScreen } from "@/screens/HomeScreen"
 import { ProfileScreen } from "@/screens/ProfileScreen"
+import { ReceiptsScreen } from "@/screens/ReceiptsScreen"
 import { useAppTheme } from "@/theme/context"
 import type { ThemedStyle } from "@/theme/types"
 
@@ -41,7 +41,7 @@ export function TabNavigator() {
       }}
     >
       <Tab.Screen
-        name="DemoShowroom"
+        name="Home"
         component={HomeScreen}
         options={{
           tabBarLabel: "Home",
@@ -56,8 +56,8 @@ export function TabNavigator() {
       />
 
       <Tab.Screen
-        name="DemoCommunity"
-        component={DemoCommunityScreen}
+        name="Receipts"
+        component={ReceiptsScreen}
         options={{
           tabBarLabel: "Receipts",
           tabBarIcon: ({ focused }) => (

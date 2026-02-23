@@ -9,8 +9,8 @@ import { NativeStackScreenProps } from "@react-navigation/native-stack"
 
 // Demo Tab Navigator types
 export type DemoTabParamList = {
-  DemoCommunity: undefined
-  DemoShowroom: { queryIndex?: string; itemIndex?: string }
+  Receipts: undefined
+  Home: { queryIndex?: string; itemIndex?: string }
   DemoDebug: undefined
   Analytics: undefined
 }
@@ -23,6 +23,9 @@ export type AppStackParamList = {
   Demo: NavigatorScreenParams<DemoTabParamList>
   ReceiptDetail: {
     receiptId: string
+    storeName?: string
+    date?: string
+    total?: number
     scannedImages?: Array<{ uri: string; width: number; height: number }>
   }
   // 🔥 Your screens go here

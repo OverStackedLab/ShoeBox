@@ -1,8 +1,9 @@
-import { FC } from "react"
+import { FC, useState } from "react"
 import { Dimensions, TextStyle, TouchableOpacity, View, ViewStyle } from "react-native"
 import * as Device from "expo-device"
 import { launchScanner } from "@dariyd/react-native-document-scanner"
 import { AntDesign, MaterialCommunityIcons } from "@expo/vector-icons"
+import { recognizeText } from "@infinitered/react-native-mlkit-text-recognition"
 import { BarChart } from "react-native-chart-kit"
 import { toast } from "sonner-native"
 
@@ -57,13 +58,31 @@ const monthlySpendingData = {
   ],
 }
 
-interface HomeScreenProps extends DemoTabScreenProps<"DemoShowroom"> {}
+interface HomeScreenProps extends DemoTabScreenProps<"Home"> {}
+
+function parseReceiptText(raw: string): { storeName?: string; date?: string; total?: number } {
+  const lines = raw
+    .split("\n")
+    .map((l) => l.trim())
+    .filter(Boolean)
+
+  const storeName = lines[0]
+
+  const dateMatch = raw.match(/\b(\d{1,2}[\/\-]\d{1,2}[\/\-]\d{2,4})\b/)
+  const date = dateMatch?.[1]
+
+  const totalMatch = raw.match(/(?:TOTAL|Total|total)[:\s]*\$?\s*(\d+\.\d{2})/)
+  const total = totalMatch ? parseFloat(totalMatch[1]) : undefined
+
+  return { storeName, date, total }
+}
 
 export const HomeScreen: FC<HomeScreenProps> = function HomeScreen({ navigation }) {
   const {
     themed,
     theme: { colors },
   } = useAppTheme()
+  const [isProcessing, setIsProcessing] = useState(false)
 
   const handleScanReceipt = async () => {
     if (!Device.isDevice) {
@@ -88,10 +107,31 @@ export const HomeScreen: FC<HomeScreenProps> = function HomeScreen({ navigation 
           height: img.height,
         }))
 
-        navigation.navigate("ReceiptDetail", {
-          receiptId: Date.now().toString(),
-          scannedImages,
-        })
+        setIsProcessing(true)
+        const loadingToast = toast.loading("Reading receipt…")
+
+        try {
+          const { text } = await recognizeText(scannedImages[0].uri)
+          const { storeName, date, total } = parseReceiptText(text)
+          toast.dismiss(loadingToast)
+
+          navigation.navigate("ReceiptDetail", {
+            receiptId: Date.now().toString(),
+            scannedImages,
+            storeName,
+            date,
+            total,
+          })
+        } catch {
+          toast.dismiss(loadingToast)
+          toast.error("Could not read receipt text.")
+          navigation.navigate("ReceiptDetail", {
+            receiptId: Date.now().toString(),
+            scannedImages,
+          })
+        } finally {
+          setIsProcessing(false)
+        }
       }
     } catch {
       toast.error("Failed to launch the document scanner.")
@@ -120,7 +160,12 @@ export const HomeScreen: FC<HomeScreenProps> = function HomeScreen({ navigation 
         ContentComponent={
           <View style={$scanCardContent}>
             <View style={themed($scanButtonRing)}>
-              <TouchableOpacity style={$scanButton} activeOpacity={0.8} onPress={handleScanReceipt}>
+              <TouchableOpacity
+                style={$scanButton}
+                activeOpacity={0.8}
+                onPress={handleScanReceipt}
+                disabled={isProcessing}
+              >
                 <AntDesign name="scan" size={100} color="#FFFFFF" />
               </TouchableOpacity>
             </View>
@@ -130,16 +175,20 @@ export const HomeScreen: FC<HomeScreenProps> = function HomeScreen({ navigation 
       />
 
       {/* Recent Expenses */}
+      <View style={themed($sectionRow)}>
+        <Text
+          text="Recent Expenses"
+          size="sm"
+          weight="bold"
+          uppercase
+          style={themed($sectionHeading)}
+        />
+        <TouchableOpacity>
+          <Text text="See All" size="xs" style={themed($seeAllText)} />
+        </TouchableOpacity>
+      </View>
       <Card
         style={themed($cardBase)}
-        HeadingComponent={
-          <View style={$cardHeaderRow}>
-            <Text text="Recent Expenses" weight="bold" size="md" />
-            <TouchableOpacity>
-              <Text text="See All" size="xs" style={themed($seeAllText)} />
-            </TouchableOpacity>
-          </View>
-        }
         ContentComponent={
           <View>
             {recentExpenses.map((expense, index) => (
@@ -179,8 +228,14 @@ export const HomeScreen: FC<HomeScreenProps> = function HomeScreen({ navigation 
       />
 
       {/* Monthly Spending */}
+      <Text
+        text="Monthly Spending"
+        size="sm"
+        weight="bold"
+        uppercase
+        style={themed($sectionHeading)}
+      />
       <Card
-        heading="Monthly Spending"
         style={themed($cardBase)}
         ContentComponent={
           <View style={$chartContainer}>
@@ -269,22 +324,31 @@ const $scanLabel: ThemedStyle<TextStyle> = ({ spacing }) => ({
 
 const $cardBase: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
   backgroundColor: colors.background,
-  borderRadius: 16,
+  borderRadius: 8,
   borderWidth: 1,
   borderColor: colors.border,
-  padding: spacing.md,
-  marginBottom: spacing.md,
+  paddingHorizontal: spacing.md,
+  paddingVertical: spacing.xxs,
+  marginBottom: spacing.xs,
   shadowOpacity: 0,
   elevation: 0,
   minHeight: 0,
 })
 
-const $cardHeaderRow: ViewStyle = {
+const $sectionHeading: ThemedStyle<TextStyle> = ({ colors, spacing }) => ({
+  color: colors.textDim,
+  marginTop: spacing.lg,
+  marginBottom: spacing.xs,
+  marginLeft: spacing.xs,
+})
+
+const $sectionRow: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   flexDirection: "row",
   justifyContent: "space-between",
   alignItems: "center",
-  marginBottom: 8,
-}
+  marginTop: spacing.lg,
+  marginBottom: spacing.xs,
+})
 
 const $seeAllText: ThemedStyle<TextStyle> = ({ colors }) => ({
   color: colors.tint,

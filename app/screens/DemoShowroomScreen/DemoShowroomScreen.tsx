@@ -66,7 +66,7 @@ const WebListItem: FC<DemoListItem> = ({ item, sectionIndex }) => {
   return (
     <View>
       <Link
-        screen="DemoShowroom"
+        screen="Home"
         params={{ queryIndex: sectionSlug }}
         style={themed($menuContainer)}
       >
@@ -78,7 +78,7 @@ const WebListItem: FC<DemoListItem> = ({ item, sectionIndex }) => {
         return (
           <Link
             key={`section${sectionIndex}-${u}`}
-            screen="DemoShowroom"
+            screen="Home"
             params={{ queryIndex: sectionSlug, itemIndex: itemSlug }}
           >
             <Text>{u}</Text>
@@ -115,13 +115,13 @@ const NativeListItem: FC<DemoListItem> = ({ item, sectionIndex, handleScroll }) 
 const ShowroomListItem = Platform.select({ web: WebListItem, default: NativeListItem })
 const isAndroid = Platform.OS === "android"
 
-export const DemoShowroomScreen: FC<DemoTabScreenProps<"DemoShowroom">> =
+export const DemoShowroomScreen: FC<DemoTabScreenProps<"Home">> =
   function DemoShowroomScreen(_props) {
     const [open, setOpen] = useState(false)
     const timeout = useRef<ReturnType<typeof setTimeout>>(null)
     const listRef = useRef<SectionList>(null)
     const menuRef = useRef<FlatList<DemoListItem["item"]>>(null)
-    const route = useRoute<RouteProp<DemoTabParamList, "DemoShowroom">>()
+    const route = useRoute<RouteProp<DemoTabParamList, "Home">>()
     const params = route.params
 
     const { themed, theme } = useAppTheme()

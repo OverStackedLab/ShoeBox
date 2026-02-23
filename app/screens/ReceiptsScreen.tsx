@@ -27,11 +27,9 @@ const MOCK_RECEIPTS: Receipt[] = [
   { id: "6", storeName: "Costco", date: "02/01/2026", total: 342.18 },
 ]
 
-interface ReceiptsScreenProps extends DemoTabScreenProps<"DemoCommunity"> {}
+interface ReceiptsScreenProps extends DemoTabScreenProps<"Receipts"> {}
 
-export const DemoCommunityScreen: FC<ReceiptsScreenProps> = function DemoCommunityScreen({
-  navigation,
-}) {
+export const ReceiptsScreen: FC<ReceiptsScreenProps> = function ReceiptsScreen({ navigation }) {
   const {
     themed,
     theme: { colors },
@@ -59,7 +57,7 @@ export const DemoCommunityScreen: FC<ReceiptsScreenProps> = function DemoCommuni
           heading="No Receipts Yet"
           content="Scan your first receipt to get started"
           button="Scan Receipt"
-          buttonOnPress={() => navigation.navigate("DemoShowroom", {})}
+          buttonOnPress={() => navigation.navigate("Home", {})}
         />
       ) : (
         receipts.map((receipt, index) => (
@@ -67,15 +65,18 @@ export const DemoCommunityScreen: FC<ReceiptsScreenProps> = function DemoCommuni
             key={receipt.id}
             height={72}
             bottomSeparator={index < receipts.length - 1}
-            onPress={() => navigation.navigate("ReceiptDetail", { receiptId: receipt.id })}
+            onPress={() =>
+              navigation.navigate("ReceiptDetail", {
+                receiptId: receipt.id,
+                storeName: receipt.storeName,
+                date: receipt.date,
+                total: receipt.total,
+              })
+            }
             LeftComponent={
               <View style={$receiptLeftRow}>
                 <View style={themed($receiptIconWrapper)}>
-                  <MaterialCommunityIcons
-                    name="receipt-text-outline"
-                    size={20}
-                    color={colors.tint}
-                  />
+                  <MaterialCommunityIcons name="receipt-text-outline" size={20} color={"#E8981E"} />
                 </View>
                 <View>
                   <Text text={receipt.storeName} size="sm" weight="medium" />

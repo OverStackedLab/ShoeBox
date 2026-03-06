@@ -12,42 +12,18 @@ import { Header } from "@/components/Header"
 import { ListItem } from "@/components/ListItem"
 import { Screen } from "@/components/Screen"
 import { Text } from "@/components/Text"
+import { useReceipts } from "@/context/ReceiptsContext"
+import { formatCurrency, useSettings } from "@/context/SettingsContext"
 import type { DemoTabScreenProps } from "@/navigators/navigationTypes"
 import { useAppTheme } from "@/theme/context"
 import type { ThemedStyle } from "@/theme/types"
+import { parseReceiptText } from "@/utils/receiptParser"
+import { saveReceiptImage } from "@/utils/receiptStorage"
 
 const SCREEN_PADDING = 24
 const CHART_WIDTH = Dimensions.get("window").width - SCREEN_PADDING * 2
 const ACCENT_ORANGE = "#E8981E"
 const SCAN_BUTTON_SIZE = 220
-
-interface ExpenseItem {
-  id: string
-  name: string
-  date: string
-  amount: number
-  icon: keyof typeof MaterialCommunityIcons.glyphMap
-  iconColor: string
-}
-
-const recentExpenses: ExpenseItem[] = [
-  {
-    id: "1",
-    name: "Denorel Back",
-    date: "10/06/2021",
-    amount: -13.0,
-    icon: "credit-card-outline",
-    iconColor: "#E8981E",
-  },
-  {
-    id: "2",
-    name: "Tester",
-    date: "12/06/2021",
-    amount: -12.0,
-    icon: "clipboard-text-outline",
-    iconColor: "#E8981E",
-  },
-]
 
 const monthlySpendingData = {
   labels: ["", "", "", "", "", "", "", "", "", "", "", ""],
@@ -60,29 +36,14 @@ const monthlySpendingData = {
 
 interface HomeScreenProps extends DemoTabScreenProps<"Home"> {}
 
-function parseReceiptText(raw: string): { storeName?: string; date?: string; total?: number } {
-  const lines = raw
-    .split("\n")
-    .map((l) => l.trim())
-    .filter(Boolean)
-
-  const storeName = lines[0]
-
-  const dateMatch = raw.match(/\b(\d{1,2}[\/\-]\d{1,2}[\/\-]\d{2,4})\b/)
-  const date = dateMatch?.[1]
-
-  const totalMatch = raw.match(/(?:TOTAL|Total|total)[:\s]*\$?\s*(\d+\.\d{2})/)
-  const total = totalMatch ? parseFloat(totalMatch[1]) : undefined
-
-  return { storeName, date, total }
-}
-
 export const HomeScreen: FC<HomeScreenProps> = function HomeScreen({ navigation }) {
   const {
     themed,
     theme: { colors },
   } = useAppTheme()
   const [isProcessing, setIsProcessing] = useState(false)
+  const { receipts, addReceipt } = useReceipts()
+  const { currency } = useSettings()
 
   const handleScanReceipt = async () => {
     if (!Device.isDevice) {
@@ -101,22 +62,32 @@ export const HomeScreen: FC<HomeScreenProps> = function HomeScreen({ navigation 
       }
 
       if (result.images?.length) {
-        const scannedImages = result.images.map((img) => ({
-          uri: img.uri,
+        setIsProcessing(true)
+        const loadingToast = toast.loading("Reading receipt…")
+
+        const receiptId = Date.now().toString()
+        const scannedImages = result.images.map((img, i) => ({
+          uri: saveReceiptImage(img.uri, receiptId, i),
           width: img.width,
           height: img.height,
         }))
-
-        setIsProcessing(true)
-        const loadingToast = toast.loading("Reading receipt…")
 
         try {
           const { text } = await recognizeText(scannedImages[0].uri)
           const { storeName, date, total } = parseReceiptText(text)
           toast.dismiss(loadingToast)
 
-          navigation.navigate("ReceiptDetail", {
-            receiptId: Date.now().toString(),
+          addReceipt({
+            id: receiptId,
+            storeName,
+            date,
+            total,
+            scannedImages,
+            createdAt: Date.now(),
+          })
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          ;(navigation as any).navigate("ReceiptDetail", {
+            receiptId,
             scannedImages,
             storeName,
             date,
@@ -125,10 +96,9 @@ export const HomeScreen: FC<HomeScreenProps> = function HomeScreen({ navigation 
         } catch {
           toast.dismiss(loadingToast)
           toast.error("Could not read receipt text.")
-          navigation.navigate("ReceiptDetail", {
-            receiptId: Date.now().toString(),
-            scannedImages,
-          })
+          addReceipt({ id: receiptId, scannedImages, createdAt: Date.now() })
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          ;(navigation as any).navigate("ReceiptDetail", { receiptId, scannedImages })
         } finally {
           setIsProcessing(false)
         }
@@ -191,38 +161,66 @@ export const HomeScreen: FC<HomeScreenProps> = function HomeScreen({ navigation 
         style={themed($cardBase)}
         ContentComponent={
           <View>
-            {recentExpenses.map((expense, index) => (
+            {receipts.length === 0 ? (
               <ListItem
-                key={expense.id}
                 height={64}
-                bottomSeparator={index < recentExpenses.length - 1}
                 LeftComponent={
-                  <View style={$expenseLeftRow}>
-                    <View
-                      style={[$expenseIconWrapper, { backgroundColor: expense.iconColor + "20" }]}
-                    >
-                      <MaterialCommunityIcons
-                        name={expense.icon}
-                        size={20}
-                        color={expense.iconColor}
-                      />
-                    </View>
-                    <View>
-                      <Text text={expense.name} size="sm" weight="medium" />
-                      <Text text={expense.date} size="xxs" style={themed($expenseDate)} />
-                    </View>
-                  </View>
-                }
-                RightComponent={
                   <Text
-                    text={`-$${Math.abs(expense.amount).toFixed(2)}`}
-                    weight="bold"
+                    text="No receipts yet. Scan one to get started."
                     size="sm"
-                    style={$expenseAmount}
+                    style={themed($expenseDate)}
                   />
                 }
               />
-            ))}
+            ) : (
+              receipts.slice(0, 5).map((receipt, index, arr) => (
+                <ListItem
+                  key={receipt.id}
+                  height={64}
+                  bottomSeparator={index < arr.length - 1}
+                  onPress={() =>
+                    navigation.navigate("ReceiptDetail", {
+                      receiptId: receipt.id,
+                      scannedImages: receipt.scannedImages,
+                      storeName: receipt.storeName,
+                      date: receipt.date,
+                      total: receipt.total,
+                    })
+                  }
+                  LeftComponent={
+                    <View style={$expenseLeftRow}>
+                      <View
+                        style={[$expenseIconWrapper, { backgroundColor: ACCENT_ORANGE + "20" }]}
+                      >
+                        <MaterialCommunityIcons name="receipt" size={20} color={ACCENT_ORANGE} />
+                      </View>
+                      <View>
+                        <Text
+                          text={receipt.storeName ?? `Receipt #${receipt.id.slice(-4)}`}
+                          size="sm"
+                          weight="medium"
+                        />
+                        <Text
+                          text={receipt.date ?? new Date(receipt.createdAt).toLocaleDateString()}
+                          size="xxs"
+                          style={themed($expenseDate)}
+                        />
+                      </View>
+                    </View>
+                  }
+                  RightComponent={
+                    receipt.total != null ? (
+                      <Text
+                        text={`-${formatCurrency(receipt.total, currency)}`}
+                        weight="bold"
+                        size="sm"
+                        style={$expenseAmount}
+                      />
+                    ) : undefined
+                  }
+                />
+              ))
+            )}
           </View>
         }
       />

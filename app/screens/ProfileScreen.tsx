@@ -10,6 +10,7 @@ import { ListItem } from "@/components/ListItem"
 import { Screen } from "@/components/Screen"
 import { Text } from "@/components/Text"
 import { useAuth } from "@/context/AuthContext"
+import { useSettings } from "@/context/SettingsContext"
 import type { DemoTabScreenProps } from "@/navigators/navigationTypes"
 import { useAppTheme } from "@/theme/context"
 import type { ThemedStyle } from "@/theme/types"
@@ -24,6 +25,7 @@ export const ProfileScreen: FC<ProfileScreenProps> = function ProfileScreen() {
     themeContext,
   } = useAppTheme()
   const { authEmail, logout } = useAuth()
+  const { currency, setCurrency } = useSettings()
 
   const themeLabel =
     themeContext === "light" ? "Light" : themeContext === "dark" ? "Dark" : "System"
@@ -67,16 +69,33 @@ export const ProfileScreen: FC<ProfileScreenProps> = function ProfileScreen() {
       <Card
         style={themed($card)}
         ContentComponent={
-          <ListItem
-            text="Theme"
-            onPress={cycleTheme}
-            RightComponent={
-              <View style={$rightRow}>
-                <Text text={themeLabel} size="sm" style={themed($rightText)} />
-                <MaterialCommunityIcons name="chevron-right" size={20} color={colors.textDim} />
-              </View>
-            }
-          />
+          <>
+            <ListItem
+              text="Theme"
+              bottomSeparator
+              onPress={cycleTheme}
+              RightComponent={
+                <View style={$rightRow}>
+                  <Text text={themeLabel} size="sm" style={themed($rightText)} />
+                  <MaterialCommunityIcons name="chevron-right" size={20} color={colors.textDim} />
+                </View>
+              }
+            />
+            <ListItem
+              text="Currency"
+              onPress={() => setCurrency(currency === "USD" ? "HUF" : "USD")}
+              RightComponent={
+                <View style={$rightRow}>
+                  <Text
+                    text={currency === "USD" ? "USD ($)" : "HUF (Ft)"}
+                    size="sm"
+                    style={themed($rightText)}
+                  />
+                  <MaterialCommunityIcons name="chevron-right" size={20} color={colors.textDim} />
+                </View>
+              }
+            />
+          </>
         }
       />
 

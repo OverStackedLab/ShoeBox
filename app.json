@@ -14,7 +14,7 @@
   "assetBundlePatterns": ["**/*"],
   "android": {
     "icon": "./assets/images/app-icon-android-legacy.png",
-    "package": "com.overstacked.shoebox",
+    "package": "com.os.shoebox",
     "adaptiveIcon": {
       "foregroundImage": "./assets/images/app-icon-android-adaptive-foreground.png",
       "backgroundImage": "./assets/images/app-icon-android-adaptive-background.png"
@@ -25,7 +25,7 @@
   "ios": {
     "icon": "./assets/images/app-icon-ios.png",
     "supportsTablet": true,
-    "bundleIdentifier": "com.overstacked.shoebox",
+    "bundleIdentifier": "com.os.shoebox",
     "appleTeamId": "H465RAQ7RY",
     "infoPlist": {
       "NSCameraUsageDescription": "ShoeBox needs camera access to scan receipts and documents."

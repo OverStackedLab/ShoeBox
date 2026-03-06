@@ -7,25 +7,11 @@ import { Header } from "@/components/Header"
 import { ListItem } from "@/components/ListItem"
 import { Screen } from "@/components/Screen"
 import { Text } from "@/components/Text"
+import { useReceipts } from "@/context/ReceiptsContext"
+import { formatCurrency, useSettings } from "@/context/SettingsContext"
 import type { DemoTabScreenProps } from "@/navigators/navigationTypes"
 import { useAppTheme } from "@/theme/context"
 import type { ThemedStyle } from "@/theme/types"
-
-interface Receipt {
-  id: string
-  storeName: string
-  date: string
-  total: number
-}
-
-const MOCK_RECEIPTS: Receipt[] = [
-  { id: "1", storeName: "Whole Foods Market", date: "02/15/2026", total: 87.43 },
-  { id: "2", storeName: "Target", date: "02/12/2026", total: 124.99 },
-  { id: "3", storeName: "CVS Pharmacy", date: "02/10/2026", total: 23.5 },
-  { id: "4", storeName: "Home Depot", date: "02/08/2026", total: 215.0 },
-  { id: "5", storeName: "Trader Joe's", date: "02/05/2026", total: 65.32 },
-  { id: "6", storeName: "Costco", date: "02/01/2026", total: 342.18 },
-]
 
 interface ReceiptsScreenProps extends DemoTabScreenProps<"Receipts"> {}
 
@@ -35,7 +21,8 @@ export const ReceiptsScreen: FC<ReceiptsScreenProps> = function ReceiptsScreen({
     theme: { colors },
   } = useAppTheme()
 
-  const receipts = MOCK_RECEIPTS
+  const { receipts } = useReceipts()
+  const { currency } = useSettings()
 
   return (
     <Screen
@@ -66,8 +53,10 @@ export const ReceiptsScreen: FC<ReceiptsScreenProps> = function ReceiptsScreen({
             height={72}
             bottomSeparator={index < receipts.length - 1}
             onPress={() =>
-              navigation.navigate("ReceiptDetail", {
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              (navigation as any).navigate("ReceiptDetail", {
                 receiptId: receipt.id,
+                scannedImages: receipt.scannedImages,
                 storeName: receipt.storeName,
                 date: receipt.date,
                 total: receipt.total,
@@ -79,18 +68,28 @@ export const ReceiptsScreen: FC<ReceiptsScreenProps> = function ReceiptsScreen({
                   <MaterialCommunityIcons name="receipt-text-outline" size={20} color={"#E8981E"} />
                 </View>
                 <View>
-                  <Text text={receipt.storeName} size="sm" weight="medium" />
-                  <Text text={receipt.date} size="xxs" style={themed($dateText)} />
+                  <Text
+                    text={receipt.storeName ?? `Receipt #${receipt.id.slice(-4)}`}
+                    size="sm"
+                    weight="medium"
+                  />
+                  <Text
+                    text={receipt.date ?? new Date(receipt.createdAt).toLocaleDateString()}
+                    size="xxs"
+                    style={themed($dateText)}
+                  />
                 </View>
               </View>
             }
             RightComponent={
-              <Text
-                text={`$${receipt.total.toFixed(2)}`}
-                weight="bold"
-                size="sm"
-                style={$amountText}
-              />
+              receipt.total != null ? (
+                <Text
+                  text={formatCurrency(receipt.total, currency)}
+                  weight="bold"
+                  size="sm"
+                  style={$amountText}
+                />
+              ) : undefined
             }
           />
         ))

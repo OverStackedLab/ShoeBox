@@ -28,6 +28,8 @@ import { initialWindowMetrics, SafeAreaProvider } from "react-native-safe-area-c
 import { toast, Toaster } from "sonner-native"
 
 import { AuthProvider } from "./context/AuthContext"
+import { ReceiptsProvider } from "./context/ReceiptsContext"
+import { SettingsProvider } from "./context/SettingsContext"
 import { initI18n } from "./i18n"
 import { AppNavigator } from "./navigators/AppNavigator"
 import { useNavigationPersistence } from "./navigators/navigationUtilities"
@@ -104,6 +106,8 @@ export function App() {
       <SafeAreaProvider initialMetrics={initialWindowMetrics}>
         <KeyboardProvider>
           <AuthProvider>
+            <ReceiptsProvider>
+            <SettingsProvider>
             <ThemeProvider>
               <AppNavigator
                 linking={linking}
@@ -122,6 +126,8 @@ export function App() {
                 )}
               />
             </ThemeProvider>
+            </SettingsProvider>
+            </ReceiptsProvider>
           </AuthProvider>
         </KeyboardProvider>
       </SafeAreaProvider>

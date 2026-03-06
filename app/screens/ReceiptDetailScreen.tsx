@@ -1,6 +1,9 @@
-import { FC } from "react"
-import { Image, ImageStyle, TouchableOpacity, View, ViewStyle, TextStyle } from "react-native"
+import { FC, useState } from "react"
+import { Alert, Image, ImageStyle, TouchableOpacity, View, ViewStyle, TextStyle } from "react-native"
+import * as Device from "expo-device"
 import { MaterialCommunityIcons } from "@expo/vector-icons"
+import { launchScanner } from "@dariyd/react-native-document-scanner"
+import { recognizeText } from "@infinitered/react-native-mlkit-text-recognition"
 import { toast } from "sonner-native"
 
 import { Card } from "@/components/Card"
@@ -8,9 +11,13 @@ import { Header } from "@/components/Header"
 import { ListItem } from "@/components/ListItem"
 import { Screen } from "@/components/Screen"
 import { Text } from "@/components/Text"
+import { useReceipts } from "@/context/ReceiptsContext"
+import { formatCurrency, useSettings } from "@/context/SettingsContext"
 import type { AppStackScreenProps } from "@/navigators/navigationTypes"
 import { useAppTheme } from "@/theme/context"
 import type { ThemedStyle } from "@/theme/types"
+import { parseReceiptText } from "@/utils/receiptParser"
+import { saveReceiptImage } from "@/utils/receiptStorage"
 
 const ACCENT_RED = "#FF3B30"
 const TAX_RATE = 0.0875
@@ -74,17 +81,138 @@ export const ReceiptDetailScreen: FC<ReceiptDetailScreenProps> = function Receip
     themed,
     theme: { colors },
   } = useAppTheme()
-  const { receiptId, scannedImages, storeName, date, total } = route.params
+  const { receipts, removeReceipt, updateReceipt } = useReceipts()
+  const { currency } = useSettings()
+  const { receiptId, scannedImages: paramImages, storeName: paramStoreName, date: paramDate, total: paramTotal } = route.params
+  const [isProcessing, setIsProcessing] = useState(false)
+
+  // Always prefer context (reflects live edits) over stale route params
+  const stored = receipts.find((r) => r.id === receiptId)
+  const scannedImages = stored?.scannedImages ?? paramImages ?? []
+  const storeName = stored?.storeName ?? paramStoreName
+  const date = stored?.date ?? paramDate
+  const total = stored?.total ?? paramTotal
+
+  const handleReread = async () => {
+    if (!scannedImages.length) {
+      toast.warning("No stored image to re-read.")
+      return
+    }
+
+    setIsProcessing(true)
+    const loadingToast = toast.loading("Re-reading receipt…")
+
+    try {
+      const { text } = await recognizeText(scannedImages[0].uri)
+      const { storeName: newStoreName, date: newDate, total: newTotal } = parseReceiptText(text)
+      toast.dismiss(loadingToast)
+      updateReceipt(receiptId, { storeName: newStoreName, date: newDate, total: newTotal })
+      toast.success("Receipt updated.")
+    } catch {
+      toast.dismiss(loadingToast)
+      toast.error("Could not read receipt text.")
+    } finally {
+      setIsProcessing(false)
+    }
+  }
+
+  const handleRescan = async () => {
+    if (!Device.isDevice) {
+      toast.warning("Document scanning requires a physical device.")
+      return
+    }
+
+    try {
+      const result = await launchScanner({ quality: 0.8 })
+
+      if (result.didCancel) return
+
+      if (result.error) {
+        toast.error(result.errorMessage ?? "Something went wrong.")
+        return
+      }
+
+      if (result.images?.length) {
+        setIsProcessing(true)
+        const loadingToast = toast.loading("Reading receipt…")
+
+        const newImages = result.images.map((img, i) => ({
+          uri: saveReceiptImage(img.uri, receiptId, i),
+          width: img.width,
+          height: img.height,
+        }))
+
+        try {
+          const { text } = await recognizeText(newImages[0].uri)
+          const { storeName: newStoreName, date: newDate, total: newTotal } = parseReceiptText(text)
+          toast.dismiss(loadingToast)
+          updateReceipt(receiptId, {
+            scannedImages: newImages,
+            storeName: newStoreName,
+            date: newDate,
+            total: newTotal,
+          })
+          toast.success("Receipt updated.")
+        } catch {
+          toast.dismiss(loadingToast)
+          toast.error("Could not read receipt text.")
+          updateReceipt(receiptId, { scannedImages: newImages })
+        } finally {
+          setIsProcessing(false)
+        }
+      }
+    } catch {
+      toast.error("Failed to launch the document scanner.")
+    }
+  }
+
+  const handleEditField = (
+    field: 'storeName' | 'date' | 'total',
+    title: string,
+    current: string,
+    keyboardType: 'default' | 'decimal-pad' = 'default',
+  ) => {
+    Alert.prompt(
+      title,
+      undefined,
+      (value) => {
+        const trimmed = value.trim()
+        if (!trimmed) return
+        if (field === 'total') {
+          const n = parseFloat(trimmed.replace(/[^0-9.,]/g, '').replace(',', '.'))
+          if (!isNaN(n)) updateReceipt(receiptId, { total: n })
+        } else {
+          updateReceipt(receiptId, { [field]: trimmed })
+        }
+      },
+      'plain-text',
+      current,
+      keyboardType,
+    )
+  }
+
+  const handleDelete = () => {
+    Alert.alert("Delete Receipt", "Are you sure you want to delete this receipt?", [
+      { text: "Cancel", style: "cancel" },
+      {
+        text: "Delete",
+        style: "destructive",
+        onPress: () => {
+          removeReceipt(receiptId)
+          navigation.goBack()
+        },
+      },
+    ])
+  }
 
   const lineItems = MOCK_LINE_ITEMS[receiptId] ?? []
   const hasLineItems = lineItems.length > 0
 
+  // Only compute subtotal/tax breakdown for mock line item receipts
   const subtotal = hasLineItems
     ? lineItems.reduce((sum, item) => sum + item.qty * item.price, 0)
-    : total != null
-      ? total / (1 + TAX_RATE)
-      : null
-  const tax = subtotal != null ? subtotal * TAX_RATE : null
+    : null
+  const tax = hasLineItems && subtotal != null ? subtotal * TAX_RATE : null
   const displayTotal = total ?? (subtotal != null && tax != null ? subtotal + tax : null)
 
   return (
@@ -102,6 +230,22 @@ export const ReceiptDetailScreen: FC<ReceiptDetailScreenProps> = function Receip
         RightActionComponent={
           <View style={$headerActions}>
             <TouchableOpacity
+              onPress={handleReread}
+              style={themed($headerActionBtn)}
+              activeOpacity={0.7}
+              disabled={isProcessing || !scannedImages.length}
+            >
+              <MaterialCommunityIcons name="text-recognition" size={22} color={colors.text} />
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={handleRescan}
+              style={themed($headerActionBtn)}
+              activeOpacity={0.7}
+              disabled={isProcessing}
+            >
+              <MaterialCommunityIcons name="camera-retake-outline" size={22} color={colors.text} />
+            </TouchableOpacity>
+            <TouchableOpacity
               onPress={() => toast.info("Share coming soon.")}
               style={themed($headerActionBtn)}
               activeOpacity={0.7}
@@ -109,7 +253,7 @@ export const ReceiptDetailScreen: FC<ReceiptDetailScreenProps> = function Receip
               <MaterialCommunityIcons name="share-variant-outline" size={22} color={colors.text} />
             </TouchableOpacity>
             <TouchableOpacity
-              onPress={() => toast.warning("Delete coming soon.")}
+              onPress={handleDelete}
               style={themed($headerActionBtn)}
               activeOpacity={0.7}
             >
@@ -134,13 +278,7 @@ export const ReceiptDetailScreen: FC<ReceiptDetailScreenProps> = function Receip
       )}
 
       {/* Receipt Info */}
-      <Text
-        text="Details"
-        size="sm"
-        weight="bold"
-        uppercase
-        style={themed($sectionHeading)}
-      />
+      <Text text="Details" size="sm" weight="bold" uppercase style={themed($sectionHeading)} />
       <Card
         style={themed($cardBase)}
         ContentComponent={
@@ -148,6 +286,7 @@ export const ReceiptDetailScreen: FC<ReceiptDetailScreenProps> = function Receip
             <ListItem
               height={52}
               bottomSeparator
+              onPress={() => handleEditField('storeName', 'Edit Merchant', storeName ?? '')}
               LeftComponent={
                 <View style={$rowLeft}>
                   <MaterialCommunityIcons
@@ -160,16 +299,20 @@ export const ReceiptDetailScreen: FC<ReceiptDetailScreenProps> = function Receip
                 </View>
               }
               RightComponent={
-                <Text
-                  text={storeName ?? `Receipt #${receiptId}`}
-                  size="sm"
-                  weight="medium"
-                  style={$valueText}
-                />
+                <View style={$editRow}>
+                  <Text
+                    text={storeName ?? `Receipt #${receiptId}`}
+                    size="sm"
+                    weight="medium"
+                    style={$valueText}
+                  />
+                  <MaterialCommunityIcons name="pencil-outline" size={14} color={colors.textDim} style={$editIcon} />
+                </View>
               }
             />
             <ListItem
               height={52}
+              onPress={() => handleEditField('date', 'Edit Date', date ?? '')}
               LeftComponent={
                 <View style={$rowLeft}>
                   <MaterialCommunityIcons
@@ -182,7 +325,10 @@ export const ReceiptDetailScreen: FC<ReceiptDetailScreenProps> = function Receip
                 </View>
               }
               RightComponent={
-                <Text text={date ?? "—"} size="sm" weight="medium" style={$valueText} />
+                <View style={$editRow}>
+                  <Text text={date ?? "—"} size="sm" weight="medium" style={$valueText} />
+                  <MaterialCommunityIcons name="pencil-outline" size={14} color={colors.textDim} style={$editIcon} />
+                </View>
               }
             />
           </View>
@@ -206,17 +352,13 @@ export const ReceiptDetailScreen: FC<ReceiptDetailScreenProps> = function Receip
                       <View style={$itemLeft}>
                         <Text text={item.name} size="sm" />
                         {item.qty > 1 && (
-                          <Text
-                            text={`× ${item.qty}`}
-                            size="xxs"
-                            style={themed($qtyText)}
-                          />
+                          <Text text={`× ${item.qty}`} size="xxs" style={themed($qtyText)} />
                         )}
                       </View>
                     }
                     RightComponent={
                       <Text
-                        text={`$${(item.qty * item.price).toFixed(2)}`}
+                        text={formatCurrency(item.qty * item.price, currency)}
                         size="sm"
                         style={[$valueText, themed($dimText)]}
                       />
@@ -239,12 +381,10 @@ export const ReceiptDetailScreen: FC<ReceiptDetailScreenProps> = function Receip
               <ListItem
                 height={48}
                 bottomSeparator
-                LeftComponent={
-                  <Text text="Subtotal" size="sm" style={themed($dimText)} />
-                }
+                LeftComponent={<Text text="Subtotal" size="sm" style={themed($dimText)} />}
                 RightComponent={
                   <Text
-                    text={`$${subtotal.toFixed(2)}`}
+                    text={formatCurrency(subtotal, currency)}
                     size="sm"
                     style={[$valueText, themed($dimText)]}
                   />
@@ -256,11 +396,15 @@ export const ReceiptDetailScreen: FC<ReceiptDetailScreenProps> = function Receip
                 height={48}
                 bottomSeparator
                 LeftComponent={
-                  <Text text={`Tax (${(TAX_RATE * 100).toFixed(2)}%)`} size="sm" style={themed($dimText)} />
+                  <Text
+                    text={`Tax (${(TAX_RATE * 100).toFixed(2)}%)`}
+                    size="sm"
+                    style={themed($dimText)}
+                  />
                 }
                 RightComponent={
                   <Text
-                    text={`$${tax.toFixed(2)}`}
+                    text={formatCurrency(tax, currency)}
                     size="sm"
                     style={[$valueText, themed($dimText)]}
                   />
@@ -269,14 +413,20 @@ export const ReceiptDetailScreen: FC<ReceiptDetailScreenProps> = function Receip
             )}
             <ListItem
               height={56}
+              onPress={() =>
+                handleEditField('total', 'Edit Total', total?.toString() ?? '', 'decimal-pad')
+              }
               LeftComponent={<Text text="Total" size="sm" weight="bold" />}
               RightComponent={
-                <Text
-                  text={displayTotal != null ? `$${displayTotal.toFixed(2)}` : "—"}
-                  size="md"
-                  weight="bold"
-                  style={$valueText}
-                />
+                <View style={$editRow}>
+                  <Text
+                    text={displayTotal != null ? formatCurrency(displayTotal, currency) : "—"}
+                    size="md"
+                    weight="bold"
+                    style={$valueText}
+                  />
+                  <MaterialCommunityIcons name="pencil-outline" size={14} color={colors.textDim} style={$editIcon} />
+                </View>
               }
             />
           </View>
@@ -361,3 +511,13 @@ const $qtyText: ThemedStyle<TextStyle> = ({ colors }) => ({
 const $dimText: ThemedStyle<TextStyle> = ({ colors }) => ({
   color: colors.textDim,
 })
+
+const $editRow: ViewStyle = {
+  flexDirection: "row",
+  alignItems: "center",
+  alignSelf: "center",
+}
+
+const $editIcon: ViewStyle = {
+  marginLeft: 4,
+}

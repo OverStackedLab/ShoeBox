@@ -7,7 +7,7 @@ import { Card } from "@/components/Card"
 import { ListItem } from "@/components/ListItem"
 import { Screen } from "@/components/Screen"
 import { Text } from "@/components/Text"
-import type { DemoTabScreenProps } from "@/navigators/navigationTypes"
+import type { TabScreenProps } from "@/navigators/navigationTypes"
 import { useAppTheme } from "@/theme/context"
 import type { ThemedStyle } from "@/theme/types"
 
@@ -37,7 +37,7 @@ const chartData = categories.map((cat) => ({
   legendFontSize: 0,
 }))
 
-interface AnalyticsScreenProps extends DemoTabScreenProps<"Analytics"> {}
+interface AnalyticsScreenProps extends TabScreenProps<"Analytics"> {}
 
 export const AnalyticsScreen: FC<AnalyticsScreenProps> = function AnalyticsScreen() {
   const { themed } = useAppTheme()

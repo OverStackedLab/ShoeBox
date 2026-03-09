@@ -1,6 +1,7 @@
 import { FC } from "react"
-import { TextStyle, View, ViewStyle } from "react-native"
+import { Alert, TextStyle, TouchableOpacity, View, ViewStyle } from "react-native"
 import { MaterialCommunityIcons } from "@expo/vector-icons"
+import type { NativeStackNavigationProp } from "@react-navigation/native-stack"
 
 import { EmptyState } from "@/components/EmptyState"
 import { Header } from "@/components/Header"
@@ -9,11 +10,12 @@ import { Screen } from "@/components/Screen"
 import { Text } from "@/components/Text"
 import { useReceipts } from "@/context/ReceiptsContext"
 import { formatCurrency, useSettings } from "@/context/SettingsContext"
-import type { DemoTabScreenProps } from "@/navigators/navigationTypes"
+import type { AppStackParamList, TabScreenProps } from "@/navigators/navigationTypes"
 import { useAppTheme } from "@/theme/context"
 import type { ThemedStyle } from "@/theme/types"
+import { deleteReceiptImages } from "@/utils/receiptStorage"
 
-interface ReceiptsScreenProps extends DemoTabScreenProps<"Receipts"> {}
+interface ReceiptsScreenProps extends TabScreenProps<"Receipts"> {}
 
 export const ReceiptsScreen: FC<ReceiptsScreenProps> = function ReceiptsScreen({ navigation }) {
   const {
@@ -21,8 +23,23 @@ export const ReceiptsScreen: FC<ReceiptsScreenProps> = function ReceiptsScreen({
     theme: { colors },
   } = useAppTheme()
 
-  const { receipts } = useReceipts()
+  const nav = navigation as unknown as NativeStackNavigationProp<AppStackParamList>
+  const { receipts, removeReceipt } = useReceipts()
   const { currency } = useSettings()
+
+  const handleDelete = (receiptId: string) => {
+    Alert.alert("Delete Receipt", "Are you sure you want to delete this receipt?", [
+      { text: "Cancel", style: "cancel" },
+      {
+        text: "Delete",
+        style: "destructive",
+        onPress: () => {
+          deleteReceiptImages(receiptId)
+          removeReceipt(receiptId)
+        },
+      },
+    ])
+  }
 
   return (
     <Screen
@@ -53,8 +70,7 @@ export const ReceiptsScreen: FC<ReceiptsScreenProps> = function ReceiptsScreen({
             height={72}
             bottomSeparator={index < receipts.length - 1}
             onPress={() =>
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              (navigation as any).navigate("ReceiptDetail", {
+              nav.navigate("ReceiptDetail", {
                 receiptId: receipt.id,
                 scannedImages: receipt.scannedImages,
                 storeName: receipt.storeName,
@@ -82,14 +98,19 @@ export const ReceiptsScreen: FC<ReceiptsScreenProps> = function ReceiptsScreen({
               </View>
             }
             RightComponent={
-              receipt.total != null ? (
-                <Text
-                  text={formatCurrency(receipt.total, currency)}
-                  weight="bold"
-                  size="sm"
-                  style={$amountText}
-                />
-              ) : undefined
+              <View style={$rightRow}>
+                {receipt.total != null && (
+                  <Text
+                    text={formatCurrency(receipt.total, currency)}
+                    weight="bold"
+                    size="sm"
+                    style={$amountText}
+                  />
+                )}
+                <TouchableOpacity onPress={() => handleDelete(receipt.id)} hitSlop={8}>
+                  <MaterialCommunityIcons name="trash-can-outline" size={20} color={colors.textDim} />
+                </TouchableOpacity>
+              </View>
             }
           />
         ))
@@ -128,6 +149,12 @@ const $receiptIconWrapper: ThemedStyle<ViewStyle> = ({ colors }) => ({
 const $dateText: ThemedStyle<TextStyle> = ({ colors }) => ({
   color: colors.textDim,
 })
+
+const $rightRow: ViewStyle = {
+  flexDirection: "row",
+  alignItems: "center",
+  gap: 12,
+}
 
 const $amountText: TextStyle = {
   alignSelf: "center",

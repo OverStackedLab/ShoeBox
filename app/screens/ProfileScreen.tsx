@@ -11,11 +11,11 @@ import { Screen } from "@/components/Screen"
 import { Text } from "@/components/Text"
 import { useAuth } from "@/context/AuthContext"
 import { useSettings } from "@/context/SettingsContext"
-import type { DemoTabScreenProps } from "@/navigators/navigationTypes"
+import type { TabScreenProps } from "@/navigators/navigationTypes"
 import { useAppTheme } from "@/theme/context"
 import type { ThemedStyle } from "@/theme/types"
 
-interface ProfileScreenProps extends DemoTabScreenProps<"DemoDebug"> {}
+interface ProfileScreenProps extends TabScreenProps<"DemoDebug"> {}
 
 export const ProfileScreen: FC<ProfileScreenProps> = function ProfileScreen() {
   const {

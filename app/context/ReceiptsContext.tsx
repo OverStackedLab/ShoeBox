@@ -1,5 +1,8 @@
 import { createContext, FC, PropsWithChildren, useCallback, useContext, useMemo } from "react"
-import { useMMKVString } from "react-native-mmkv"
+import { MMKV, useMMKVString } from "react-native-mmkv"
+
+// TEMP: clear stale test receipts — remove after one run
+new MMKV().delete("ReceiptsProvider.receipts")
 
 export interface ScannedImage {
   uri: string

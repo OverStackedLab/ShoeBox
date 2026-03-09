@@ -1,4 +1,4 @@
-import { FC, useState } from "react"
+import { FC, useMemo, useState } from "react"
 import { Dimensions, TextStyle, TouchableOpacity, View, ViewStyle } from "react-native"
 import * as Device from "expo-device"
 import { launchScanner } from "@dariyd/react-native-document-scanner"
@@ -14,7 +14,7 @@ import { Screen } from "@/components/Screen"
 import { Text } from "@/components/Text"
 import { useReceipts } from "@/context/ReceiptsContext"
 import { formatCurrency, useSettings } from "@/context/SettingsContext"
-import type { DemoTabScreenProps } from "@/navigators/navigationTypes"
+import type { TabScreenProps } from "@/navigators/navigationTypes"
 import { useAppTheme } from "@/theme/context"
 import type { ThemedStyle } from "@/theme/types"
 import { parseReceiptText } from "@/utils/receiptParser"
@@ -25,16 +25,7 @@ const CHART_WIDTH = Dimensions.get("window").width - SCREEN_PADDING * 2
 const ACCENT_ORANGE = "#E8981E"
 const SCAN_BUTTON_SIZE = 220
 
-const monthlySpendingData = {
-  labels: ["", "", "", "", "", "", "", "", "", "", "", ""],
-  datasets: [
-    {
-      data: [500, 2200, 800, 5200, 8500, 7800, 5500, 3200, 6800, 7200, 5800, 6500],
-    },
-  ],
-}
-
-interface HomeScreenProps extends DemoTabScreenProps<"Home"> {}
+interface HomeScreenProps extends TabScreenProps<"Home"> {}
 
 export const HomeScreen: FC<HomeScreenProps> = function HomeScreen({ navigation }) {
   const {
@@ -43,7 +34,37 @@ export const HomeScreen: FC<HomeScreenProps> = function HomeScreen({ navigation 
   } = useAppTheme()
   const [isProcessing, setIsProcessing] = useState(false)
   const { receipts, addReceipt } = useReceipts()
+  console.log("🚀 ~ :37 ~ HomeScreen ~ receipts:", receipts)
   const { currency } = useSettings()
+
+  const monthlySpending = useMemo(() => {
+    const now = new Date()
+    const months = Array.from({ length: 6 }, (_, i) => {
+      const d = new Date(now.getFullYear(), now.getMonth() - (5 - i), 1)
+      return {
+        label: d.toLocaleString("default", { month: "short" }),
+        year: d.getFullYear(),
+        month: d.getMonth(),
+        total: 0,
+      }
+    })
+    for (const receipt of receipts) {
+      if (receipt.total == null) continue
+      const d = new Date(receipt.createdAt)
+      const entry = months.find((m) => m.year === d.getFullYear() && m.month === d.getMonth())
+      if (entry) entry.total += receipt.total
+    }
+    return months
+  }, [receipts])
+
+  const hasSpendingData = monthlySpending.some((m) => m.total > 0)
+  const thisMonthTotal = monthlySpending[monthlySpending.length - 1].total
+  const chartData = {
+    labels: monthlySpending.map((m) => m.label),
+    datasets: [{ data: monthlySpending.map((m) => (m.total > 0 ? m.total : 0)) }],
+  }
+  const yAxisLabel = currency === "HUF" ? "" : "$"
+  const yAxisSuffix = currency === "HUF" ? " Ft" : ""
 
   const handleScanReceipt = async () => {
     if (!Device.isDevice) {
@@ -85,8 +106,7 @@ export const HomeScreen: FC<HomeScreenProps> = function HomeScreen({ navigation 
             scannedImages,
             createdAt: Date.now(),
           })
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          ;(navigation as any).navigate("ReceiptDetail", {
+          navigation.navigate("ReceiptDetail", {
             receiptId,
             scannedImages,
             storeName,
@@ -97,8 +117,7 @@ export const HomeScreen: FC<HomeScreenProps> = function HomeScreen({ navigation 
           toast.dismiss(loadingToast)
           toast.error("Could not read receipt text.")
           addReceipt({ id: receiptId, scannedImages, createdAt: Date.now() })
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          ;(navigation as any).navigate("ReceiptDetail", { receiptId, scannedImages })
+          navigation.navigate("ReceiptDetail", { receiptId, scannedImages })
         } finally {
           setIsProcessing(false)
         }
@@ -153,7 +172,7 @@ export const HomeScreen: FC<HomeScreenProps> = function HomeScreen({ navigation 
           uppercase
           style={themed($sectionHeading)}
         />
-        <TouchableOpacity>
+        <TouchableOpacity onPress={() => navigation.navigate("Receipts")}>
           <Text text="See All" size="xs" style={themed($seeAllText)} />
         </TouchableOpacity>
       </View>
@@ -162,16 +181,22 @@ export const HomeScreen: FC<HomeScreenProps> = function HomeScreen({ navigation 
         ContentComponent={
           <View>
             {receipts.length === 0 ? (
-              <ListItem
-                height={64}
-                LeftComponent={
-                  <Text
-                    text="No receipts yet. Scan one to get started."
-                    size="sm"
-                    style={themed($expenseDate)}
-                  />
-                }
-              />
+              <View style={themed($emptyState)}>
+                <View style={[$expenseIconWrapper, { backgroundColor: ACCENT_ORANGE + "20" }]}>
+                  <MaterialCommunityIcons name="receipt" size={28} color={ACCENT_ORANGE} />
+                </View>
+                <Text
+                  text="No expenses yet"
+                  weight="medium"
+                  size="sm"
+                  style={themed($emptyTitle)}
+                />
+                <Text
+                  text="Scan your first receipt to start tracking your spending"
+                  size="xs"
+                  style={themed($emptySubtitle)}
+                />
+              </View>
             ) : (
               receipts.slice(0, 5).map((receipt, index, arr) => (
                 <ListItem
@@ -226,44 +251,73 @@ export const HomeScreen: FC<HomeScreenProps> = function HomeScreen({ navigation 
       />
 
       {/* Monthly Spending */}
-      <Text
-        text="Monthly Spending"
-        size="sm"
-        weight="bold"
-        uppercase
-        style={themed($sectionHeading)}
-      />
+      <View style={themed($sectionRow)}>
+        <Text
+          text="Monthly Spending"
+          size="sm"
+          weight="bold"
+          uppercase
+          style={themed($sectionHeading)}
+        />
+        {hasSpendingData && (
+          <Text
+            text={formatCurrency(thisMonthTotal, currency)}
+            size="sm"
+            weight="bold"
+            style={$expenseAmount}
+          />
+        )}
+      </View>
       <Card
         style={themed($cardBase)}
         ContentComponent={
-          <View style={$chartContainer}>
-            <BarChart
-              data={monthlySpendingData}
-              width={CHART_WIDTH - 32}
-              height={200}
-              yAxisLabel="$"
-              yAxisSuffix=""
-              fromZero
-              showBarTops={false}
-              withInnerLines={false}
-              chartConfig={{
-                backgroundColor: "transparent",
-                backgroundGradientFrom: colors.background,
-                backgroundGradientFromOpacity: 0,
-                backgroundGradientTo: colors.background,
-                backgroundGradientToOpacity: 0,
-                decimalPlaces: 0,
-                color: () => ACCENT_ORANGE,
-                labelColor: () => colors.textDim,
-                barPercentage: 0.4,
-                barRadius: 3,
-                propsForBackgroundLines: {
-                  strokeWidth: 0,
-                },
-              }}
-              style={$chartStyle}
-            />
-          </View>
+          hasSpendingData ? (
+            <View style={$chartContainer}>
+              <BarChart
+                data={chartData}
+                width={CHART_WIDTH - 32}
+                height={200}
+                yAxisLabel={yAxisLabel}
+                yAxisSuffix={yAxisSuffix}
+                fromZero
+                showBarTops={false}
+                withInnerLines={false}
+                chartConfig={{
+                  backgroundColor: "transparent",
+                  backgroundGradientFrom: colors.background,
+                  backgroundGradientFromOpacity: 0,
+                  backgroundGradientTo: colors.background,
+                  backgroundGradientToOpacity: 0,
+                  decimalPlaces: 0,
+                  color: () => ACCENT_ORANGE,
+                  labelColor: () => colors.textDim,
+                  barPercentage: 0.4,
+                  barRadius: 3,
+                  propsForBackgroundLines: {
+                    strokeWidth: 0,
+                  },
+                }}
+                style={$chartStyle}
+              />
+            </View>
+          ) : (
+            <View style={themed($emptyState)}>
+              <View style={[$expenseIconWrapper, { backgroundColor: ACCENT_ORANGE + "20" }]}>
+                <MaterialCommunityIcons name="chart-bar" size={28} color={ACCENT_ORANGE} />
+              </View>
+              <Text
+                text="No spending data yet"
+                weight="medium"
+                size="sm"
+                style={themed($emptyTitle)}
+              />
+              <Text
+                text="Your monthly totals will appear here"
+                size="xs"
+                style={themed($emptySubtitle)}
+              />
+            </View>
+          )
         }
       />
     </Screen>
@@ -366,6 +420,20 @@ const $expenseIconWrapper: ViewStyle = {
   justifyContent: "center",
   marginEnd: 12,
 }
+
+const $emptyState: ThemedStyle<ViewStyle> = ({ spacing }) => ({
+  alignItems: "center",
+  paddingVertical: spacing.xl,
+  gap: spacing.xs,
+})
+
+const $emptyTitle: ThemedStyle<TextStyle> = ({ spacing }) => ({
+  marginTop: spacing.xxs,
+})
+
+const $emptySubtitle: ThemedStyle<TextStyle> = ({ colors }) => ({
+  color: colors.textDim,
+})
 
 const $expenseDate: ThemedStyle<TextStyle> = ({ colors }) => ({
   color: colors.textDim,

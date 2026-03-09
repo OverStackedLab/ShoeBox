@@ -19,7 +19,13 @@ export type DemoTabParamList = {
 export type AppStackParamList = {
   Welcome: undefined
   Login: undefined
-  Home: undefined
+  Home: {
+    receiptId: string
+    storeName?: string
+    date?: string
+    total?: number
+    scannedImages?: Array<{ uri: string; width: number; height: number }>
+  }
   Demo: NavigatorScreenParams<DemoTabParamList>
   ReceiptDetail: {
     receiptId: string
@@ -37,7 +43,7 @@ export type AppStackScreenProps<T extends keyof AppStackParamList> = NativeStack
   T
 >
 
-export type DemoTabScreenProps<T extends keyof DemoTabParamList> = CompositeScreenProps<
+export type TabScreenProps<T extends keyof DemoTabParamList> = CompositeScreenProps<
   BottomTabScreenProps<DemoTabParamList, T>,
   AppStackScreenProps<keyof AppStackParamList>
 >

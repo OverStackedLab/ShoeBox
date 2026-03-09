@@ -1,12 +1,16 @@
-import { FC } from "react"
+import { FC, useMemo } from "react"
 import { Dimensions, TextStyle, View, ViewStyle } from "react-native"
 import { MaterialCommunityIcons } from "@expo/vector-icons"
 import { PieChart } from "react-native-chart-kit"
 
 import { Card } from "@/components/Card"
+import { EmptyState } from "@/components/EmptyState"
 import { ListItem } from "@/components/ListItem"
 import { Screen } from "@/components/Screen"
 import { Text } from "@/components/Text"
+import { RECEIPT_CATEGORIES } from "@/constants/categories"
+import { useReceipts } from "@/context/ReceiptsContext"
+import { formatCurrency, useSettings } from "@/context/SettingsContext"
 import type { TabScreenProps } from "@/navigators/navigationTypes"
 import { useAppTheme } from "@/theme/context"
 import type { ThemedStyle } from "@/theme/types"
@@ -14,33 +18,35 @@ import type { ThemedStyle } from "@/theme/types"
 const CHART_SIZE = Dimensions.get("window").width - 16
 const DONUT_HOLE = CHART_SIZE * 0.3
 
-interface CategoryItem {
-  name: string
-  amount: number
-  color: string
-}
-
-const categories: CategoryItem[] = [
-  { name: "Category", amount: 12.0, color: "#E8981E" },
-  { name: "Spending", amount: 10.0, color: "#F5B041" },
-  { name: "Food", amount: 4.0, color: "#F0C060" },
-  { name: "Business", amount: 2.0, color: "#D4780A" },
-  { name: "Savings", amount: 3.0, color: "#90c853" },
-  { name: "Others", amount: 1.0, color: "#C46A08" },
-]
-
-const chartData = categories.map((cat) => ({
-  name: cat.name,
-  population: cat.amount,
-  color: cat.color,
-  legendFontColor: "#999",
-  legendFontSize: 0,
-}))
-
 interface AnalyticsScreenProps extends TabScreenProps<"Analytics"> {}
 
 export const AnalyticsScreen: FC<AnalyticsScreenProps> = function AnalyticsScreen() {
   const { themed } = useAppTheme()
+  const { receipts } = useReceipts()
+  const { currency } = useSettings()
+
+  const categories = useMemo(() => {
+    const totals: Record<string, number> = {}
+    for (const receipt of receipts) {
+      if (receipt.total == null) continue
+      const key = receipt.category ?? 'other'
+      totals[key] = (totals[key] ?? 0) + receipt.total
+    }
+    return RECEIPT_CATEGORIES
+      .map((cat) => ({ name: cat.label, amount: totals[cat.key] ?? 0, color: cat.color }))
+      .filter((cat) => cat.amount > 0)
+      .sort((a, b) => b.amount - a.amount)
+  }, [receipts])
+
+  const hasData = categories.length > 0
+
+  const chartData = categories.map((cat) => ({
+    name: cat.name,
+    population: cat.amount,
+    color: cat.color,
+    legendFontColor: "#999",
+    legendFontSize: 0,
+  }))
 
   return (
     <Screen
@@ -50,66 +56,77 @@ export const AnalyticsScreen: FC<AnalyticsScreenProps> = function AnalyticsScree
     >
       <Text preset="heading" style={themed($heading)} text="Analytics" />
 
-      {/* Donut Chart */}
-      <Card
-        style={themed($chartCard)}
-        ContentComponent={
-          <View>
-            <View style={$chartWrapper}>
-              <PieChart
-                data={chartData}
-                width={CHART_SIZE}
-                height={CHART_SIZE * 0.7}
-                chartConfig={{
-                  color: () => "#FFF",
-                }}
-                accessor="population"
-                backgroundColor="transparent"
-                paddingLeft={String(CHART_SIZE / 4)}
-                hasLegend={false}
-                absolute
-              />
-              <View style={themed($donutHole)} />
-            </View>
-
-            {/* Legend */}
-            <View style={$legendRow}>
-              {categories.map((cat, i) => (
-                <View key={i} style={$legendItem}>
-                  <View style={[$dot, { backgroundColor: cat.color }]} />
-                  <Text size="xs" style={themed($legendText)} text={cat.name} />
-                </View>
-              ))}
-            </View>
-          </View>
-        }
-      />
-
-      {/* Top Categories */}
-      <Card
-        heading="Top Categories"
-        style={themed($categoriesCard)}
-        ContentComponent={
-          <View>
-            {categories.slice(0, 4).map((cat, i) => (
-              <ListItem
-                key={i}
-                text={cat.name}
-                bottomSeparator={i < 3}
-                LeftComponent={
-                  <MaterialCommunityIcons
-                    name="circle"
-                    color={cat.color}
-                    size={24}
-                    style={$circleIcon}
+      {hasData ? (
+        <>
+          {/* Donut Chart */}
+          <Card
+            style={themed($chartCard)}
+            ContentComponent={
+              <View>
+                <View style={$chartWrapper}>
+                  <PieChart
+                    data={chartData}
+                    width={CHART_SIZE}
+                    height={CHART_SIZE * 0.7}
+                    chartConfig={{
+                      color: () => "#FFF",
+                    }}
+                    accessor="population"
+                    backgroundColor="transparent"
+                    paddingLeft={String(CHART_SIZE / 4)}
+                    hasLegend={false}
+                    absolute
                   />
-                }
-                RightComponent={<Text style={$categoryAmount} text={`$${cat.amount.toFixed(2)}`} />}
-              />
-            ))}
-          </View>
-        }
-      />
+                  <View style={themed($donutHole)} />
+                </View>
+
+                {/* Legend */}
+                <View style={$legendRow}>
+                  {categories.map((cat, i) => (
+                    <View key={i} style={$legendItem}>
+                      <View style={[$dot, { backgroundColor: cat.color }]} />
+                      <Text size="xs" style={themed($legendText)} text={cat.name} />
+                    </View>
+                  ))}
+                </View>
+              </View>
+            }
+          />
+
+          {/* Top Categories */}
+          <Card
+            heading="Top Categories"
+            style={themed($categoriesCard)}
+            ContentComponent={
+              <View>
+                {categories.slice(0, 4).map((cat, i) => (
+                  <ListItem
+                    key={i}
+                    text={cat.name}
+                    bottomSeparator={i < Math.min(categories.length, 4) - 1}
+                    LeftComponent={
+                      <MaterialCommunityIcons
+                        name="circle"
+                        color={cat.color}
+                        size={24}
+                        style={$circleIcon}
+                      />
+                    }
+                    RightComponent={
+                      <Text style={$categoryAmount} text={formatCurrency(cat.amount, currency)} />
+                    }
+                  />
+                ))}
+              </View>
+            }
+          />
+        </>
+      ) : (
+        <EmptyState
+          heading="No Data Yet"
+          content="Assign categories to your receipts to see spending breakdowns here"
+        />
+      )}
     </Screen>
   )
 }

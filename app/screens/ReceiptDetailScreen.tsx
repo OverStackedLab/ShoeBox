@@ -1,5 +1,5 @@
 import { FC, useState } from "react"
-import { Alert, Image, ImageStyle, TouchableOpacity, View, ViewStyle, TextStyle } from "react-native"
+import { Alert, Image, ImageStyle, Modal, TouchableOpacity, View, ViewStyle, TextStyle } from "react-native"
 import * as Device from "expo-device"
 import { MaterialCommunityIcons } from "@expo/vector-icons"
 import { launchScanner } from "@dariyd/react-native-document-scanner"
@@ -11,6 +11,7 @@ import { Header } from "@/components/Header"
 import { ListItem } from "@/components/ListItem"
 import { Screen } from "@/components/Screen"
 import { Text } from "@/components/Text"
+import { RECEIPT_CATEGORIES } from "@/constants/categories"
 import { useReceipts } from "@/context/ReceiptsContext"
 import { formatCurrency, useSettings } from "@/context/SettingsContext"
 import type { AppStackScreenProps } from "@/navigators/navigationTypes"
@@ -85,6 +86,7 @@ export const ReceiptDetailScreen: FC<ReceiptDetailScreenProps> = function Receip
   const { currency } = useSettings()
   const { receiptId, scannedImages: paramImages, storeName: paramStoreName, date: paramDate, total: paramTotal } = route.params
   const [isProcessing, setIsProcessing] = useState(false)
+  const [categoryModalVisible, setCategoryModalVisible] = useState(false)
 
   // Always prefer context (reflects live edits) over stale route params
   const stored = receipts.find((r) => r.id === receiptId)
@@ -92,6 +94,7 @@ export const ReceiptDetailScreen: FC<ReceiptDetailScreenProps> = function Receip
   const storeName = stored?.storeName ?? paramStoreName
   const date = stored?.date ?? paramDate
   const total = stored?.total ?? paramTotal
+  const category = stored?.category
 
   const handleReread = async () => {
     if (!scannedImages.length) {
@@ -312,6 +315,7 @@ export const ReceiptDetailScreen: FC<ReceiptDetailScreenProps> = function Receip
             />
             <ListItem
               height={52}
+              bottomSeparator
               onPress={() => handleEditField('date', 'Edit Date', date ?? '')}
               LeftComponent={
                 <View style={$rowLeft}>
@@ -331,9 +335,76 @@ export const ReceiptDetailScreen: FC<ReceiptDetailScreenProps> = function Receip
                 </View>
               }
             />
+            <ListItem
+              height={52}
+              onPress={() => setCategoryModalVisible(true)}
+              LeftComponent={
+                <View style={$rowLeft}>
+                  <MaterialCommunityIcons
+                    name="tag-outline"
+                    size={16}
+                    color={colors.textDim}
+                    style={$rowIcon}
+                  />
+                  <Text text="Category" size="sm" style={themed($labelText)} />
+                </View>
+              }
+              RightComponent={
+                <View style={$editRow}>
+                  {category && (
+                    <View
+                      style={[$categoryDot, { backgroundColor: RECEIPT_CATEGORIES.find((c) => c.key === category)?.color }]}
+                    />
+                  )}
+                  <Text
+                    text={RECEIPT_CATEGORIES.find((c) => c.key === category)?.label ?? "—"}
+                    size="sm"
+                    weight="medium"
+                    style={$valueText}
+                  />
+                  <MaterialCommunityIcons name="chevron-right" size={16} color={colors.textDim} style={$editIcon} />
+                </View>
+              }
+            />
           </View>
         }
       />
+
+      {/* Category Picker Modal */}
+      <Modal
+        visible={categoryModalVisible}
+        animationType="slide"
+        transparent
+        onRequestClose={() => setCategoryModalVisible(false)}
+      >
+        <TouchableOpacity style={$modalOverlay} activeOpacity={1} onPress={() => setCategoryModalVisible(false)} />
+        <View style={themed($modalSheet)}>
+          <View style={themed($modalHandle)} />
+          <Text text="Select Category" size="md" weight="bold" style={themed($modalTitle)} />
+          {RECEIPT_CATEGORIES.map((cat, index) => (
+            <ListItem
+              key={cat.key}
+              height={52}
+              bottomSeparator={index < RECEIPT_CATEGORIES.length - 1}
+              onPress={() => {
+                updateReceipt(receiptId, { category: cat.key })
+                setCategoryModalVisible(false)
+              }}
+              LeftComponent={
+                <View style={$rowLeft}>
+                  <View style={[$categoryDot, { backgroundColor: cat.color }]} />
+                  <Text text={cat.label} size="sm" />
+                </View>
+              }
+              RightComponent={
+                category === cat.key ? (
+                  <MaterialCommunityIcons name="check" size={18} color={cat.color} />
+                ) : undefined
+              }
+            />
+          ))}
+        </View>
+      </Modal>
 
       {/* Line Items */}
       {hasLineItems && (
@@ -521,3 +592,37 @@ const $editRow: ViewStyle = {
 const $editIcon: ViewStyle = {
   marginLeft: 4,
 }
+
+const $categoryDot: ViewStyle = {
+  width: 10,
+  height: 10,
+  borderRadius: 5,
+  marginRight: 8,
+}
+
+const $modalOverlay: ViewStyle = {
+  flex: 1,
+  backgroundColor: "rgba(0,0,0,0.4)",
+}
+
+const $modalSheet: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
+  backgroundColor: colors.background,
+  borderTopLeftRadius: 20,
+  borderTopRightRadius: 20,
+  paddingHorizontal: spacing.lg,
+  paddingBottom: spacing.xl,
+  paddingTop: spacing.sm,
+})
+
+const $modalHandle: ThemedStyle<ViewStyle> = ({ colors }) => ({
+  width: 36,
+  height: 4,
+  borderRadius: 2,
+  backgroundColor: colors.border,
+  alignSelf: "center",
+  marginBottom: 16,
+})
+
+const $modalTitle: ThemedStyle<TextStyle> = ({ spacing }) => ({
+  marginBottom: spacing.sm,
+})

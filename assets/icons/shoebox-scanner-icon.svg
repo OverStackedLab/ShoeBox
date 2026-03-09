@@ -1,0 +1,15 @@
+<svg viewBox="0 0 80 80" width="80" height="80" xmlns="http://www.w3.org/2000/svg">
+  <!-- Receipt body -->
+  <rect x="23" y="15" width="34" height="50" rx="3" fill="none" stroke="#E8981E" stroke-width="2" />
+  <!-- Receipt lines -->
+  <rect x="29" y="23" width="22" height="3" rx="1.5" fill="#E8981E" />
+  <rect x="29" y="30" width="16" height="2" rx="1" fill="#E8981E" opacity="0.5" />
+  <rect x="29" y="36" width="19" height="2" rx="1" fill="#E8981E" opacity="0.5" />
+  <rect x="29" y="42" width="13" height="2" rx="1" fill="#E8981E" opacity="0.5" />
+  <rect x="29" y="48" width="17" height="2" rx="1" fill="#E8981E" opacity="0.4" />
+  <!-- Corner brackets -->
+  <path d="M4 18 L4 4 L18 4" fill="none" stroke="#90C853" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" />
+  <path d="M62 4 L76 4 L76 18" fill="none" stroke="#90C853" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" />
+  <path d="M4 62 L4 76 L18 76" fill="none" stroke="#90C853" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" />
+  <path d="M76 62 L76 76 L62 76" fill="none" stroke="#90C853" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" />
+</svg>

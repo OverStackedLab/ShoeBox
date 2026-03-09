@@ -2,9 +2,10 @@ import { FC, useMemo, useState } from "react"
 import { Dimensions, TextStyle, TouchableOpacity, View, ViewStyle } from "react-native"
 import * as Device from "expo-device"
 import { launchScanner } from "@dariyd/react-native-document-scanner"
-import { AntDesign, MaterialCommunityIcons } from "@expo/vector-icons"
+import { MaterialCommunityIcons } from "@expo/vector-icons"
 import { recognizeText } from "@infinitered/react-native-mlkit-text-recognition"
 import { BarChart } from "react-native-chart-kit"
+import { SvgXml } from "react-native-svg"
 import { toast } from "sonner-native"
 
 import { Card } from "@/components/Card"
@@ -20,6 +21,19 @@ import type { ThemedStyle } from "@/theme/types"
 import { parseReceiptText } from "@/utils/receiptParser"
 import { saveReceiptImage } from "@/utils/receiptStorage"
 
+const SHOEBOX_SCANNER_SVG = `<svg viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg">
+  <rect x="23" y="15" width="34" height="50" rx="3" fill="none" stroke="#FFFFFF" stroke-width="2" />
+  <rect x="29" y="23" width="22" height="3" rx="1.5" fill="#FFFFFF" />
+  <rect x="29" y="30" width="16" height="2" rx="1" fill="#FFFFFF" opacity="0.5" />
+  <rect x="29" y="36" width="19" height="2" rx="1" fill="#FFFFFF" opacity="0.5" />
+  <rect x="29" y="42" width="13" height="2" rx="1" fill="#FFFFFF" opacity="0.5" />
+  <rect x="29" y="48" width="17" height="2" rx="1" fill="#FFFFFF" opacity="0.4" />
+  <path d="M4 18 L4 4 L18 4" fill="none" stroke="#FFFFFF" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" />
+  <path d="M62 4 L76 4 L76 18" fill="none" stroke="#FFFFFF" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" />
+  <path d="M4 62 L4 76 L18 76" fill="none" stroke="#FFFFFF" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" />
+  <path d="M76 62 L76 76 L62 76" fill="none" stroke="#FFFFFF" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" />
+</svg>`
+
 const SCREEN_PADDING = 24
 const CHART_WIDTH = Dimensions.get("window").width - SCREEN_PADDING * 2
 const ACCENT_ORANGE = "#E8981E"
@@ -34,7 +48,6 @@ export const HomeScreen: FC<HomeScreenProps> = function HomeScreen({ navigation 
   } = useAppTheme()
   const [isProcessing, setIsProcessing] = useState(false)
   const { receipts, addReceipt } = useReceipts()
-  console.log("🚀 ~ :37 ~ HomeScreen ~ receipts:", receipts)
   const { currency } = useSettings()
 
   const monthlySpending = useMemo(() => {
@@ -155,7 +168,7 @@ export const HomeScreen: FC<HomeScreenProps> = function HomeScreen({ navigation 
                 onPress={handleScanReceipt}
                 disabled={isProcessing}
               >
-                <AntDesign name="scan" size={100} color="#FFFFFF" />
+                <SvgXml xml={SHOEBOX_SCANNER_SVG} width={100} height={100} />
               </TouchableOpacity>
             </View>
             <Text text="Scan Receipt" weight="medium" size="sm" style={themed($scanLabel)} />

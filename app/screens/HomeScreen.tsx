@@ -1,11 +1,19 @@
-import { FC, useMemo, useState } from "react"
-import { Dimensions, TextStyle, TouchableOpacity, View, ViewStyle } from "react-native"
+import { FC, useEffect, useMemo, useRef, useState } from "react"
+import {
+  Animated,
+  Dimensions,
+  Easing,
+  TextStyle,
+  TouchableOpacity,
+  View,
+  ViewStyle,
+} from "react-native"
 import * as Device from "expo-device"
 import { launchScanner } from "@dariyd/react-native-document-scanner"
 import { MaterialCommunityIcons } from "@expo/vector-icons"
 import { recognizeText } from "@infinitered/react-native-mlkit-text-recognition"
 import { BarChart } from "react-native-chart-kit"
-import { SvgXml } from "react-native-svg"
+import { Circle, Svg, SvgXml } from "react-native-svg"
 import { toast } from "sonner-native"
 
 import { Card } from "@/components/Card"
@@ -47,6 +55,21 @@ export const HomeScreen: FC<HomeScreenProps> = function HomeScreen({ navigation 
     theme: { colors },
   } = useAppTheme()
   const [isProcessing, setIsProcessing] = useState(false)
+  const pulseAnim = useRef(new Animated.Value(0)).current
+
+  useEffect(() => {
+    const animation = Animated.loop(
+      Animated.timing(pulseAnim, {
+        toValue: 1,
+        duration: 2000,
+        easing: Easing.linear,
+        useNativeDriver: true,
+      }),
+    )
+    animation.start()
+    return () => animation.stop()
+  }, [pulseAnim])
+
   const { receipts, addReceipt } = useReceipts()
   const { currency } = useSettings()
 
@@ -161,15 +184,54 @@ export const HomeScreen: FC<HomeScreenProps> = function HomeScreen({ navigation 
         style={themed($scanCard)}
         ContentComponent={
           <View style={$scanCardContent}>
-            <View style={themed($scanButtonRing)}>
-              <TouchableOpacity
-                style={$scanButton}
-                activeOpacity={0.8}
-                onPress={handleScanReceipt}
-                disabled={isProcessing}
+            <View style={$scanButtonContainer}>
+              <Animated.View
+                style={[
+                  $spinnerContainer,
+                  {
+                    transform: [
+                      {
+                        rotate: pulseAnim.interpolate({
+                          inputRange: [0, 1],
+                          outputRange: ["0deg", "360deg"],
+                        }),
+                      },
+                    ],
+                  },
+                ]}
               >
-                <SvgXml xml={SHOEBOX_SCANNER_SVG} width={100} height={100} />
-              </TouchableOpacity>
+                <Svg width={RING_SIZE} height={RING_SIZE}>
+                  <Circle
+                    cx={RING_SIZE / 2}
+                    cy={RING_SIZE / 2}
+                    r={SPINNER_RADIUS}
+                    stroke={ACCENT_ORANGE}
+                    strokeWidth={SPINNER_STROKE}
+                    strokeOpacity={0.15}
+                    fill="none"
+                  />
+                  <Circle
+                    cx={RING_SIZE / 2}
+                    cy={RING_SIZE / 2}
+                    r={SPINNER_RADIUS}
+                    stroke={SPINNER_COLOR}
+                    strokeWidth={SPINNER_STROKE}
+                    fill="none"
+                    strokeDasharray={`${SPINNER_ARC} ${SPINNER_GAP}`}
+                    strokeLinecap="butt"
+                  />
+                </Svg>
+              </Animated.View>
+              <View style={themed($scanButtonRing)}>
+                <TouchableOpacity
+                  style={$scanButton}
+                  activeOpacity={0.8}
+                  onPress={handleScanReceipt}
+                  disabled={isProcessing}
+                >
+                  <SvgXml xml={SHOEBOX_SCANNER_SVG} width={100} height={100} />
+                </TouchableOpacity>
+              </View>
             </View>
             <Text text="Scan Receipt" weight="medium" size="sm" style={themed($scanLabel)} />
           </View>
@@ -352,7 +414,6 @@ const $scanCard: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
   backgroundColor: colors.background,
   borderWidth: 0,
   paddingVertical: spacing.lg,
-  marginBottom: spacing.md,
   alignItems: "center",
   shadowOpacity: 0,
   elevation: 0,
@@ -364,12 +425,27 @@ const $scanCardContent: ViewStyle = {
   justifyContent: "center",
 }
 
-const $scanButtonRing: ThemedStyle<ViewStyle> = ({ colors }) => ({
+const $scanButtonContainer: ViewStyle = {
+  alignItems: "center",
+  justifyContent: "center",
+}
+
+const $spinnerContainer: ViewStyle = {
+  position: "absolute",
+}
+
+const SPINNER_COLOR = "#90c853"
+const SPINNER_STROKE = 20
+const RING_SIZE = SCAN_BUTTON_SIZE + SPINNER_STROKE * 2 + 8
+const SPINNER_RADIUS = RING_SIZE / 2 - SPINNER_STROKE / 2
+const SPINNER_CIRCUMFERENCE = 2 * Math.PI * SPINNER_RADIUS
+const SPINNER_ARC = SPINNER_CIRCUMFERENCE * 0.2
+const SPINNER_GAP = SPINNER_CIRCUMFERENCE * 0.8
+
+const $scanButtonRing: ThemedStyle<ViewStyle> = () => ({
   width: SCAN_BUTTON_SIZE + 16,
   height: SCAN_BUTTON_SIZE + 16,
   borderRadius: (SCAN_BUTTON_SIZE + 16) / 2,
-  borderWidth: 1,
-  borderColor: colors.border,
   alignItems: "center",
   justifyContent: "center",
 })
@@ -384,7 +460,7 @@ const $scanButton: ViewStyle = {
 }
 
 const $scanLabel: ThemedStyle<TextStyle> = ({ spacing }) => ({
-  marginTop: spacing.sm,
+  marginTop: spacing.xl,
 })
 
 const $cardBase: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
@@ -411,7 +487,6 @@ const $sectionRow: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   flexDirection: "row",
   justifyContent: "space-between",
   alignItems: "center",
-  marginTop: spacing.lg,
   marginBottom: spacing.xs,
 })
 

@@ -1,9 +1,20 @@
 import { FC, useState } from "react"
-import { Alert, Image, ImageStyle, Modal, TouchableOpacity, View, ViewStyle, TextStyle } from "react-native"
+import {
+  Alert,
+  Image,
+  ImageStyle,
+  Modal,
+  ScrollView,
+  TouchableOpacity,
+  View,
+  ViewStyle,
+  TextStyle,
+} from "react-native"
 import * as Device from "expo-device"
-import { MaterialCommunityIcons } from "@expo/vector-icons"
 import { launchScanner } from "@dariyd/react-native-document-scanner"
+import { MaterialCommunityIcons } from "@expo/vector-icons"
 import { recognizeText } from "@infinitered/react-native-mlkit-text-recognition"
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context"
 import { toast } from "sonner-native"
 
 import { Card } from "@/components/Card"
@@ -28,6 +39,11 @@ interface LineItem {
   name: string
   qty: number
   price: number
+}
+
+interface OcrLine {
+  text: string
+  frame: { left: number; top: number; right: number; bottom: number }
 }
 
 const MOCK_LINE_ITEMS: Record<string, LineItem[]> = {
@@ -85,8 +101,12 @@ export const ReceiptDetailScreen: FC<ReceiptDetailScreenProps> = function Receip
   const { receipts, removeReceipt, updateReceipt } = useReceipts()
   const { currency } = useSettings()
   const { receiptId, scannedImages: paramImages, storeName: paramStoreName, date: paramDate, total: paramTotal } = route.params
+  const insets = useSafeAreaInsets()
   const [isProcessing, setIsProcessing] = useState(false)
   const [categoryModalVisible, setCategoryModalVisible] = useState(false)
+  const [ocrOverlayVisible, setOcrOverlayVisible] = useState(false)
+  const [ocrLines, setOcrLines] = useState<OcrLine[]>([])
+  const [imageContainerWidth, setImageContainerWidth] = useState(0)
 
   // Always prefer context (reflects live edits) over stale route params
   const stored = receipts.find((r) => r.id === receiptId)
@@ -117,6 +137,53 @@ export const ReceiptDetailScreen: FC<ReceiptDetailScreenProps> = function Receip
     } finally {
       setIsProcessing(false)
     }
+  }
+
+  const handleSelectText = async () => {
+    if (!scannedImages.length) return
+    setIsProcessing(true)
+    try {
+      const result = await recognizeText(scannedImages[0].uri)
+      const lines: OcrLine[] = result.blocks.flatMap((b) => b.lines)
+      setOcrLines(lines)
+      setOcrOverlayVisible(true)
+    } catch {
+      toast.error("Could not read receipt text.")
+    } finally {
+      setIsProcessing(false)
+    }
+  }
+
+  const handleLineTap = (text: string) => {
+    Alert.alert(text, "Apply as:", [
+      {
+        text: "Merchant",
+        onPress: () => {
+          updateReceipt(receiptId, { storeName: text })
+          setOcrOverlayVisible(false)
+        },
+      },
+      {
+        text: "Date",
+        onPress: () => {
+          updateReceipt(receiptId, { date: text })
+          setOcrOverlayVisible(false)
+        },
+      },
+      {
+        text: "Total",
+        onPress: () => {
+          const n = parseFloat(text.replace(/[^0-9.]/g, ""))
+          if (!isNaN(n)) {
+            updateReceipt(receiptId, { total: n })
+            setOcrOverlayVisible(false)
+          } else {
+            Alert.alert("Invalid", `"${text}" is not a valid amount.`)
+          }
+        },
+      },
+      { text: "Cancel", style: "cancel" },
+    ])
   }
 
   const handleRescan = async () => {
@@ -232,6 +299,14 @@ export const ReceiptDetailScreen: FC<ReceiptDetailScreenProps> = function Receip
         safeAreaEdges={[]}
         RightActionComponent={
           <View style={$headerActions}>
+            <TouchableOpacity
+              onPress={handleSelectText}
+              style={themed($headerActionBtn)}
+              activeOpacity={0.7}
+              disabled={isProcessing || !scannedImages.length}
+            >
+              <MaterialCommunityIcons name="cursor-text" size={22} color={colors.text} />
+            </TouchableOpacity>
             <TouchableOpacity
               onPress={handleReread}
               style={themed($headerActionBtn)}
@@ -369,6 +444,58 @@ export const ReceiptDetailScreen: FC<ReceiptDetailScreenProps> = function Receip
           </View>
         }
       />
+
+      {/* OCR Text Selection Overlay */}
+      <Modal
+        visible={ocrOverlayVisible}
+        animationType="slide"
+        onRequestClose={() => setOcrOverlayVisible(false)}
+      >
+        <SafeAreaView style={$ocrSafeArea} edges={["bottom"]}>
+          <View style={[themed($ocrHeader), { paddingTop: insets.top }]}>
+            <Text text="Tap text to use it" size="sm" weight="medium" />
+            <TouchableOpacity onPress={() => setOcrOverlayVisible(false)} activeOpacity={0.7}>
+              <MaterialCommunityIcons name="close" size={22} color={colors.text} />
+            </TouchableOpacity>
+          </View>
+          <ScrollView style={$ocrScrollView}>
+            <View onLayout={(e) => setImageContainerWidth(e.nativeEvent.layout.width)}>
+              {scannedImages.length > 0 && (
+                <>
+                  <Image
+                    source={{ uri: scannedImages[0].uri }}
+                    style={[
+                      $ocrImage,
+                      { aspectRatio: (scannedImages[0].width ?? 1) / (scannedImages[0].height ?? 1) },
+                    ]}
+                    resizeMode="contain"
+                  />
+                  {imageContainerWidth > 0 &&
+                    ocrLines.map((line, i) => {
+                      const scale = imageContainerWidth / (scannedImages[0].width ?? imageContainerWidth)
+                      return (
+                        <TouchableOpacity
+                          key={i}
+                          activeOpacity={0.5}
+                          style={[
+                            $ocrLineHit,
+                            {
+                              left: line.frame.left * scale,
+                              top: line.frame.top * scale,
+                              width: (line.frame.right - line.frame.left) * scale,
+                              height: Math.max((line.frame.bottom - line.frame.top) * scale, 20),
+                            },
+                          ]}
+                          onPress={() => handleLineTap(line.text)}
+                        />
+                      )
+                    })}
+                </>
+              )}
+            </View>
+          </ScrollView>
+        </SafeAreaView>
+      </Modal>
 
       {/* Category Picker Modal */}
       <Modal
@@ -626,3 +753,32 @@ const $modalHandle: ThemedStyle<ViewStyle> = ({ colors }) => ({
 const $modalTitle: ThemedStyle<TextStyle> = ({ spacing }) => ({
   marginBottom: spacing.sm,
 })
+
+const $ocrSafeArea: ViewStyle = {
+  flex: 1,
+  backgroundColor: "#000",
+}
+
+const $ocrScrollView: ViewStyle = {
+  flex: 1,
+}
+
+const $ocrHeader: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
+  flexDirection: "row",
+  justifyContent: "space-between",
+  alignItems: "center",
+  paddingHorizontal: spacing.lg,
+  paddingVertical: spacing.sm,
+  backgroundColor: colors.background,
+})
+
+const $ocrImage: ImageStyle = {
+  width: "100%",
+}
+
+const $ocrLineHit: ViewStyle = {
+  position: "absolute",
+  borderWidth: 1,
+  borderColor: "rgba(232, 152, 30, 0.6)",
+  backgroundColor: "rgba(232, 152, 30, 0.15)",
+}

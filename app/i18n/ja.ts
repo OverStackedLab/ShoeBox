@@ -34,6 +34,20 @@ const ja: Translations = {
   errors: {
     invalidEmail: "有効なメールアドレスを入力してください.",
   },
+  signUpScreen: {
+    signUp: "アカウント作成",
+    enterDetails: "新しいアカウントを作成するには以下に入力してください。",
+    emailFieldLabel: "メールアドレス",
+    passwordFieldLabel: "パスワード",
+    confirmPasswordFieldLabel: "パスワードの確認",
+    emailFieldPlaceholder: "メールアドレスを入力",
+    passwordFieldPlaceholder: "パスワードを作成",
+    confirmPasswordFieldPlaceholder: "パスワードを繰り返す",
+    tapToSignUp: "アカウント作成",
+    alreadyHaveAccount: "すでにアカウントをお持ちですか？",
+    logIn: "ログイン",
+    checkEmail: "アカウントを確認するためにメールをご確認ください。",
+  },
   loginScreen: {
     logIn: "ログイン",
     enterDetails:
@@ -44,6 +58,7 @@ const ja: Translations = {
     passwordFieldPlaceholder: "パスワードを入力してください",
     tapToLogIn: "タップしてログインしよう！",
     hint: "ヒント: お好みのメールアドレスとパスワードを使ってください :)",
+    createAccount: "アカウントを作成する",
   },
   demoNavigator: {
     componentsTab: "コンポーネント",

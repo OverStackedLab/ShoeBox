@@ -8,7 +8,7 @@ import { EmptyState } from "@/components/EmptyState"
 import { ListItem } from "@/components/ListItem"
 import { Screen } from "@/components/Screen"
 import { Text } from "@/components/Text"
-import { RECEIPT_CATEGORIES } from "@/constants/categories"
+import { useCategories } from "@/context/CategoriesContext"
 import { useReceipts } from "@/context/ReceiptsContext"
 import { formatCurrency, useSettings } from "@/context/SettingsContext"
 import type { TabScreenProps } from "@/navigators/navigationTypes"
@@ -23,20 +23,21 @@ interface AnalyticsScreenProps extends TabScreenProps<"Analytics"> {}
 export const AnalyticsScreen: FC<AnalyticsScreenProps> = function AnalyticsScreen() {
   const { themed } = useAppTheme()
   const { receipts } = useReceipts()
+  const { categories: allCategories } = useCategories()
   const { currency } = useSettings()
 
   const categories = useMemo(() => {
     const totals: Record<string, number> = {}
     for (const receipt of receipts) {
       if (receipt.total == null) continue
-      const key = receipt.category ?? 'other'
+      const key = receipt.category ?? "other"
       totals[key] = (totals[key] ?? 0) + receipt.total
     }
-    return RECEIPT_CATEGORIES
-      .map((cat) => ({ name: cat.label, amount: totals[cat.key] ?? 0, color: cat.color }))
+    return allCategories
+      .map((cat) => ({ name: cat.label, amount: totals[cat.id] ?? 0, color: cat.color }))
       .filter((cat) => cat.amount > 0)
       .sort((a, b) => b.amount - a.amount)
-  }, [receipts])
+  }, [receipts, allCategories])
 
   const hasData = categories.length > 0
 

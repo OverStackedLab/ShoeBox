@@ -34,6 +34,20 @@ const fr: Translations = {
   errors: {
     invalidEmail: "Adresse e-mail invalide.",
   },
+  signUpScreen: {
+    signUp: "Créer un compte",
+    enterDetails: "Entrez vos informations ci-dessous pour créer un compte.",
+    emailFieldLabel: "E-mail",
+    passwordFieldLabel: "Mot de passe",
+    confirmPasswordFieldLabel: "Confirmer le mot de passe",
+    emailFieldPlaceholder: "Entrez votre adresse e-mail",
+    passwordFieldPlaceholder: "Créez un mot de passe",
+    confirmPasswordFieldPlaceholder: "Répétez votre mot de passe",
+    tapToSignUp: "Créer un compte",
+    alreadyHaveAccount: "Vous avez déjà un compte ?",
+    logIn: "Se connecter",
+    checkEmail: "Vérifiez votre e-mail pour confirmer votre compte.",
+  },
   loginScreen: {
     logIn: "Se connecter",
     enterDetails:
@@ -44,6 +58,7 @@ const fr: Translations = {
     passwordFieldPlaceholder: "Mot de passe super secret ici",
     tapToLogIn: "Appuyez pour vous connecter!",
     hint: "Astuce : vous pouvez utiliser n'importe quelle adresse e-mail et votre mot de passe préféré :)",
+    createAccount: "Créer un compte",
   },
   demoNavigator: {
     componentsTab: "Composants",

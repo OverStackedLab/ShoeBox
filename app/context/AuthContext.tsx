@@ -1,14 +1,17 @@
-import { createContext, FC, PropsWithChildren, useCallback, useContext, useMemo } from "react"
-import { useMMKVString } from "react-native-mmkv"
+import { createContext, FC, PropsWithChildren, useCallback, useContext, useEffect, useState } from "react"
+
+import type { Session } from "@supabase/supabase-js"
+
+import { supabase } from "@/services/supabase/supabase"
 
 export type AuthContextType = {
   isAuthenticated: boolean
-  authToken?: string
-  authEmail?: string
-  setAuthToken: (token?: string) => void
-  setAuthEmail: (email: string) => void
+  session: Session | null
+  authEmail: string | undefined
+  isLoading: boolean
+  signIn: (email: string, password: string) => Promise<string | null>
+  signUp: (email: string, password: string) => Promise<string | null>
   logout: () => void
-  validationError: string
 }
 
 export const AuthContext = createContext<AuthContextType | null>(null)
@@ -16,29 +19,46 @@ export const AuthContext = createContext<AuthContextType | null>(null)
 export interface AuthProviderProps {}
 
 export const AuthProvider: FC<PropsWithChildren<AuthProviderProps>> = ({ children }) => {
-  const [authToken, setAuthToken] = useMMKVString("AuthProvider.authToken")
-  const [authEmail, setAuthEmail] = useMMKVString("AuthProvider.authEmail")
+  const [session, setSession] = useState<Session | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session: initialSession } }) => {
+      setSession(initialSession)
+      setIsLoading(false)
+    })
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, updatedSession) => {
+      setSession(updatedSession)
+    })
+
+    return () => subscription.unsubscribe()
+  }, [])
+
+  const signIn = useCallback(async (email: string, password: string): Promise<string | null> => {
+    const { error } = await supabase.auth.signInWithPassword({ email, password })
+    return error?.message ?? null
+  }, [])
+
+  const signUp = useCallback(async (email: string, password: string): Promise<string | null> => {
+    const { error } = await supabase.auth.signUp({ email, password })
+    return error?.message ?? null
+  }, [])
 
   const logout = useCallback(() => {
-    setAuthToken(undefined)
-    setAuthEmail("")
-  }, [setAuthEmail, setAuthToken])
+    supabase.auth.signOut()
+  }, [])
 
-  const validationError = useMemo(() => {
-    if (!authEmail || authEmail.length === 0) return "can't be blank"
-    if (authEmail.length < 6) return "must be at least 6 characters"
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(authEmail)) return "must be a valid email address"
-    return ""
-  }, [authEmail])
-
-  const value = {
-    isAuthenticated: !!authToken,
-    authToken,
-    authEmail,
-    setAuthToken,
-    setAuthEmail,
+  const value: AuthContextType = {
+    isAuthenticated: !!session,
+    session,
+    authEmail: session?.user?.email,
+    isLoading,
+    signIn,
+    signUp,
     logout,
-    validationError,
   }
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

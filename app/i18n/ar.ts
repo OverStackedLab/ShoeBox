@@ -33,6 +33,20 @@ const ar: Translations = {
   errors: {
     invalidEmail: "عنوان البريد الالكتروني غير صالح",
   },
+  signUpScreen: {
+    signUp: "إنشاء حساب",
+    enterDetails: "أدخل بياناتك أدناه لإنشاء حساب جديد.",
+    emailFieldLabel: "البريد الإلكتروني",
+    passwordFieldLabel: "كلمة السر",
+    confirmPasswordFieldLabel: "تأكيد كلمة السر",
+    emailFieldPlaceholder: "أدخل بريدك الإلكتروني",
+    passwordFieldPlaceholder: "أنشئ كلمة سر",
+    confirmPasswordFieldPlaceholder: "أعد إدخال كلمة السر",
+    tapToSignUp: "إنشاء حساب",
+    alreadyHaveAccount: "هل لديك حساب بالفعل؟",
+    logIn: "تسجيل الدخول",
+    checkEmail: "تحقق من بريدك الإلكتروني لتأكيد حسابك.",
+  },
   loginScreen: {
     logIn: "تسجيل الدخول",
     enterDetails:
@@ -43,6 +57,7 @@ const ar: Translations = {
     passwordFieldPlaceholder: "كلمة السر هنا فائقة السر",
     tapToLogIn: "انقر لتسجيل الدخول!",
     hint: "(: تلميح: يمكنك استخدام اي عنوان بريد الكتروني وكلمة السر المفضلة لديك",
+    createAccount: "إنشاء حساب",
   },
   demoNavigator: {
     componentsTab: "عناصر",

@@ -33,6 +33,20 @@ const hi: Translations = {
   errors: {
     invalidEmail: "अमान्य ईमेल पता।",
   },
+  signUpScreen: {
+    signUp: "खाता बनाएं",
+    enterDetails: "नया खाता बनाने के लिए अपनी जानकारी दर्ज करें।",
+    emailFieldLabel: "ईमेल",
+    passwordFieldLabel: "पासवर्ड",
+    confirmPasswordFieldLabel: "पासवर्ड की पुष्टि करें",
+    emailFieldPlaceholder: "अपना ईमेल दर्ज करें",
+    passwordFieldPlaceholder: "पासवर्ड बनाएं",
+    confirmPasswordFieldPlaceholder: "पासवर्ड दोहराएं",
+    tapToSignUp: "खाता बनाएं",
+    alreadyHaveAccount: "पहले से खाता है?",
+    logIn: "लॉग इन करें",
+    checkEmail: "अपना खाता पुष्टि करने के लिए ईमेल देखें।",
+  },
   loginScreen: {
     logIn: "लॉग इन करें",
     enterDetails:
@@ -43,6 +57,7 @@ const hi: Translations = {
     passwordFieldPlaceholder: "सुपर सीक्रेट पासवर्ड यहाँ",
     tapToLogIn: "लॉग इन करने के लिए टैप करें!",
     hint: "संकेत: आप किसी भी ईमेल पते और अपने पसंदीदा पासवर्ड का उपयोग कर सकते हैं :)",
+    createAccount: "खाता बनाएं",
   },
   demoNavigator: {
     componentsTab: "कंपोनेंट्स",

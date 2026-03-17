@@ -1,4 +1,4 @@
-import { ComponentType, FC, useEffect, useMemo, useRef, useState } from "react"
+import { ComponentType, FC, useMemo, useRef, useState } from "react"
 // eslint-disable-next-line no-restricted-imports
 import { TextInput, TextStyle, ViewStyle } from "react-native"
 
@@ -14,42 +14,39 @@ import type { ThemedStyle } from "@/theme/types"
 
 interface LoginScreenProps extends AppStackScreenProps<"Login"> {}
 
-export const LoginScreen: FC<LoginScreenProps> = () => {
+export const LoginScreen: FC<LoginScreenProps> = ({ navigation }) => {
   const authPasswordInput = useRef<TextInput>(null)
 
+  const [authEmail, setAuthEmail] = useState("")
   const [authPassword, setAuthPassword] = useState("")
   const [isAuthPasswordHidden, setIsAuthPasswordHidden] = useState(true)
   const [isSubmitted, setIsSubmitted] = useState(false)
-  const [attemptsCount, setAttemptsCount] = useState(0)
-  const { authEmail, setAuthEmail, setAuthToken, validationError } = useAuth()
+  const [isLoading, setIsLoading] = useState(false)
+  const [serverError, setServerError] = useState("")
+  const { signIn } = useAuth()
 
   const {
     themed,
     theme: { colors },
   } = useAppTheme()
 
-  useEffect(() => {
-    // Here is where you could fetch credentials from keychain or storage
-    // and pre-fill the form fields.
-    setAuthEmail("ignite@infinite.red")
-    setAuthPassword("ign1teIsAwes0m3")
-  }, [setAuthEmail])
+  const emailError = isSubmitted ? validateEmail(authEmail) : ""
 
-  const error = isSubmitted ? validationError : ""
-
-  function login() {
+  async function login() {
     setIsSubmitted(true)
-    setAttemptsCount(attemptsCount + 1)
+    if (validateEmail(authEmail)) return
 
-    if (validationError) return
+    setIsLoading(true)
+    setServerError("")
+    const error = await signIn(authEmail, authPassword)
+    setIsLoading(false)
 
-    // Make a request to your server to get an authentication token.
-    // If successful, reset the fields and set the token.
-    setIsSubmitted(false)
+    if (error) {
+      setServerError(error)
+      return
+    }
+
     setAuthPassword("")
-
-    // We'll mock this with a fake token.
-    setAuthToken(String(Date.now()))
   }
 
   const PasswordRightAccessory: ComponentType<TextFieldAccessoryProps> = useMemo(
@@ -76,8 +73,9 @@ export const LoginScreen: FC<LoginScreenProps> = () => {
     >
       <Text testID="login-heading" tx="loginScreen:logIn" preset="heading" style={themed($logIn)} />
       <Text tx="loginScreen:enterDetails" preset="subheading" style={themed($enterDetails)} />
-      {attemptsCount > 2 && (
-        <Text tx="loginScreen:hint" size="sm" weight="light" style={themed($hint)} />
+
+      {!!serverError && (
+        <Text text={serverError} size="sm" style={themed($serverError)} />
       )}
 
       <TextField
@@ -90,8 +88,8 @@ export const LoginScreen: FC<LoginScreenProps> = () => {
         keyboardType="email-address"
         labelTx="loginScreen:emailFieldLabel"
         placeholderTx="loginScreen:emailFieldPlaceholder"
-        helper={error}
-        status={error ? "error" : undefined}
+        helper={emailError}
+        status={emailError ? "error" : undefined}
         onSubmitEditing={() => authPasswordInput.current?.focus()}
       />
 
@@ -116,9 +114,23 @@ export const LoginScreen: FC<LoginScreenProps> = () => {
         style={themed($tapButton)}
         preset="reversed"
         onPress={login}
+        disabled={isLoading}
+      />
+
+      <Button
+        tx="loginScreen:createAccount"
+        preset="default"
+        style={themed($createAccountButton)}
+        onPress={() => navigation.navigate("SignUp")}
       />
     </Screen>
   )
+}
+
+function validateEmail(email: string): string {
+  if (!email || email.length === 0) return "can't be blank"
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return "must be a valid email address"
+  return ""
 }
 
 const $screenContentContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
@@ -134,8 +146,8 @@ const $enterDetails: ThemedStyle<TextStyle> = ({ spacing }) => ({
   marginBottom: spacing.lg,
 })
 
-const $hint: ThemedStyle<TextStyle> = ({ colors, spacing }) => ({
-  color: colors.tint,
+const $serverError: ThemedStyle<TextStyle> = ({ colors, spacing }) => ({
+  color: colors.error,
   marginBottom: spacing.md,
 })
 
@@ -145,4 +157,8 @@ const $textField: ThemedStyle<ViewStyle> = ({ spacing }) => ({
 
 const $tapButton: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   marginTop: spacing.xs,
+})
+
+const $createAccountButton: ThemedStyle<ViewStyle> = ({ spacing }) => ({
+  marginTop: spacing.sm,
 })

@@ -22,7 +22,7 @@ import { Header } from "@/components/Header"
 import { ListItem } from "@/components/ListItem"
 import { Screen } from "@/components/Screen"
 import { Text } from "@/components/Text"
-import { RECEIPT_CATEGORIES } from "@/constants/categories"
+import { useCategories } from "@/context/CategoriesContext"
 import { useReceipts } from "@/context/ReceiptsContext"
 import { formatCurrency, useSettings } from "@/context/SettingsContext"
 import type { AppStackScreenProps } from "@/navigators/navigationTypes"
@@ -99,8 +99,15 @@ export const ReceiptDetailScreen: FC<ReceiptDetailScreenProps> = function Receip
     theme: { colors },
   } = useAppTheme()
   const { receipts, removeReceipt, updateReceipt } = useReceipts()
+  const { categories } = useCategories()
   const { currency } = useSettings()
-  const { receiptId, scannedImages: paramImages, storeName: paramStoreName, date: paramDate, total: paramTotal } = route.params
+  const {
+    receiptId,
+    scannedImages: paramImages,
+    storeName: paramStoreName,
+    date: paramDate,
+    total: paramTotal,
+  } = route.params
   const insets = useSafeAreaInsets()
   const [isProcessing, setIsProcessing] = useState(false)
   const [categoryModalVisible, setCategoryModalVisible] = useState(false)
@@ -237,10 +244,10 @@ export const ReceiptDetailScreen: FC<ReceiptDetailScreenProps> = function Receip
   }
 
   const handleEditField = (
-    field: 'storeName' | 'date' | 'total',
+    field: "storeName" | "date" | "total",
     title: string,
     current: string,
-    keyboardType: 'default' | 'decimal-pad' = 'default',
+    keyboardType: "default" | "decimal-pad" = "default",
   ) => {
     Alert.prompt(
       title,
@@ -248,14 +255,14 @@ export const ReceiptDetailScreen: FC<ReceiptDetailScreenProps> = function Receip
       (value) => {
         const trimmed = value.trim()
         if (!trimmed) return
-        if (field === 'total') {
-          const n = parseFloat(trimmed.replace(/[^0-9.,]/g, '').replace(',', '.'))
+        if (field === "total") {
+          const n = parseFloat(trimmed.replace(/[^0-9.,]/g, "").replace(",", "."))
           if (!isNaN(n)) updateReceipt(receiptId, { total: n })
         } else {
           updateReceipt(receiptId, { [field]: trimmed })
         }
       },
-      'plain-text',
+      "plain-text",
       current,
       keyboardType,
     )
@@ -364,7 +371,7 @@ export const ReceiptDetailScreen: FC<ReceiptDetailScreenProps> = function Receip
             <ListItem
               height={52}
               bottomSeparator
-              onPress={() => handleEditField('storeName', 'Edit Merchant', storeName ?? '')}
+              onPress={() => handleEditField("storeName", "Edit Merchant", storeName ?? "")}
               LeftComponent={
                 <View style={$rowLeft}>
                   <MaterialCommunityIcons
@@ -384,14 +391,19 @@ export const ReceiptDetailScreen: FC<ReceiptDetailScreenProps> = function Receip
                     weight="medium"
                     style={$valueText}
                   />
-                  <MaterialCommunityIcons name="pencil-outline" size={14} color={colors.textDim} style={$editIcon} />
+                  <MaterialCommunityIcons
+                    name="pencil-outline"
+                    size={14}
+                    color={colors.textDim}
+                    style={$editIcon}
+                  />
                 </View>
               }
             />
             <ListItem
               height={52}
               bottomSeparator
-              onPress={() => handleEditField('date', 'Edit Date', date ?? '')}
+              onPress={() => handleEditField("date", "Edit Date", date ?? "")}
               LeftComponent={
                 <View style={$rowLeft}>
                   <MaterialCommunityIcons
@@ -406,7 +418,12 @@ export const ReceiptDetailScreen: FC<ReceiptDetailScreenProps> = function Receip
               RightComponent={
                 <View style={$editRow}>
                   <Text text={date ?? "—"} size="sm" weight="medium" style={$valueText} />
-                  <MaterialCommunityIcons name="pencil-outline" size={14} color={colors.textDim} style={$editIcon} />
+                  <MaterialCommunityIcons
+                    name="pencil-outline"
+                    size={14}
+                    color={colors.textDim}
+                    style={$editIcon}
+                  />
                 </View>
               }
             />
@@ -428,16 +445,27 @@ export const ReceiptDetailScreen: FC<ReceiptDetailScreenProps> = function Receip
                 <View style={$editRow}>
                   {category && (
                     <View
-                      style={[$categoryDot, { backgroundColor: RECEIPT_CATEGORIES.find((c) => c.key === category)?.color }]}
+                      style={[
+                        $categoryDot,
+                        {
+                          backgroundColor: categories.find((c) => c.id === category)
+                            ?.color,
+                        },
+                      ]}
                     />
                   )}
                   <Text
-                    text={RECEIPT_CATEGORIES.find((c) => c.key === category)?.label ?? "—"}
+                    text={categories.find((c) => c.id === category)?.label ?? "—"}
                     size="sm"
                     weight="medium"
                     style={$valueText}
                   />
-                  <MaterialCommunityIcons name="chevron-right" size={16} color={colors.textDim} style={$editIcon} />
+                  <MaterialCommunityIcons
+                    name="chevron-right"
+                    size={16}
+                    color={colors.textDim}
+                    style={$editIcon}
+                  />
                 </View>
               }
             />
@@ -466,13 +494,16 @@ export const ReceiptDetailScreen: FC<ReceiptDetailScreenProps> = function Receip
                     source={{ uri: scannedImages[0].uri }}
                     style={[
                       $ocrImage,
-                      { aspectRatio: (scannedImages[0].width ?? 1) / (scannedImages[0].height ?? 1) },
+                      {
+                        aspectRatio: (scannedImages[0].width ?? 1) / (scannedImages[0].height ?? 1),
+                      },
                     ]}
                     resizeMode="contain"
                   />
                   {imageContainerWidth > 0 &&
                     ocrLines.map((line, i) => {
-                      const scale = imageContainerWidth / (scannedImages[0].width ?? imageContainerWidth)
+                      const scale =
+                        imageContainerWidth / (scannedImages[0].width ?? imageContainerWidth)
                       return (
                         <TouchableOpacity
                           key={i}
@@ -504,17 +535,21 @@ export const ReceiptDetailScreen: FC<ReceiptDetailScreenProps> = function Receip
         transparent
         onRequestClose={() => setCategoryModalVisible(false)}
       >
-        <TouchableOpacity style={$modalOverlay} activeOpacity={1} onPress={() => setCategoryModalVisible(false)} />
+        <TouchableOpacity
+          style={$modalOverlay}
+          activeOpacity={1}
+          onPress={() => setCategoryModalVisible(false)}
+        />
         <View style={themed($modalSheet)}>
           <View style={themed($modalHandle)} />
           <Text text="Select Category" size="md" weight="bold" style={themed($modalTitle)} />
-          {RECEIPT_CATEGORIES.map((cat, index) => (
+          {categories.map((cat, index) => (
             <ListItem
-              key={cat.key}
+              key={cat.id}
               height={52}
-              bottomSeparator={index < RECEIPT_CATEGORIES.length - 1}
+              bottomSeparator={index < categories.length - 1}
               onPress={() => {
-                updateReceipt(receiptId, { category: cat.key })
+                updateReceipt(receiptId, { category: cat.id })
                 setCategoryModalVisible(false)
               }}
               LeftComponent={
@@ -524,7 +559,7 @@ export const ReceiptDetailScreen: FC<ReceiptDetailScreenProps> = function Receip
                 </View>
               }
               RightComponent={
-                category === cat.key ? (
+                category === cat.id ? (
                   <MaterialCommunityIcons name="check" size={18} color={cat.color} />
                 ) : undefined
               }
@@ -612,7 +647,7 @@ export const ReceiptDetailScreen: FC<ReceiptDetailScreenProps> = function Receip
             <ListItem
               height={56}
               onPress={() =>
-                handleEditField('total', 'Edit Total', total?.toString() ?? '', 'decimal-pad')
+                handleEditField("total", "Edit Total", total?.toString() ?? "", "decimal-pad")
               }
               LeftComponent={<Text text="Total" size="sm" weight="bold" />}
               RightComponent={
@@ -623,7 +658,12 @@ export const ReceiptDetailScreen: FC<ReceiptDetailScreenProps> = function Receip
                     weight="bold"
                     style={$valueText}
                   />
-                  <MaterialCommunityIcons name="pencil-outline" size={14} color={colors.textDim} style={$editIcon} />
+                  <MaterialCommunityIcons
+                    name="pencil-outline"
+                    size={14}
+                    color={colors.textDim}
+                    style={$editIcon}
+                  />
                 </View>
               }
             />

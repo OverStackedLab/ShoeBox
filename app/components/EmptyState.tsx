@@ -7,7 +7,7 @@ import type { ThemedStyle } from "@/theme/types"
 import { Button, ButtonProps } from "./Button"
 import { Text, TextProps } from "./Text"
 
-const sadFace = require("@assets/images/sad-face.png")
+const logo = require("@assets/images/logo.png")
 
 interface EmptyStateProps {
   /**
@@ -118,14 +118,13 @@ interface EmptyStatePresetItem {
  */
 export function EmptyState(props: EmptyStateProps) {
   const {
-    theme,
     themed,
     theme: { spacing },
   } = useAppTheme()
 
   const EmptyStatePresets = {
     generic: {
-      imageSource: sadFace,
+      imageSource: logo,
       heading: translate("emptyStateComponent:generic.heading"),
       content: translate("emptyStateComponent:generic.content"),
       button: translate("emptyStateComponent:generic.button"),
@@ -197,7 +196,6 @@ export function EmptyState(props: EmptyStateProps) {
           source={imageSource}
           {...ImageProps}
           style={$imageStyles}
-          tintColor={theme.colors.palette.neutral900}
         />
       )}
 
@@ -237,7 +235,13 @@ export function EmptyState(props: EmptyStateProps) {
   )
 }
 
-const $image: ImageStyle = { alignSelf: "center" }
+const $image: ImageStyle = {
+  alignSelf: "center",
+  width: "90%",
+  height: undefined,
+  aspectRatio: 1,
+  resizeMode: "contain",
+}
 const $heading: ThemedStyle<TextStyle> = ({ spacing }) => ({
   textAlign: "center",
   paddingHorizontal: spacing.lg,

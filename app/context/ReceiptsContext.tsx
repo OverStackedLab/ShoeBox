@@ -1,8 +1,6 @@
 import { createContext, FC, PropsWithChildren, useCallback, useContext, useMemo } from "react"
 import { MMKV, useMMKVString } from "react-native-mmkv"
 
-import type { ReceiptCategory } from "@/constants/categories"
-
 // TEMP: clear stale test receipts — remove after one run
 new MMKV().delete("ReceiptsProvider.receipts")
 
@@ -17,7 +15,7 @@ export interface Receipt {
   storeName?: string
   date?: string
   total?: number
-  category?: ReceiptCategory
+  category?: string
   scannedImages: ScannedImage[]
   createdAt: number
 }

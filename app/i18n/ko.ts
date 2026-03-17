@@ -33,6 +33,20 @@ const ko: Translations = {
   errors: {
     invalidEmail: "잘못된 이메일 주소 입니다.",
   },
+  signUpScreen: {
+    signUp: "계정 만들기",
+    enterDetails: "새 계정을 만들려면 아래에 정보를 입력하세요.",
+    emailFieldLabel: "이메일",
+    passwordFieldLabel: "비밀번호",
+    confirmPasswordFieldLabel: "비밀번호 확인",
+    emailFieldPlaceholder: "이메일을 입력하세요",
+    passwordFieldPlaceholder: "비밀번호를 만드세요",
+    confirmPasswordFieldPlaceholder: "비밀번호를 반복하세요",
+    tapToSignUp: "계정 만들기",
+    alreadyHaveAccount: "이미 계정이 있으신가요?",
+    logIn: "로그인",
+    checkEmail: "계정을 확인하려면 이메일을 확인하세요.",
+  },
   loginScreen: {
     logIn: "로그인",
     enterDetails:
@@ -43,6 +57,7 @@ const ko: Translations = {
     passwordFieldPlaceholder: "엄청 비밀스러운 암호를 입력하세요",
     tapToLogIn: "눌러서 로그인 하기!",
     hint: "힌트: 가장 좋아하는 암호와 아무런 아무 이메일 주소나 사용할 수 있어요 :)",
+    createAccount: "계정 만들기",
   },
   demoNavigator: {
     componentsTab: "컴포넌트",

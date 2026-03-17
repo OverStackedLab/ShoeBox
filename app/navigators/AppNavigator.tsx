@@ -11,6 +11,7 @@ import Config from "@/config"
 import { useAuth } from "@/context/AuthContext"
 import { ErrorBoundary } from "@/screens/ErrorScreen/ErrorBoundary"
 import { LoginScreen } from "@/screens/LoginScreen"
+import { SignUpScreen } from "@/screens/SignUpScreen"
 import { ReceiptDetailScreen } from "@/screens/ReceiptDetailScreen"
 import { WelcomeScreen } from "@/screens/WelcomeScreen"
 import { useAppTheme } from "@/theme/context"
@@ -57,6 +58,7 @@ const AppStack = () => {
       ) : (
         <>
           <Stack.Screen name="Login" component={LoginScreen} />
+          <Stack.Screen name="SignUp" component={SignUpScreen} />
         </>
       )}
 

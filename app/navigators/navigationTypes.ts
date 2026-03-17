@@ -19,6 +19,7 @@ export type DemoTabParamList = {
 export type AppStackParamList = {
   Welcome: undefined
   Login: undefined
+  SignUp: undefined
   Home: {
     receiptId: string
     storeName?: string

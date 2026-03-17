@@ -1,5 +1,15 @@
-import { FC, useCallback } from "react"
-import { LayoutAnimation, TextStyle, View, ViewStyle } from "react-native"
+import { FC, useCallback, useState } from "react"
+import {
+  Alert,
+  LayoutAnimation,
+  Modal,
+  ScrollView,
+  TextInput,
+  TextStyle,
+  TouchableOpacity,
+  View,
+  ViewStyle,
+} from "react-native"
 import * as Application from "expo-application"
 import { MaterialCommunityIcons } from "@expo/vector-icons"
 
@@ -10,6 +20,7 @@ import { ListItem } from "@/components/ListItem"
 import { Screen } from "@/components/Screen"
 import { Text } from "@/components/Text"
 import { useAuth } from "@/context/AuthContext"
+import { CATEGORY_COLORS, useCategories } from "@/context/CategoriesContext"
 import { useSettings } from "@/context/SettingsContext"
 import type { TabScreenProps } from "@/navigators/navigationTypes"
 import { useAppTheme } from "@/theme/context"
@@ -22,24 +33,49 @@ export const ProfileScreen: FC<ProfileScreenProps> = function ProfileScreen() {
     themed,
     theme: { colors },
     setThemeContextOverride,
-    themeContext,
+    themeScheme,
   } = useAppTheme()
   const { authEmail, logout } = useAuth()
   const { currency, setCurrency } = useSettings()
+  const { categories, addCategory, removeCategory } = useCategories()
 
-  const themeLabel =
-    themeContext === "light" ? "Light" : themeContext === "dark" ? "Dark" : "System"
+  const [manageCategoriesVisible, setManageCategoriesVisible] = useState(false)
+  const [newLabel, setNewLabel] = useState("")
+  const [newColor, setNewColor] = useState(CATEGORY_COLORS[0])
+  const [isSaving, setIsSaving] = useState(false)
+
+  const themeLabel = themeScheme === "light" ? "Light" : themeScheme === "dark" ? "Dark" : "System"
 
   const cycleTheme = useCallback(() => {
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut)
-    if (themeContext === undefined) {
+    if (themeScheme === undefined) {
       setThemeContextOverride("light")
-    } else if (themeContext === "light") {
+    } else if (themeScheme === "light") {
       setThemeContextOverride("dark")
     } else {
       setThemeContextOverride(undefined)
     }
-  }, [themeContext, setThemeContextOverride])
+  }, [themeScheme, setThemeContextOverride])
+
+  const handleAddCategory = useCallback(async () => {
+    const label = newLabel.trim()
+    if (!label) return
+    setIsSaving(true)
+    await addCategory(label, newColor)
+    setIsSaving(false)
+    setNewLabel("")
+    setNewColor(CATEGORY_COLORS[0])
+  }, [newLabel, newColor, addCategory])
+
+  const handleDeleteCategory = useCallback(
+    (id: string, label: string) => {
+      Alert.alert("Delete Category", `Remove "${label}"?`, [
+        { text: "Cancel", style: "cancel" },
+        { text: "Delete", style: "destructive", onPress: () => removeCategory(id) },
+      ])
+    },
+    [removeCategory],
+  )
 
   return (
     <Screen preset="scroll" safeAreaEdges={["top"]} contentContainerStyle={themed($container)}>
@@ -83,11 +119,26 @@ export const ProfileScreen: FC<ProfileScreenProps> = function ProfileScreen() {
             />
             <ListItem
               text="Currency"
+              bottomSeparator
               onPress={() => setCurrency(currency === "USD" ? "HUF" : "USD")}
               RightComponent={
                 <View style={$rightRow}>
                   <Text
                     text={currency === "USD" ? "USD ($)" : "HUF (Ft)"}
+                    size="sm"
+                    style={themed($rightText)}
+                  />
+                  <MaterialCommunityIcons name="chevron-right" size={20} color={colors.textDim} />
+                </View>
+              }
+            />
+            <ListItem
+              text="Categories"
+              onPress={() => setManageCategoriesVisible(true)}
+              RightComponent={
+                <View style={$rightRow}>
+                  <Text
+                    text={`${categories.length} total`}
                     size="sm"
                     style={themed($rightText)}
                   />
@@ -139,6 +190,88 @@ export const ProfileScreen: FC<ProfileScreenProps> = function ProfileScreen() {
         style={$signOutButton}
         textStyle={$signOutText}
       />
+
+      {/* Manage Categories Modal */}
+      <Modal
+        visible={manageCategoriesVisible}
+        animationType="slide"
+        transparent
+        onRequestClose={() => setManageCategoriesVisible(false)}
+      >
+        <TouchableOpacity
+          style={$modalOverlay}
+          activeOpacity={1}
+          onPress={() => setManageCategoriesVisible(false)}
+        />
+        <View style={themed($modalSheet)}>
+          <View style={themed($modalHandle)} />
+          <Text text="Categories" size="md" weight="bold" style={themed($modalTitle)} />
+          <ScrollView showsVerticalScrollIndicator={false}>
+            {/* Category list */}
+            <View style={themed($categoryList)}>
+              {categories.map((cat, index) => (
+                <View
+                  key={cat.id}
+                  style={[
+                    themed($categoryRow),
+                    index < categories.length - 1 && themed($categoryRowBorder),
+                  ]}
+                >
+                  <View style={[$dot, { backgroundColor: cat.color }]} />
+                  <Text text={cat.label} size="sm" style={$categoryLabel} />
+                  {cat.isCustom ? (
+                    <TouchableOpacity
+                      onPress={() => handleDeleteCategory(cat.id, cat.label)}
+                      hitSlop={8}
+                    >
+                      <MaterialCommunityIcons
+                        name="trash-can-outline"
+                        size={18}
+                        color={colors.textDim}
+                      />
+                    </TouchableOpacity>
+                  ) : (
+                    <MaterialCommunityIcons name="lock-outline" size={16} color={colors.textDim} />
+                  )}
+                </View>
+              ))}
+            </View>
+
+            {/* New category form */}
+            <View style={themed($newCategorySection)}>
+              <Text text="New Category" size="sm" weight="semiBold" style={themed($newCategoryTitle)} />
+              <TextInput
+                value={newLabel}
+                onChangeText={setNewLabel}
+                placeholder="Category name"
+                placeholderTextColor={colors.textDim}
+                style={themed($labelInput)}
+                maxLength={30}
+              />
+              <View style={$colorSwatches}>
+                {CATEGORY_COLORS.map((color) => (
+                  <TouchableOpacity
+                    key={color}
+                    onPress={() => setNewColor(color)}
+                    style={[$swatch, { backgroundColor: color }]}
+                  >
+                    {newColor === color && (
+                      <MaterialCommunityIcons name="check" size={14} color="#fff" />
+                    )}
+                  </TouchableOpacity>
+                ))}
+              </View>
+              <Button
+                text={isSaving ? "Saving…" : "Add Category"}
+                preset="reversed"
+                style={themed($addButton)}
+                disabled={!newLabel.trim() || isSaving}
+                onPress={handleAddCategory}
+              />
+            </View>
+          </ScrollView>
+        </View>
+      </Modal>
     </Screen>
   )
 }
@@ -216,4 +349,105 @@ const $sectionHeading: ThemedStyle<TextStyle> = ({ colors, spacing }) => ({
   marginTop: spacing.lg,
   marginBottom: spacing.xs,
   marginLeft: spacing.xs,
+})
+
+const $modalOverlay: ViewStyle = {
+  flex: 1,
+  backgroundColor: "rgba(0,0,0,0.4)",
+}
+
+const $modalSheet: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
+  backgroundColor: colors.background,
+  borderTopLeftRadius: 20,
+  borderTopRightRadius: 20,
+  paddingHorizontal: spacing.md,
+  paddingBottom: spacing.xl,
+  maxHeight: "85%",
+})
+
+const $modalHandle: ThemedStyle<ViewStyle> = ({ colors }) => ({
+  width: 36,
+  height: 4,
+  borderRadius: 2,
+  backgroundColor: colors.border,
+  alignSelf: "center",
+  marginTop: 8,
+  marginBottom: 4,
+})
+
+const $modalTitle: ThemedStyle<TextStyle> = ({ spacing }) => ({
+  textAlign: "center",
+  marginVertical: spacing.sm,
+})
+
+const $categoryList: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
+  borderWidth: 1,
+  borderColor: colors.border,
+  borderRadius: 8,
+  paddingHorizontal: spacing.sm,
+  marginBottom: spacing.md,
+})
+
+const $categoryRow: ThemedStyle<ViewStyle> = () => ({
+  flexDirection: "row",
+  alignItems: "center",
+  gap: 10,
+  paddingVertical: 10,
+})
+
+const $categoryRowBorder: ThemedStyle<ViewStyle> = ({ colors }) => ({
+  borderBottomWidth: 1,
+  borderBottomColor: colors.border,
+})
+
+const $dot: ViewStyle = {
+  width: 12,
+  height: 12,
+  borderRadius: 6,
+  flexShrink: 0,
+}
+
+const $categoryLabel: TextStyle = {
+  flex: 1,
+}
+
+const $newCategorySection: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
+  borderWidth: 1,
+  borderColor: colors.border,
+  borderRadius: 8,
+  padding: spacing.md,
+  gap: spacing.sm,
+  marginBottom: spacing.md,
+})
+
+const $newCategoryTitle: ThemedStyle<TextStyle> = ({ spacing }) => ({
+  marginBottom: spacing.xxs,
+})
+
+const $labelInput: ThemedStyle<TextStyle> = ({ colors, spacing }) => ({
+  borderWidth: 1,
+  borderColor: colors.border,
+  borderRadius: 8,
+  paddingHorizontal: spacing.sm,
+  paddingVertical: spacing.xs,
+  color: colors.text,
+  fontSize: 14,
+})
+
+const $colorSwatches: ViewStyle = {
+  flexDirection: "row",
+  flexWrap: "wrap",
+  gap: 8,
+}
+
+const $swatch: ViewStyle = {
+  width: 28,
+  height: 28,
+  borderRadius: 14,
+  alignItems: "center",
+  justifyContent: "center",
+}
+
+const $addButton: ThemedStyle<ViewStyle> = ({ spacing }) => ({
+  marginTop: spacing.xxs,
 })

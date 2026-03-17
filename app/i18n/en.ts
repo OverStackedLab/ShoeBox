@@ -32,6 +32,20 @@ const en = {
   errors: {
     invalidEmail: "Invalid email address.",
   },
+  signUpScreen: {
+    signUp: "Create Account",
+    enterDetails: "Enter your details below to create a new account.",
+    emailFieldLabel: "Email",
+    passwordFieldLabel: "Password",
+    confirmPasswordFieldLabel: "Confirm Password",
+    emailFieldPlaceholder: "Enter your email address",
+    passwordFieldPlaceholder: "Create a password",
+    confirmPasswordFieldPlaceholder: "Repeat your password",
+    tapToSignUp: "Create Account",
+    alreadyHaveAccount: "Already have an account?",
+    logIn: "Log in",
+    checkEmail: "Check your email to confirm your account.",
+  },
   loginScreen: {
     logIn: "Log In",
     enterDetails:
@@ -42,6 +56,7 @@ const en = {
     passwordFieldPlaceholder: "Super secret password here",
     tapToLogIn: "Tap to log in!",
     hint: "Hint: you can use any email address and your favorite password :)",
+    createAccount: "Create an account",
   },
   demoNavigator: {
     componentsTab: "Components",

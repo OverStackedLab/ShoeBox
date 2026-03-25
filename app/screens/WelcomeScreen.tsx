@@ -19,7 +19,7 @@ export const WelcomeScreen: FC<WelcomeScreenProps> = function WelcomeScreen(_pro
   const { navigation } = _props
 
   function goNext() {
-    navigation.navigate("Demo", { screen: "Home", params: {} })
+    navigation.navigate("Tabs", { screen: "Home", params: {} })
   }
 
   return (

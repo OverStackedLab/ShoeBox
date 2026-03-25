@@ -52,13 +52,12 @@ const config = {
       path: "",
     },
     Welcome: "welcome",
-    Demo: {
+    Tabs: {
       screens: {
         Home: {
           path: "showroom/:queryIndex?/:itemIndex?",
         },
-        DemoDebug: "debug",
-        DemoPodcastList: "podcast",
+        Profile: "profile",
         Receipts: "receipts",
       },
     },

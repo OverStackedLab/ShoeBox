@@ -26,7 +26,7 @@ import type { TabScreenProps } from "@/navigators/navigationTypes"
 import { useAppTheme } from "@/theme/context"
 import type { ThemedStyle } from "@/theme/types"
 
-interface ProfileScreenProps extends TabScreenProps<"DemoDebug"> {}
+interface ProfileScreenProps extends TabScreenProps<"Profile"> {}
 
 export const ProfileScreen: FC<ProfileScreenProps> = function ProfileScreen() {
   const {

@@ -51,7 +51,7 @@ const AppStack = () => {
         <>
           <Stack.Screen name="Welcome" component={WelcomeScreen} />
 
-          <Stack.Screen name="Demo" component={TabNavigator} />
+          <Stack.Screen name="Tabs" component={TabNavigator} />
 
           <Stack.Screen name="ReceiptDetail" component={ReceiptDetailScreen} />
         </>

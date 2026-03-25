@@ -10,13 +10,12 @@ import { ReceiptsScreen } from "@/screens/ReceiptsScreen"
 import { useAppTheme } from "@/theme/context"
 import type { ThemedStyle } from "@/theme/types"
 
-import type { DemoTabParamList } from "./navigationTypes"
+import type { TabParamList } from "./navigationTypes"
 
-const Tab = createBottomTabNavigator<DemoTabParamList>()
+const Tab = createBottomTabNavigator<TabParamList>()
 
 /**
- * This is the main navigator for the demo screens with a bottom tab bar.
- * Each tab is a stack navigator with its own set of screens.
+ * Main bottom tab navigator.
  *
  * More info: https://reactnavigation.org/docs/bottom-tab-navigator/
  * @returns {JSX.Element} The rendered `TabNavigator`.
@@ -87,7 +86,7 @@ export function TabNavigator() {
       />
 
       <Tab.Screen
-        name="DemoDebug"
+        name="Profile"
         component={ProfileScreen}
         options={{
           tabBarLabel: "Profile",

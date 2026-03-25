@@ -9,11 +9,13 @@ const ja: Translations = {
     logOut: "ログアウト",
   },
   welcomeScreen: {
-    postscript:
-      "注目！ — このアプリはお好みの見た目では無いかもしれません(デザイナーがこのスクリーンを送ってこない限りは。もしそうなら公開しちゃいましょう！)",
-    readyForLaunch: "このアプリはもう少しで公開できます！",
-    exciting: "(楽しみですね！)",
-    letsGo: "レッツゴー！",
+    tagline: "すべてのレシートを整理。",
+    subtitle: "レシートを分類・検索・安全に保管。",
+    featureScan: "レシートを撮影して即座に保存",
+    featureOrganize: "支出を自動でカテゴリ分け",
+    featureInsights: "支出をひと目で把握",
+    getStarted: "はじめる",
+    logOut: "ログアウト",
   },
   errorScreen: {
     title: "問題が発生しました",

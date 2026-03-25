@@ -9,11 +9,13 @@ const es: Translations = {
     logOut: "Cerrar sesión",
   },
   welcomeScreen: {
-    postscript:
-      "psst — Esto probablemente no es cómo se va a ver tu app. (A menos que tu diseñador te haya enviado estas pantallas, y en ese caso, ¡lánzalas en producción!)",
-    readyForLaunch: "Tu app, casi lista para su lanzamiento",
-    exciting: "(¡ohh, esto es emocionante!)",
-    letsGo: "¡Vamos!",
+    tagline: "Cada recibo, organizado.",
+    subtitle: "Tus recibos. Ordenados. Buscables. Seguros.",
+    featureScan: "Captura y guarda recibos al instante",
+    featureOrganize: "Categoriza tus gastos automáticamente",
+    featureInsights: "Controla tus gastos de un vistazo",
+    getStarted: "Comenzar",
+    logOut: "Cerrar sesión",
   },
   errorScreen: {
     title: "¡Algo salió mal!",

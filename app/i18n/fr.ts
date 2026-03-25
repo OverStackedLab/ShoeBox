@@ -9,11 +9,13 @@ const fr: Translations = {
     logOut: "Déconnexion",
   },
   welcomeScreen: {
-    postscript:
-      "psst  — Ce n'est probablement pas à quoi ressemble votre application. (À moins que votre designer ne vous ait donné ces écrans, dans ce cas, mettez la en prod !)",
-    readyForLaunch: "Votre application, presque prête pour le lancement !",
-    exciting: "(ohh, c'est excitant !)",
-    letsGo: "Allons-y !",
+    tagline: "Chaque reçu, organisé.",
+    subtitle: "Vos reçus. Triés. Recherchables. Sécurisés.",
+    featureScan: "Photographiez et sauvegardez vos reçus",
+    featureOrganize: "Catégorisez vos dépenses automatiquement",
+    featureInsights: "Suivez vos dépenses en un coup d'œil",
+    getStarted: "Commencer",
+    logOut: "Se déconnecter",
   },
   errorScreen: {
     title: "Quelque chose s'est mal passé !",

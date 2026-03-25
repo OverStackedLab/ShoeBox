@@ -9,11 +9,13 @@ const ar: Translations = {
     logOut: "تسجيل خروج",
   },
   welcomeScreen: {
-    postscript:
-      "ربما لا يكون هذا هو الشكل الذي يبدو عليه تطبيقك مالم يمنحك المصمم هذه الشاشات وشحنها في هذه الحالة",
-    readyForLaunch: "تطبيقك تقريبا جاهز للتشغيل",
-    exciting: "اوه هذا مثير",
-    letsGo: "لنذهب",
+    tagline: "كل إيصال، منظم.",
+    subtitle: "إيصالاتك. مرتبة. قابلة للبحث. آمنة.",
+    featureScan: "التقط واحفظ الإيصالات فوراً",
+    featureOrganize: "صنّف مصاريفك تلقائياً",
+    featureInsights: "تتبع نفقاتك بنظرة واحدة",
+    getStarted: "ابدأ الآن",
+    logOut: "تسجيل خروج",
   },
   errorScreen: {
     title: "هناك خطأ ما",

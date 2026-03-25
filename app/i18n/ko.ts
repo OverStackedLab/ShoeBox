@@ -9,11 +9,13 @@ const ko: Translations = {
     logOut: "로그아웃",
   },
   welcomeScreen: {
-    postscript:
-      "잠깐! — 지금 보시는 것은 아마도 당신의 앱의 모양새가 아닐겁니다. (디자이너분이 이렇게 건내주셨다면 모를까요. 만약에 그렇다면, 이대로 가져갑시다!) ",
-    readyForLaunch: "출시 준비가 거의 끝난 나만의 앱!",
-    exciting: "(오, 이거 신나는데요!)",
-    letsGo: "가보자구요!",
+    tagline: "모든 영수증, 정리 완료.",
+    subtitle: "영수증을 분류하고, 검색하고, 안전하게 보관하세요.",
+    featureScan: "영수증을 촬영하고 즉시 저장",
+    featureOrganize: "지출을 자동으로 분류",
+    featureInsights: "한눈에 지출 파악",
+    getStarted: "시작하기",
+    logOut: "로그아웃",
   },
   errorScreen: {
     title: "뭔가 잘못되었습니다!",

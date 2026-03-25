@@ -8,11 +8,13 @@ const en = {
     logOut: "Log Out",
   },
   welcomeScreen: {
-    postscript:
-      "psst  — This probably isn't what your app looks like. (Unless your designer handed you these screens, and in that case, ship it!)",
-    readyForLaunch: "Your app, almost ready for launch!",
-    exciting: "(ohh, this is exciting!)",
-    letsGo: "Let's go!",
+    tagline: "Every receipt, organized.",
+    subtitle: "Your receipts. Sorted. Searchable. Safe.",
+    featureScan: "Snap & save receipts instantly",
+    featureOrganize: "Auto-categorize your spending",
+    featureInsights: "Track expenses at a glance",
+    getStarted: "Get Started",
+    logOut: "Log out of your account",
   },
   errorScreen: {
     title: "Something went wrong!",

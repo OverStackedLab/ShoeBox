@@ -191,13 +191,7 @@ export function EmptyState(props: EmptyStateProps) {
 
   return (
     <View style={$containerStyles}>
-      {isImagePresent && (
-        <Image
-          source={imageSource}
-          {...ImageProps}
-          style={$imageStyles}
-        />
-      )}
+      {isImagePresent && <Image source={imageSource} {...ImageProps} style={$imageStyles} />}
 
       {isHeadingPresent && (
         <Text

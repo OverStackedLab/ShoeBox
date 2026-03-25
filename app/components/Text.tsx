@@ -61,7 +61,17 @@ export interface TextProps extends RNTextProps {
  * @returns {JSX.Element} The rendered `Text` component.
  */
 export const Text = forwardRef(function Text(props: TextProps, ref: ForwardedRef<RNText>) {
-  const { weight, size, tx, txOptions, text, children, uppercase, style: $styleOverride, ...rest } = props
+  const {
+    weight,
+    size,
+    tx,
+    txOptions,
+    text,
+    children,
+    uppercase,
+    style: $styleOverride,
+    ...rest
+  } = props
   const { themed } = useAppTheme()
 
   const i18nText = tx && translate(tx, txOptions)

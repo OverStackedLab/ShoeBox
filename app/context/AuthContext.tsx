@@ -1,4 +1,12 @@
-import { createContext, FC, PropsWithChildren, useCallback, useContext, useEffect, useState } from "react"
+import {
+  createContext,
+  FC,
+  PropsWithChildren,
+  useCallback,
+  useContext,
+  useEffect,
+  useState,
+} from "react"
 
 import type { Session } from "@supabase/supabase-js"
 

@@ -1,8 +1,20 @@
-import { createContext, FC, PropsWithChildren, useCallback, useContext, useMemo } from "react"
-import { MMKV, useMMKVString } from "react-native-mmkv"
+import {
+  createContext,
+  FC,
+  PropsWithChildren,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+} from "react"
+import { useMMKVString } from "react-native-mmkv"
 
-// TEMP: clear stale test receipts — remove after one run
-new MMKV().delete("ReceiptsProvider.receipts")
+import { useAuth } from "@/context/AuthContext"
+import {
+  deleteReceiptRemote,
+  fetchRemoteReceipts,
+  upsertReceiptRemote,
+} from "@/services/supabase/receipts"
 
 export interface ScannedImage {
   uri: string
@@ -31,6 +43,8 @@ const ReceiptsContext = createContext<ReceiptsContextType | null>(null)
 
 export const ReceiptsProvider: FC<PropsWithChildren> = ({ children }) => {
   const [receiptsJson, setReceiptsJson] = useMMKVString("ReceiptsProvider.receipts")
+  const { session } = useAuth()
+  const userId = session?.user?.id
 
   const receipts = useMemo<Receipt[]>(() => {
     try {
@@ -40,27 +54,40 @@ export const ReceiptsProvider: FC<PropsWithChildren> = ({ children }) => {
     }
   }, [receiptsJson])
 
+  // Fetch from Supabase whenever the logged-in user changes
+  useEffect(() => {
+    if (!userId) return
+    fetchRemoteReceipts(userId)
+      .then((remote) => setReceiptsJson(JSON.stringify(remote)))
+      .catch(console.error)
+  }, [userId, setReceiptsJson])
+
   const addReceipt = useCallback(
     (receipt: Receipt) => {
       setReceiptsJson(JSON.stringify([receipt, ...receipts]))
+      if (userId) upsertReceiptRemote(receipt, userId).catch(console.error)
     },
-    [receipts, setReceiptsJson],
+    [receipts, setReceiptsJson, userId],
   )
 
   const removeReceipt = useCallback(
     (id: string) => {
       setReceiptsJson(JSON.stringify(receipts.filter((r) => r.id !== id)))
+      if (userId) deleteReceiptRemote(id).catch(console.error)
     },
-    [receipts, setReceiptsJson],
+    [receipts, setReceiptsJson, userId],
   )
 
   const updateReceipt = useCallback(
     (id: string, updates: Partial<Omit<Receipt, "id" | "createdAt">>) => {
-      setReceiptsJson(
-        JSON.stringify(receipts.map((r) => (r.id === id ? { ...r, ...updates } : r))),
-      )
+      const updated = receipts.map((r) => (r.id === id ? { ...r, ...updates } : r))
+      setReceiptsJson(JSON.stringify(updated))
+      if (userId) {
+        const receipt = updated.find((r) => r.id === id)
+        if (receipt) upsertReceiptRemote(receipt, userId).catch(console.error)
+      }
     },
-    [receipts, setReceiptsJson],
+    [receipts, setReceiptsJson, userId],
   )
 
   return (

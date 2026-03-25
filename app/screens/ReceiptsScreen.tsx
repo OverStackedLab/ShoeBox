@@ -108,7 +108,11 @@ export const ReceiptsScreen: FC<ReceiptsScreenProps> = function ReceiptsScreen({
                   />
                 )}
                 <TouchableOpacity onPress={() => handleDelete(receipt.id)} hitSlop={8}>
-                  <MaterialCommunityIcons name="trash-can-outline" size={20} color={colors.textDim} />
+                  <MaterialCommunityIcons
+                    name="trash-can-outline"
+                    size={20}
+                    color={colors.textDim}
+                  />
                 </TouchableOpacity>
               </View>
             }

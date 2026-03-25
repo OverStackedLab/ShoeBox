@@ -1,6 +1,6 @@
-import { Directory, File, Paths } from 'expo-file-system'
+import { Directory, File, Paths } from "expo-file-system"
 
-const receiptsDir = new Directory(Paths.document, 'receipts')
+const receiptsDir = new Directory(Paths.document, "receipts")
 
 function ensureDir() {
   if (!receiptsDir.exists) {

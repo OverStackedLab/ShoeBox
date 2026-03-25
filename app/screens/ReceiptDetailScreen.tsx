@@ -448,8 +448,7 @@ export const ReceiptDetailScreen: FC<ReceiptDetailScreenProps> = function Receip
                       style={[
                         $categoryDot,
                         {
-                          backgroundColor: categories.find((c) => c.id === category)
-                            ?.color,
+                          backgroundColor: categories.find((c) => c.id === category)?.color,
                         },
                       ]}
                     />

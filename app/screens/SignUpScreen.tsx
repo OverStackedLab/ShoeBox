@@ -40,7 +40,12 @@ export const SignUpScreen: FC<SignUpScreenProps> = ({ navigation }) => {
 
   async function handleSignUp() {
     setIsSubmitted(true)
-    if (validateEmail(email) || validatePassword(password) || validateConfirmPassword(password, confirmPassword)) return
+    if (
+      validateEmail(email) ||
+      validatePassword(password) ||
+      validateConfirmPassword(password, confirmPassword)
+    )
+      return
 
     setIsLoading(true)
     setServerError("")

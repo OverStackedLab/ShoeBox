@@ -108,28 +108,28 @@ export function App() {
         <KeyboardProvider>
           <AuthProvider>
             <CategoriesProvider>
-            <ReceiptsProvider>
-            <SettingsProvider>
-            <ThemeProvider>
-              <AppNavigator
-                linking={linking}
-                initialState={initialNavigationState}
-                onStateChange={onNavigationStateChange}
-              />
-              <Toaster
-                ToastWrapper={({ toastId, children, style, ...props }) => (
-                  <Pressable
-                    {...props}
-                    style={[style, $toastWrapper]}
-                    onPress={() => toast.dismiss(toastId)}
-                  >
-                    {children}
-                  </Pressable>
-                )}
-              />
-            </ThemeProvider>
-            </SettingsProvider>
-            </ReceiptsProvider>
+              <ReceiptsProvider>
+                <SettingsProvider>
+                  <ThemeProvider>
+                    <AppNavigator
+                      linking={linking}
+                      initialState={initialNavigationState}
+                      onStateChange={onNavigationStateChange}
+                    />
+                    <Toaster
+                      ToastWrapper={({ toastId, children, style, ...props }) => (
+                        <Pressable
+                          {...props}
+                          style={[style, $toastWrapper]}
+                          onPress={() => toast.dismiss(toastId)}
+                        >
+                          {children}
+                        </Pressable>
+                      )}
+                    />
+                  </ThemeProvider>
+                </SettingsProvider>
+              </ReceiptsProvider>
             </CategoriesProvider>
           </AuthProvider>
         </KeyboardProvider>

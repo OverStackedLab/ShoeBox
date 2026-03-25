@@ -44,7 +44,16 @@
  *   with check (auth.uid() = user_id);
  * ─────────────────────────────────────────────────────────────────────────────
  */
-import { createContext, FC, PropsWithChildren, useCallback, useContext, useEffect, useMemo, useState } from "react"
+import {
+  createContext,
+  FC,
+  PropsWithChildren,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from "react"
 import { useMMKVString } from "react-native-mmkv"
 
 import { RECEIPT_CATEGORIES } from "@/constants/categories"
@@ -60,9 +69,18 @@ export interface Category {
 
 // Preset colors available when creating a new category
 export const CATEGORY_COLORS = [
-  "#E8981E", "#F5B041", "#90C853", "#5DADE2",
-  "#A569BD", "#F0C060", "#D4780A", "#EC7063",
-  "#48C9B0", "#5499C7", "#F1948A", "#B6ACA6",
+  "#E8981E",
+  "#F5B041",
+  "#90C853",
+  "#5DADE2",
+  "#A569BD",
+  "#F0C060",
+  "#D4780A",
+  "#EC7063",
+  "#48C9B0",
+  "#5499C7",
+  "#F1948A",
+  "#B6ACA6",
 ]
 
 // Hardcoded fallback used instantly while Supabase loads
@@ -85,8 +103,12 @@ const CategoriesContext = createContext<CategoriesContextType | null>(null)
 
 export const CategoriesProvider: FC<PropsWithChildren> = ({ children }) => {
   const { session } = useAuth()
-  const [defaultCachedJson, setDefaultCachedJson] = useMMKVString("CategoriesProvider.defaultCategories")
-  const [customCachedJson, setCustomCachedJson] = useMMKVString("CategoriesProvider.customCategories")
+  const [defaultCachedJson, setDefaultCachedJson] = useMMKVString(
+    "CategoriesProvider.defaultCategories",
+  )
+  const [customCachedJson, setCustomCachedJson] = useMMKVString(
+    "CategoriesProvider.customCategories",
+  )
   const [isLoading, setIsLoading] = useState(false)
 
   const defaultCategories = useMemo<Category[]>(() => {
@@ -185,7 +207,9 @@ export const CategoriesProvider: FC<PropsWithChildren> = ({ children }) => {
   )
 
   return (
-    <CategoriesContext.Provider value={{ categories, customCategories, isLoading, addCategory, removeCategory }}>
+    <CategoriesContext.Provider
+      value={{ categories, customCategories, isLoading, addCategory, removeCategory }}
+    >
       {children}
     </CategoriesContext.Provider>
   )

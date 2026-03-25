@@ -74,9 +74,7 @@ export const LoginScreen: FC<LoginScreenProps> = ({ navigation }) => {
       <Text testID="login-heading" tx="loginScreen:logIn" preset="heading" style={themed($logIn)} />
       <Text tx="loginScreen:enterDetails" preset="subheading" style={themed($enterDetails)} />
 
-      {!!serverError && (
-        <Text text={serverError} size="sm" style={themed($serverError)} />
-      )}
+      {!!serverError && <Text text={serverError} size="sm" style={themed($serverError)} />}
 
       <TextField
         value={authEmail}

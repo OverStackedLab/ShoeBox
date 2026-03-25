@@ -137,11 +137,7 @@ export const ProfileScreen: FC<ProfileScreenProps> = function ProfileScreen() {
               onPress={() => setManageCategoriesVisible(true)}
               RightComponent={
                 <View style={$rightRow}>
-                  <Text
-                    text={`${categories.length} total`}
-                    size="sm"
-                    style={themed($rightText)}
-                  />
+                  <Text text={`${categories.length} total`} size="sm" style={themed($rightText)} />
                   <MaterialCommunityIcons name="chevron-right" size={20} color={colors.textDim} />
                 </View>
               }
@@ -239,7 +235,12 @@ export const ProfileScreen: FC<ProfileScreenProps> = function ProfileScreen() {
 
             {/* New category form */}
             <View style={themed($newCategorySection)}>
-              <Text text="New Category" size="sm" weight="semiBold" style={themed($newCategoryTitle)} />
+              <Text
+                text="New Category"
+                size="sm"
+                weight="semiBold"
+                style={themed($newCategoryTitle)}
+              />
               <TextInput
                 value={newLabel}
                 onChangeText={setNewLabel}

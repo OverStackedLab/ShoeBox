@@ -21,16 +21,19 @@ ShoeBox is a React Native mobile app built with Expo (SDK 54) using the Ignite C
 ## Architecture
 
 ### Path Aliases
+
 - `@/*` maps to `./app/*`
 - `@assets/*` maps to `./assets/*`
 
 ### Key Directories
+
 - **`app/`** — All application source code
 - **`app/components/`** — Reusable UI components (Text, Button, TextField, Icon, Screen, Header, etc.)
 - **`app/screens/`** — Screen components, one per route
 - **`app/navigators/`** — React Navigation setup (native stack + bottom tabs)
 - **`app/services/api/`** — API client using apisauce
-- **`app/context/`** — React Context providers (AuthContext for auth state, ReceiptsContext for receipt data, SettingsContext for currency/preferences — all with MMKV persistence)
+- **`app/services/supabase/`** — Supabase client and receipt service functions
+- **`app/context/`** — React Context providers (AuthContext for auth state, ReceiptsContext for receipt data, CategoriesContext for category management, SettingsContext for currency/preferences — all with MMKV persistence)
 - **`app/theme/`** — Design tokens (colors, spacing, typography, timing) with light/dark theme support
 - **`app/i18n/`** — i18next internationalization (en, ar, es, fr, ja, ko, hi)
 - **`app/utils/storage/`** — MMKV-based persistent key-value storage
@@ -38,6 +41,7 @@ ShoeBox is a React Native mobile app built with Expo (SDK 54) using the Ignite C
 - **`app/devtools/`** — Reactotron setup for development debugging
 
 ### Important Conventions
+
 - **Do not import `Text`, `Button`, or `TextInput` from `react-native`** — use the custom components from `@/components` instead (enforced by ESLint).
 - **Do not import `SafeAreaView` from `react-native`** — use `react-native-safe-area-context`.
 - **Do not import React as default** — use named imports: `import { useState } from "react"`.
@@ -46,4 +50,5 @@ ShoeBox is a React Native mobile app built with Expo (SDK 54) using the Ignite C
 - **Prefer component props over style overrides**: Always use existing component props (presets, size, weight, heading, text, LeftComponent, RightComponent, bottomSeparator, etc.) before adding custom styles. Only add style overrides for properties not covered by the component API. For example, `Text` presets already set `color: colors.text`, so don't re-declare it in a style; `Card` has `heading`/`ContentComponent` props; `ListItem` has `text`/`LeftComponent`/`RightComponent`/`bottomSeparator` props.
 
 ### Formatting
+
 - No semicolons, double quotes (Prettier `singleQuote: false`), trailing commas everywhere, 100 char print width.

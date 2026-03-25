@@ -5,7 +5,11 @@ export function parseAmount(raw: string): number {
   return parseFloat(s.replace(/[,.]/g, ""))
 }
 
-export function parseReceiptText(raw: string): { storeName?: string; date?: string; total?: number } {
+export function parseReceiptText(raw: string): {
+  storeName?: string
+  date?: string
+  total?: number
+} {
   const lines = raw
     .split("\n")
     .map((l) => l.trim())

@@ -13,6 +13,7 @@ import { useReceipts } from "@/context/ReceiptsContext"
 import { formatCurrency, useSettings } from "@/context/SettingsContext"
 import type { TabScreenProps } from "@/navigators/navigationTypes"
 import { useAppTheme } from "@/theme/context"
+import { spacing } from "@/theme/spacing"
 import type { ThemedStyle } from "@/theme/types"
 
 const CHART_SIZE = Dimensions.get("window").width - 16
@@ -50,13 +51,7 @@ export const AnalyticsScreen: FC<AnalyticsScreenProps> = function AnalyticsScree
   }))
 
   return (
-    <Screen
-      preset="scroll"
-      safeAreaEdges={["top"]}
-      contentContainerStyle={themed($screenContainer)}
-    >
-      <Text preset="heading" style={themed($heading)} text="Analytics" />
-
+    <Screen preset="scroll" contentContainerStyle={themed($screenContainer)}>
       {hasData ? (
         <>
           {/* Donut Chart */}
@@ -134,12 +129,8 @@ export const AnalyticsScreen: FC<AnalyticsScreenProps> = function AnalyticsScree
 
 const $screenContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   paddingHorizontal: spacing.lg,
+  paddingTop: spacing.md,
   paddingBottom: spacing.xl,
-})
-
-const $heading: ThemedStyle<TextStyle> = ({ spacing }) => ({
-  textAlign: "center",
-  marginVertical: spacing.md,
 })
 
 const $chartCard: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
@@ -171,9 +162,9 @@ const $legendRow: ViewStyle = {
   flexDirection: "row",
   flexWrap: "wrap",
   justifyContent: "flex-start",
-  gap: 12,
-  marginTop: 4,
-  marginHorizontal: 8,
+  gap: spacing.sm,
+  marginTop: spacing.xxs,
+  marginHorizontal: spacing.xs,
 }
 
 const $legendItem: ViewStyle = {
@@ -205,7 +196,7 @@ const $categoriesCard: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
 
 const $circleIcon: TextStyle = {
   alignSelf: "center",
-  marginEnd: 12,
+  marginEnd: spacing.sm,
 }
 
 const $categoryAmount: TextStyle = {

@@ -27,7 +27,9 @@ import { useReceipts } from "@/context/ReceiptsContext"
 import { formatCurrency, useSettings } from "@/context/SettingsContext"
 import type { AppStackScreenProps } from "@/navigators/navigationTypes"
 import { useAppTheme } from "@/theme/context"
+import { spacing } from "@/theme/spacing"
 import type { ThemedStyle } from "@/theme/types"
+import { $tabularNums } from "@/theme/typography"
 import { parseReceiptText } from "@/utils/receiptParser"
 import { saveReceiptImage } from "@/utils/receiptStorage"
 
@@ -363,7 +365,7 @@ export const ReceiptDetailScreen: FC<ReceiptDetailScreenProps> = function Receip
       )}
 
       {/* Receipt Info */}
-      <Text text="Details" size="sm" weight="bold" uppercase style={themed($sectionHeading)} />
+      <Text text="Details" preset="sectionHeading" style={themed($sectionHeading)} />
       <Card
         style={themed($cardBase)}
         ContentComponent={
@@ -541,7 +543,7 @@ export const ReceiptDetailScreen: FC<ReceiptDetailScreenProps> = function Receip
         />
         <View style={themed($modalSheet)}>
           <View style={themed($modalHandle)} />
-          <Text text="Select Category" size="md" weight="bold" style={themed($modalTitle)} />
+          <Text text="Select Category" preset="modalTitle" style={themed($modalTitle)} />
           {categories.map((cat, index) => (
             <ListItem
               key={cat.id}
@@ -570,7 +572,7 @@ export const ReceiptDetailScreen: FC<ReceiptDetailScreenProps> = function Receip
       {/* Line Items */}
       {hasLineItems && (
         <>
-          <Text text="Items" size="sm" weight="bold" uppercase style={themed($sectionHeading)} />
+          <Text text="Items" preset="sectionHeading" style={themed($sectionHeading)} />
           <Card
             style={themed($cardBase)}
             ContentComponent={
@@ -604,7 +606,7 @@ export const ReceiptDetailScreen: FC<ReceiptDetailScreenProps> = function Receip
       )}
 
       {/* Summary */}
-      <Text text="Summary" size="sm" weight="bold" uppercase style={themed($sectionHeading)} />
+      <Text text="Summary" preset="sectionHeading" style={themed($sectionHeading)} />
       <Card
         style={themed($cardBase)}
         ContentComponent={
@@ -724,7 +726,7 @@ const $rowLeft: ViewStyle = {
 }
 
 const $rowIcon: ViewStyle = {
-  marginRight: 8,
+  marginRight: spacing.xs,
 }
 
 const $labelText: ThemedStyle<TextStyle> = ({ colors }) => ({
@@ -733,7 +735,7 @@ const $labelText: ThemedStyle<TextStyle> = ({ colors }) => ({
 
 const $valueText: TextStyle = {
   alignSelf: "center",
-  fontVariant: ["tabular-nums"],
+  ...$tabularNums,
 }
 
 const $itemLeft: ViewStyle = {
@@ -756,14 +758,14 @@ const $editRow: ViewStyle = {
 }
 
 const $editIcon: ViewStyle = {
-  marginLeft: 4,
+  marginLeft: spacing.xxs,
 }
 
 const $categoryDot: ViewStyle = {
   width: 10,
   height: 10,
   borderRadius: 5,
-  marginRight: 8,
+  marginRight: spacing.xs,
 }
 
 const $modalOverlay: ViewStyle = {
@@ -780,13 +782,13 @@ const $modalSheet: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
   paddingTop: spacing.sm,
 })
 
-const $modalHandle: ThemedStyle<ViewStyle> = ({ colors }) => ({
+const $modalHandle: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
   width: 36,
   height: 4,
   borderRadius: 2,
   backgroundColor: colors.border,
   alignSelf: "center",
-  marginBottom: 16,
+  marginBottom: spacing.md,
 })
 
 const $modalTitle: ThemedStyle<TextStyle> = ({ spacing }) => ({

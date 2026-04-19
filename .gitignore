@@ -72,6 +72,9 @@ bin/Exponent.app
 /ios
 expo-env.d.ts
 
+# EAS local build output
+build-*.tar.gz
+
 ## Secrets
 npm-debug.*
 *.jks

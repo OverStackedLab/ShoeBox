@@ -31,6 +31,10 @@ const palette = {
   angry100: "#F2D6CD",
   angry500: "#C03403",
 
+  brandOrange: "#E8981E",
+  brandGreen: "#90c853",
+  brandRed: "#FF3B30",
+
   overlay20: "rgba(25, 16, 21, 0.2)",
   overlay50: "rgba(25, 16, 21, 0.5)",
 } as const
@@ -47,4 +51,7 @@ export const colors = {
   separator: palette.neutral300,
   error: palette.angry500,
   errorBackground: palette.angry100,
+  accent: palette.brandOrange,
+  accentAlt: palette.brandGreen,
+  destructive: palette.brandRed,
 } as const

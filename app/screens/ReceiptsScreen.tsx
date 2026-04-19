@@ -4,7 +4,6 @@ import { MaterialCommunityIcons } from "@expo/vector-icons"
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack"
 
 import { EmptyState } from "@/components/EmptyState"
-import { Header } from "@/components/Header"
 import { ListItem } from "@/components/ListItem"
 import { Screen } from "@/components/Screen"
 import { Text } from "@/components/Text"
@@ -12,7 +11,9 @@ import { useReceipts } from "@/context/ReceiptsContext"
 import { formatCurrency, useSettings } from "@/context/SettingsContext"
 import type { AppStackParamList, TabScreenProps } from "@/navigators/navigationTypes"
 import { useAppTheme } from "@/theme/context"
+import { spacing } from "@/theme/spacing"
 import type { ThemedStyle } from "@/theme/types"
+import { $tabularNums } from "@/theme/typography"
 import { deleteReceiptImages } from "@/utils/receiptStorage"
 
 interface ReceiptsScreenProps extends TabScreenProps<"Receipts"> {}
@@ -42,20 +43,7 @@ export const ReceiptsScreen: FC<ReceiptsScreenProps> = function ReceiptsScreen({
   }
 
   return (
-    <Screen
-      preset="scroll"
-      safeAreaEdges={["top"]}
-      contentContainerStyle={themed($screenContainer)}
-    >
-      <Header
-        title="Receipts"
-        titleMode="flex"
-        titleStyle={$headerTitle}
-        safeAreaEdges={[]}
-        rightIcon="bell"
-        rightIconColor={colors.text}
-      />
-
+    <Screen preset="scroll" contentContainerStyle={themed($screenContainer)}>
       {receipts.length === 0 ? (
         <EmptyState
           heading="No Receipts Yet"
@@ -125,14 +113,9 @@ export const ReceiptsScreen: FC<ReceiptsScreenProps> = function ReceiptsScreen({
 
 const $screenContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   paddingHorizontal: spacing.lg,
+  paddingTop: spacing.md,
   paddingBottom: spacing.xl,
 })
-
-const $headerTitle: TextStyle = {
-  fontSize: 28,
-  lineHeight: 36,
-  textAlign: "left",
-}
 
 const $receiptLeftRow: ViewStyle = {
   flexDirection: "row",
@@ -146,7 +129,7 @@ const $receiptIconWrapper: ThemedStyle<ViewStyle> = ({ colors }) => ({
   borderRadius: 20,
   alignItems: "center",
   justifyContent: "center",
-  marginEnd: 12,
+  marginEnd: spacing.sm,
   backgroundColor: colors.tint + "20",
 })
 
@@ -162,5 +145,5 @@ const $rightRow: ViewStyle = {
 
 const $amountText: TextStyle = {
   alignSelf: "center",
-  fontVariant: ["tabular-nums"],
+  ...$tabularNums,
 }

@@ -61,7 +61,7 @@ export const WelcomeScreen: FC<WelcomeScreenProps> = function WelcomeScreen(_pro
       <View style={themed($bottomContainer)}>
         <Button
           testID="next-screen-button"
-          preset="reversed"
+          preset="primary"
           tx="welcomeScreen:getStarted"
           onPress={goNext}
         />

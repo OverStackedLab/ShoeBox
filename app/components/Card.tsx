@@ -15,7 +15,7 @@ import type { ThemedStyle, ThemedStyleArray } from "@/theme/types"
 
 import { Text, TextProps } from "./Text"
 
-type Presets = "default" | "reversed"
+type Presets = "default" | "reversed" | "flat"
 
 interface CardProps extends TouchableOpacityProps {
   /**
@@ -279,6 +279,15 @@ const $alignmentWrapperFlexOptions = {
   "force-footer-bottom": "space-between",
 } as const
 
+const $containerFlat: ThemedStyle<ViewStyle> = (theme) => ({
+  borderRadius: theme.spacing.xs,
+  paddingHorizontal: theme.spacing.md,
+  paddingVertical: theme.spacing.xxs,
+  borderWidth: 1,
+  backgroundColor: theme.colors.background,
+  borderColor: theme.colors.border,
+})
+
 const $containerPresets: Record<Presets, ThemedStyleArray<ViewStyle>> = {
   default: [
     $styles.row,
@@ -296,19 +305,23 @@ const $containerPresets: Record<Presets, ThemedStyleArray<ViewStyle>> = {
       borderColor: theme.colors.palette.neutral500,
     }),
   ],
+  flat: [$styles.row, $containerFlat],
 }
 
 const $headingPresets: Record<Presets, ThemedStyleArray<TextStyle>> = {
   default: [],
   reversed: [(theme) => ({ color: theme.colors.palette.neutral100 })],
+  flat: [],
 }
 
 const $contentPresets: Record<Presets, ThemedStyleArray<TextStyle>> = {
   default: [],
   reversed: [(theme) => ({ color: theme.colors.palette.neutral100 })],
+  flat: [],
 }
 
 const $footerPresets: Record<Presets, ThemedStyleArray<TextStyle>> = {
   default: [],
   reversed: [(theme) => ({ color: theme.colors.palette.neutral100 })],
+  flat: [],
 }

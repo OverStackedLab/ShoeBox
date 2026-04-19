@@ -20,13 +20,6 @@ export type AppStackParamList = {
   Welcome: undefined
   Login: undefined
   SignUp: undefined
-  Home: {
-    receiptId: string
-    storeName?: string
-    date?: string
-    total?: number
-    scannedImages?: Array<{ uri: string; width: number; height: number }>
-  }
   Tabs: NavigatorScreenParams<TabParamList>
   ReceiptDetail: {
     receiptId: string

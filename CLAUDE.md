@@ -42,6 +42,7 @@ ShoeBox is a React Native mobile app built with Expo (SDK 54) using the Ignite C
 
 ### Important Conventions
 
+- **Read [docs/STYLE_GUIDE.md](docs/STYLE_GUIDE.md) first.** It's the source of truth for component, typography, and theming conventions. Consult it before writing new components or custom styles, and update it as new conventions emerge.
 - **Do not import `Text`, `Button`, or `TextInput` from `react-native`** — use the custom components from `@/components` instead (enforced by ESLint).
 - **Do not import `SafeAreaView` from `react-native`** — use `react-native-safe-area-context`.
 - **Do not import React as default** — use named imports: `import { useState } from "react"`.

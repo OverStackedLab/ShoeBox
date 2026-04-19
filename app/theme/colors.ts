@@ -31,6 +31,10 @@ const palette = {
   angry100: "#F2D6CD",
   angry500: "#C03403",
 
+  brandOrange: "#E8981E",
+  brandGreen: "#90c853",
+  brandRed: "#FF3B30",
+
   overlay20: "rgba(25, 16, 21, 0.2)",
   overlay50: "rgba(25, 16, 21, 0.5)",
 } as const
@@ -57,7 +61,7 @@ export const colors = {
   /**
    * The default color of the screen background.
    */
-  background: palette.neutral200,
+  background: palette.neutral100,
   /**
    * The default border color.
    */
@@ -82,4 +86,16 @@ export const colors = {
    * Error Background.
    */
   errorBackground: palette.angry100,
+  /**
+   * Primary brand accent (orange). Used for the scan CTA, receipt icons, etc.
+   */
+  accent: palette.brandOrange,
+  /**
+   * Secondary brand accent (green). Used for the active tab and scan spinner.
+   */
+  accentAlt: palette.brandGreen,
+  /**
+   * Destructive action color (red).
+   */
+  destructive: palette.brandRed,
 } as const

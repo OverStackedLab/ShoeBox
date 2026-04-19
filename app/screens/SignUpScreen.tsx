@@ -103,7 +103,7 @@ export const SignUpScreen: FC<SignUpScreenProps> = ({ navigation }) => {
         <Text text={successMessage} preset="subheading" style={themed($subheading)} />
         <Button
           tx="signUpScreen:logIn"
-          preset="reversed"
+          preset="primary"
           style={themed($tapButton)}
           onPress={() => navigation.navigate("Login")}
         />
@@ -174,7 +174,7 @@ export const SignUpScreen: FC<SignUpScreenProps> = ({ navigation }) => {
       <Button
         tx="signUpScreen:tapToSignUp"
         style={themed($tapButton)}
-        preset="reversed"
+        preset="primary"
         onPress={handleSignUp}
         disabled={isLoading}
       />

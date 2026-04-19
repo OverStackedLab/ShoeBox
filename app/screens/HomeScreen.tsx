@@ -17,7 +17,6 @@ import { Circle, Svg, SvgXml } from "react-native-svg"
 import { toast } from "sonner-native"
 
 import { Card } from "@/components/Card"
-import { Header } from "@/components/Header"
 import { ListItem } from "@/components/ListItem"
 import { Screen } from "@/components/Screen"
 import { Text } from "@/components/Text"
@@ -25,7 +24,9 @@ import { useReceipts } from "@/context/ReceiptsContext"
 import { formatCurrency, useSettings } from "@/context/SettingsContext"
 import type { TabScreenProps } from "@/navigators/navigationTypes"
 import { useAppTheme } from "@/theme/context"
+import { spacing } from "@/theme/spacing"
 import type { ThemedStyle } from "@/theme/types"
+import { $tabularNums } from "@/theme/typography"
 import { parseReceiptText } from "@/utils/receiptParser"
 import { saveReceiptImage } from "@/utils/receiptStorage"
 
@@ -44,7 +45,6 @@ const SHOEBOX_SCANNER_SVG = `<svg viewBox="0 0 80 80" xmlns="http://www.w3.org/2
 
 const SCREEN_PADDING = 24
 const CHART_WIDTH = Dimensions.get("window").width - SCREEN_PADDING * 2
-const ACCENT_ORANGE = "#E8981E"
 const SCAN_BUTTON_SIZE = 220
 
 interface HomeScreenProps extends TabScreenProps<"Home"> {}
@@ -164,108 +164,78 @@ export const HomeScreen: FC<HomeScreenProps> = function HomeScreen({ navigation 
   }
 
   return (
-    <Screen
-      preset="scroll"
-      safeAreaEdges={["top"]}
-      contentContainerStyle={themed($screenContainer)}
-    >
-      {/* Header */}
-      <Header
-        title="Home"
-        titleMode="flex"
-        titleStyle={$headerTitle}
-        safeAreaEdges={[]}
-        rightIcon="bell"
-        rightIconColor={colors.text}
-      />
-
+    <Screen preset="scroll" contentContainerStyle={themed($screenContainer)}>
       {/* Scan Receipt */}
-      <Card
-        style={themed($scanCard)}
-        ContentComponent={
-          <View style={$scanCardContent}>
-            <View style={$scanButtonContainer}>
-              <Animated.View
-                style={[
-                  $spinnerContainer,
+      <View style={themed($scanSection)}>
+        <View style={$scanButtonContainer}>
+          <Animated.View
+            style={[
+              $spinnerContainer,
+              {
+                transform: [
                   {
-                    transform: [
-                      {
-                        rotate: pulseAnim.interpolate({
-                          inputRange: [0, 1],
-                          outputRange: ["0deg", "360deg"],
-                        }),
-                      },
-                    ],
+                    rotate: pulseAnim.interpolate({
+                      inputRange: [0, 1],
+                      outputRange: ["0deg", "360deg"],
+                    }),
                   },
-                ]}
-              >
-                <Svg width={RING_SIZE} height={RING_SIZE}>
-                  <Circle
-                    cx={RING_SIZE / 2}
-                    cy={RING_SIZE / 2}
-                    r={SPINNER_RADIUS}
-                    stroke={ACCENT_ORANGE}
-                    strokeWidth={SPINNER_STROKE}
-                    strokeOpacity={0.15}
-                    fill="none"
-                  />
-                  <Circle
-                    cx={RING_SIZE / 2}
-                    cy={RING_SIZE / 2}
-                    r={SPINNER_RADIUS}
-                    stroke={SPINNER_COLOR}
-                    strokeWidth={SPINNER_STROKE}
-                    fill="none"
-                    strokeDasharray={`${SPINNER_ARC} ${SPINNER_GAP}`}
-                    strokeLinecap="butt"
-                  />
-                </Svg>
-              </Animated.View>
-              <View style={themed($scanButtonRing)}>
-                <TouchableOpacity
-                  style={$scanButton}
-                  activeOpacity={0.8}
-                  onPress={handleScanReceipt}
-                  disabled={isProcessing}
-                >
-                  <SvgXml xml={SHOEBOX_SCANNER_SVG} width={100} height={100} />
-                </TouchableOpacity>
-              </View>
-            </View>
-            <Text text="Scan Receipt" weight="medium" size="sm" style={themed($scanLabel)} />
+                ],
+              },
+            ]}
+          >
+            <Svg width={RING_SIZE} height={RING_SIZE}>
+              <Circle
+                cx={RING_SIZE / 2}
+                cy={RING_SIZE / 2}
+                r={SPINNER_RADIUS}
+                stroke={colors.accent}
+                strokeWidth={SPINNER_STROKE}
+                strokeOpacity={0.15}
+                fill="none"
+              />
+              <Circle
+                cx={RING_SIZE / 2}
+                cy={RING_SIZE / 2}
+                r={SPINNER_RADIUS}
+                stroke={colors.accentAlt}
+                strokeWidth={SPINNER_STROKE}
+                fill="none"
+                strokeDasharray={`${SPINNER_ARC} ${SPINNER_GAP}`}
+                strokeLinecap="butt"
+              />
+            </Svg>
+          </Animated.View>
+          <View style={themed($scanButtonRing)}>
+            <TouchableOpacity
+              style={themed($scanButton)}
+              activeOpacity={0.8}
+              onPress={handleScanReceipt}
+              disabled={isProcessing}
+            >
+              <SvgXml xml={SHOEBOX_SCANNER_SVG} width={100} height={100} />
+            </TouchableOpacity>
           </View>
-        }
-      />
+        </View>
+        <Text text="Scan Receipt" preset="formLabel" style={themed($scanLabel)} />
+      </View>
 
       {/* Recent Expenses */}
       <View style={themed($sectionRow)}>
-        <Text
-          text="Recent Expenses"
-          size="sm"
-          weight="bold"
-          uppercase
-          style={themed($sectionHeading)}
-        />
+        <Text text="Recent Expenses" preset="sectionHeading" style={themed($sectionHeading)} />
         <TouchableOpacity onPress={() => navigation.navigate("Receipts")}>
           <Text text="See All" size="xs" style={themed($seeAllText)} />
         </TouchableOpacity>
       </View>
       <Card
-        style={themed($cardBase)}
+        preset="flat"
         ContentComponent={
           <View>
             {receipts.length === 0 ? (
               <View style={themed($emptyState)}>
-                <View style={[$expenseIconWrapper, { backgroundColor: ACCENT_ORANGE + "20" }]}>
-                  <MaterialCommunityIcons name="receipt" size={28} color={ACCENT_ORANGE} />
+                <View style={[$expenseIconWrapper, { backgroundColor: colors.accent + "20" }]}>
+                  <MaterialCommunityIcons name="receipt" size={28} color={colors.accent} />
                 </View>
-                <Text
-                  text="No expenses yet"
-                  weight="medium"
-                  size="sm"
-                  style={themed($emptyTitle)}
-                />
+                <Text text="No expenses yet" preset="formLabel" style={themed($emptyTitle)} />
                 <Text
                   text="Scan your first receipt to start tracking your spending"
                   size="xs"
@@ -290,9 +260,9 @@ export const HomeScreen: FC<HomeScreenProps> = function HomeScreen({ navigation 
                   LeftComponent={
                     <View style={$expenseLeftRow}>
                       <View
-                        style={[$expenseIconWrapper, { backgroundColor: ACCENT_ORANGE + "20" }]}
+                        style={[$expenseIconWrapper, { backgroundColor: colors.accent + "20" }]}
                       >
-                        <MaterialCommunityIcons name="receipt" size={20} color={ACCENT_ORANGE} />
+                        <MaterialCommunityIcons name="receipt" size={20} color={colors.accent} />
                       </View>
                       <View>
                         <Text
@@ -327,13 +297,7 @@ export const HomeScreen: FC<HomeScreenProps> = function HomeScreen({ navigation 
 
       {/* Monthly Spending */}
       <View style={themed($sectionRow)}>
-        <Text
-          text="Monthly Spending"
-          size="sm"
-          weight="bold"
-          uppercase
-          style={themed($sectionHeading)}
-        />
+        <Text text="Monthly Spending" preset="sectionHeading" style={themed($sectionHeading)} />
         {hasSpendingData && (
           <Text
             text={formatCurrency(thisMonthTotal, currency)}
@@ -344,7 +308,7 @@ export const HomeScreen: FC<HomeScreenProps> = function HomeScreen({ navigation 
         )}
       </View>
       <Card
-        style={themed($cardBase)}
+        preset="flat"
         ContentComponent={
           hasSpendingData ? (
             <View style={$chartContainer}>
@@ -364,7 +328,7 @@ export const HomeScreen: FC<HomeScreenProps> = function HomeScreen({ navigation 
                   backgroundGradientTo: colors.background,
                   backgroundGradientToOpacity: 0,
                   decimalPlaces: 0,
-                  color: () => ACCENT_ORANGE,
+                  color: () => colors.accent,
                   labelColor: () => colors.textDim,
                   barPercentage: 0.4,
                   barRadius: 3,
@@ -377,15 +341,10 @@ export const HomeScreen: FC<HomeScreenProps> = function HomeScreen({ navigation 
             </View>
           ) : (
             <View style={themed($emptyState)}>
-              <View style={[$expenseIconWrapper, { backgroundColor: ACCENT_ORANGE + "20" }]}>
-                <MaterialCommunityIcons name="chart-bar" size={28} color={ACCENT_ORANGE} />
+              <View style={[$expenseIconWrapper, { backgroundColor: colors.accent + "20" }]}>
+                <MaterialCommunityIcons name="chart-bar" size={28} color={colors.accent} />
               </View>
-              <Text
-                text="No spending data yet"
-                weight="medium"
-                size="sm"
-                style={themed($emptyTitle)}
-              />
+              <Text text="No spending data yet" preset="formLabel" style={themed($emptyTitle)} />
               <Text
                 text="Your monthly totals will appear here"
                 size="xs"
@@ -401,29 +360,14 @@ export const HomeScreen: FC<HomeScreenProps> = function HomeScreen({ navigation 
 
 const $screenContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   paddingHorizontal: spacing.lg,
+  paddingTop: spacing.md,
   paddingBottom: spacing.xl,
 })
 
-const $headerTitle: TextStyle = {
-  fontSize: 28,
-  lineHeight: 36,
-  textAlign: "left",
-}
-
-const $scanCard: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
-  backgroundColor: colors.background,
-  borderWidth: 0,
+const $scanSection: ThemedStyle<ViewStyle> = ({ spacing }) => ({
+  alignItems: "center",
   paddingVertical: spacing.lg,
-  alignItems: "center",
-  shadowOpacity: 0,
-  elevation: 0,
-  minHeight: 0,
 })
-
-const $scanCardContent: ViewStyle = {
-  alignItems: "center",
-  justifyContent: "center",
-}
 
 const $scanButtonContainer: ViewStyle = {
   alignItems: "center",
@@ -434,7 +378,6 @@ const $spinnerContainer: ViewStyle = {
   position: "absolute",
 }
 
-const SPINNER_COLOR = "#90c853"
 const SPINNER_STROKE = 20
 const RING_SIZE = SCAN_BUTTON_SIZE + SPINNER_STROKE * 2 + 8
 const SPINNER_RADIUS = RING_SIZE / 2 - SPINNER_STROKE / 2
@@ -443,37 +386,24 @@ const SPINNER_ARC = SPINNER_CIRCUMFERENCE * 0.2
 const SPINNER_GAP = SPINNER_CIRCUMFERENCE * 0.8
 
 const $scanButtonRing: ThemedStyle<ViewStyle> = () => ({
-  width: SCAN_BUTTON_SIZE + 16,
-  height: SCAN_BUTTON_SIZE + 16,
-  borderRadius: (SCAN_BUTTON_SIZE + 16) / 2,
+  width: SCAN_BUTTON_SIZE + spacing.md,
+  height: SCAN_BUTTON_SIZE + spacing.md,
+  borderRadius: (SCAN_BUTTON_SIZE + spacing.md) / 2,
   alignItems: "center",
   justifyContent: "center",
 })
 
-const $scanButton: ViewStyle = {
+const $scanButton: ThemedStyle<ViewStyle> = ({ colors }) => ({
   width: SCAN_BUTTON_SIZE,
   height: SCAN_BUTTON_SIZE,
   borderRadius: SCAN_BUTTON_SIZE / 2,
-  backgroundColor: ACCENT_ORANGE,
+  backgroundColor: colors.accent,
   alignItems: "center",
   justifyContent: "center",
-}
+})
 
 const $scanLabel: ThemedStyle<TextStyle> = ({ spacing }) => ({
   marginTop: spacing.xl,
-})
-
-const $cardBase: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
-  backgroundColor: colors.background,
-  borderRadius: 8,
-  borderWidth: 1,
-  borderColor: colors.border,
-  paddingHorizontal: spacing.md,
-  paddingVertical: spacing.xxs,
-  marginBottom: spacing.xs,
-  shadowOpacity: 0,
-  elevation: 0,
-  minHeight: 0,
 })
 
 const $sectionHeading: ThemedStyle<TextStyle> = ({ colors, spacing }) => ({
@@ -506,7 +436,7 @@ const $expenseIconWrapper: ViewStyle = {
   borderRadius: 20,
   alignItems: "center",
   justifyContent: "center",
-  marginEnd: 12,
+  marginEnd: spacing.sm,
 }
 
 const $emptyState: ThemedStyle<ViewStyle> = ({ spacing }) => ({
@@ -529,12 +459,12 @@ const $expenseDate: ThemedStyle<TextStyle> = ({ colors }) => ({
 
 const $expenseAmount: TextStyle = {
   alignSelf: "center",
-  fontVariant: ["tabular-nums"],
+  ...$tabularNums,
 }
 
 const $chartContainer: ViewStyle = {
   alignItems: "center",
-  marginTop: 8,
+  marginTop: spacing.xs,
 }
 
 const $chartStyle: ViewStyle = {

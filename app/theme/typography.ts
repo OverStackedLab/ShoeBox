@@ -1,7 +1,7 @@
 // TODO: write documentation about fonts and typography along with guides on how to add custom fonts in own
 // markdown file and add links from here
 
-import { Platform } from "react-native"
+import { Platform, TextStyle } from "react-native"
 import {
   Roboto_300Light as robotoLight,
   Roboto_400Regular as robotoRegular,
@@ -87,3 +87,5 @@ export const typography = {
    */
   code: Platform.select({ ios: fonts.courier, android: fonts.monospace }),
 }
+
+export const $tabularNums: TextStyle = { fontVariant: ["tabular-nums"] }

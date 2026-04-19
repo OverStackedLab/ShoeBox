@@ -4,7 +4,6 @@ import {
   LayoutAnimation,
   Modal,
   ScrollView,
-  TextInput,
   TextStyle,
   TouchableOpacity,
   View,
@@ -15,15 +14,16 @@ import { MaterialCommunityIcons } from "@expo/vector-icons"
 
 import { Button } from "@/components/Button"
 import { Card } from "@/components/Card"
-import { Header } from "@/components/Header"
 import { ListItem } from "@/components/ListItem"
 import { Screen } from "@/components/Screen"
 import { Text } from "@/components/Text"
+import { TextField } from "@/components/TextField"
 import { useAuth } from "@/context/AuthContext"
 import { CATEGORY_COLORS, useCategories } from "@/context/CategoriesContext"
 import { useSettings } from "@/context/SettingsContext"
 import type { TabScreenProps } from "@/navigators/navigationTypes"
 import { useAppTheme } from "@/theme/context"
+import { spacing } from "@/theme/spacing"
 import type { ThemedStyle } from "@/theme/types"
 
 interface ProfileScreenProps extends TabScreenProps<"Profile"> {}
@@ -78,16 +78,14 @@ export const ProfileScreen: FC<ProfileScreenProps> = function ProfileScreen() {
   )
 
   return (
-    <Screen preset="scroll" safeAreaEdges={["top"]} contentContainerStyle={themed($container)}>
-      <Header title="Profile" titleMode="flex" safeAreaEdges={[]} />
-
+    <Screen preset="scroll" contentContainerStyle={themed($screenContainer)}>
       {/* User Info */}
       <Card
         style={[themed($card), themed($userInfoCard)]}
         ContentComponent={
           <View style={$userInfo}>
-            <View style={$avatar}>
-              <MaterialCommunityIcons name="account" size={90} color="#FFFFFF" />
+            <View style={themed($avatar)}>
+              <MaterialCommunityIcons name="account" size={90} color={colors.palette.neutral100} />
             </View>
             {authEmail ? (
               <Text text={authEmail} size="sm" style={themed($email)} />
@@ -101,7 +99,7 @@ export const ProfileScreen: FC<ProfileScreenProps> = function ProfileScreen() {
       />
 
       {/* Settings */}
-      <Text text="Settings" size="sm" weight="bold" uppercase style={themed($sectionHeading)} />
+      <Text text="Settings" preset="sectionHeading" style={themed($sectionHeading)} />
       <Card
         style={themed($card)}
         ContentComponent={
@@ -147,7 +145,7 @@ export const ProfileScreen: FC<ProfileScreenProps> = function ProfileScreen() {
       />
 
       {/* App Info */}
-      <Text text="App Info" size="sm" weight="semiBold" uppercase style={themed($sectionHeading)} />
+      <Text text="App Info" preset="sectionHeading" style={themed($sectionHeading)} />
       <Card
         style={themed($card)}
         ContentComponent={
@@ -178,14 +176,8 @@ export const ProfileScreen: FC<ProfileScreenProps> = function ProfileScreen() {
       />
 
       {/* Account */}
-      <Text text="Account" size="sm" weight="semiBold" uppercase style={themed($sectionHeading)} />
-      <Button
-        preset="filled"
-        text="Sign Out"
-        onPress={logout}
-        style={$signOutButton}
-        textStyle={$signOutText}
-      />
+      <Text text="Account" preset="sectionHeading" style={themed($sectionHeading)} />
+      <Button preset="primary" text="Sign Out" onPress={logout} />
 
       {/* Manage Categories Modal */}
       <Modal
@@ -201,7 +193,7 @@ export const ProfileScreen: FC<ProfileScreenProps> = function ProfileScreen() {
         />
         <View style={themed($modalSheet)}>
           <View style={themed($modalHandle)} />
-          <Text text="Categories" size="md" weight="bold" style={themed($modalTitle)} />
+          <Text text="Categories" preset="modalTitle" style={themed($modalTitle)} />
           <ScrollView showsVerticalScrollIndicator={false}>
             {/* Category list */}
             <View style={themed($categoryList)}>
@@ -241,12 +233,10 @@ export const ProfileScreen: FC<ProfileScreenProps> = function ProfileScreen() {
                 weight="semiBold"
                 style={themed($newCategoryTitle)}
               />
-              <TextInput
+              <TextField
                 value={newLabel}
                 onChangeText={setNewLabel}
                 placeholder="Category name"
-                placeholderTextColor={colors.textDim}
-                style={themed($labelInput)}
                 maxLength={30}
               />
               <View style={$colorSwatches}>
@@ -264,7 +254,7 @@ export const ProfileScreen: FC<ProfileScreenProps> = function ProfileScreen() {
               </View>
               <Button
                 text={isSaving ? "Saving…" : "Add Category"}
-                preset="reversed"
+                preset="primary"
                 style={themed($addButton)}
                 disabled={!newLabel.trim() || isSaving}
                 onPress={handleAddCategory}
@@ -277,8 +267,9 @@ export const ProfileScreen: FC<ProfileScreenProps> = function ProfileScreen() {
   )
 }
 
-const $container: ThemedStyle<ViewStyle> = ({ spacing }) => ({
+const $screenContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   paddingHorizontal: spacing.lg,
+  paddingTop: spacing.md,
   paddingBottom: spacing.xl,
 })
 
@@ -296,18 +287,18 @@ const $card: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
 
 const $userInfo: ViewStyle = {
   alignItems: "center",
-  paddingVertical: 8,
-  gap: 12,
+  paddingVertical: spacing.xs,
+  gap: spacing.sm,
 }
 
-const $avatar: ViewStyle = {
+const $avatar: ThemedStyle<ViewStyle> = ({ colors }) => ({
   width: 120,
   height: 120,
   borderRadius: 60,
   alignItems: "center",
   justifyContent: "center",
-  backgroundColor: "#E8981E",
-}
+  backgroundColor: colors.accent,
+})
 
 const $email: ThemedStyle<TextStyle> = ({ colors }) => ({
   color: colors.textDim,
@@ -317,7 +308,7 @@ const $rightRow: ViewStyle = {
   flexDirection: "row",
   alignItems: "center",
   alignSelf: "center",
-  gap: 4,
+  gap: spacing.xxs,
 }
 
 const $rightText: ThemedStyle<TextStyle> = ({ colors }) => ({
@@ -333,16 +324,7 @@ const $userInfoCard: ThemedStyle<ViewStyle> = ({ colors }) => ({
 const $noEmailRow: ViewStyle = {
   flexDirection: "row",
   alignItems: "center",
-  gap: 4,
-}
-
-const $signOutButton: ViewStyle = {
-  borderRadius: 8,
-  backgroundColor: "#E8981E",
-}
-
-const $signOutText: TextStyle = {
-  color: "#FFFFFF",
+  gap: spacing.xxs,
 }
 
 const $sectionHeading: ThemedStyle<TextStyle> = ({ colors, spacing }) => ({
@@ -366,14 +348,14 @@ const $modalSheet: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
   maxHeight: "85%",
 })
 
-const $modalHandle: ThemedStyle<ViewStyle> = ({ colors }) => ({
+const $modalHandle: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
   width: 36,
   height: 4,
   borderRadius: 2,
   backgroundColor: colors.border,
   alignSelf: "center",
-  marginTop: 8,
-  marginBottom: 4,
+  marginTop: spacing.xs,
+  marginBottom: spacing.xxs,
 })
 
 const $modalTitle: ThemedStyle<TextStyle> = ({ spacing }) => ({
@@ -389,11 +371,11 @@ const $categoryList: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
   marginBottom: spacing.md,
 })
 
-const $categoryRow: ThemedStyle<ViewStyle> = () => ({
+const $categoryRow: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   flexDirection: "row",
   alignItems: "center",
-  gap: 10,
-  paddingVertical: 10,
+  gap: spacing.sm,
+  paddingVertical: spacing.sm,
 })
 
 const $categoryRowBorder: ThemedStyle<ViewStyle> = ({ colors }) => ({
@@ -423,16 +405,6 @@ const $newCategorySection: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
 
 const $newCategoryTitle: ThemedStyle<TextStyle> = ({ spacing }) => ({
   marginBottom: spacing.xxs,
-})
-
-const $labelInput: ThemedStyle<TextStyle> = ({ colors, spacing }) => ({
-  borderWidth: 1,
-  borderColor: colors.border,
-  borderRadius: 8,
-  paddingHorizontal: spacing.sm,
-  paddingVertical: spacing.xs,
-  color: colors.text,
-  fontSize: 14,
 })
 
 const $colorSwatches: ViewStyle = {

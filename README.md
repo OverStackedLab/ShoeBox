@@ -9,6 +9,19 @@ This is the boilerplate that [Infinite Red](https://infinite.red) uses as a way 
 
 ## Getting Started
 
+### Environment Setup
+
+Copy the example env file and fill in your values:
+
+```bash
+cp .env.example .env
+```
+
+| Variable | Description |
+|---|---|
+| `EXPO_PUBLIC_SUPABASE_URL` | Your Supabase project URL (found in Project Settings → API) |
+| `EXPO_PUBLIC_SUPABASE_KEY` | Your Supabase publishable (anon) key |
+
 ```bash
 yarn install
 yarn start

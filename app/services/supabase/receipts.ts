@@ -1,3 +1,4 @@
+import { decode } from "base64-arraybuffer"
 import { File, Directory, Paths } from "expo-file-system"
 
 import { supabase } from "./supabase"
@@ -31,11 +32,10 @@ export async function upsertReceiptRemote(receipt: Receipt, userId: string): Pro
     const path = `${userId}/${receipt.id}_${i}.jpg`
 
     if (img.uri.startsWith("file://")) {
-      const response = await fetch(img.uri)
-      const blob = await response.blob()
+      const base64 = await new File(img.uri).base64()
       const { error: uploadError } = await supabase.storage
         .from("receipt-images")
-        .upload(path, blob, { contentType: "image/jpeg", upsert: true })
+        .upload(path, decode(base64), { contentType: "image/jpeg", upsert: true })
       if (uploadError) throw uploadError
     }
 

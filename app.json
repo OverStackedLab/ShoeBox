@@ -14,7 +14,7 @@
   "assetBundlePatterns": ["**/*"],
   "android": {
     "icon": "./assets/images/app-icon-android-legacy.png",
-    "package": "com.os.shoebox",
+    "package": "com.overstacked.shoebox",
     "adaptiveIcon": {
       "foregroundImage": "./assets/images/app-icon-android-adaptive-foreground.png",
       "backgroundImage": "./assets/images/app-icon-android-adaptive-background.png"
@@ -28,7 +28,16 @@
     "bundleIdentifier": "com.os.shoebox",
     "appleTeamId": "H465RAQ7RY",
     "infoPlist": {
-      "NSCameraUsageDescription": "ShoeBox needs camera access to scan receipts and documents."
+      "NSCameraUsageDescription": "ShoeBox needs camera access to scan receipts and documents.",
+      "ITSAppUsesNonExemptEncryption": false
+    },
+    "privacyManifests": {
+      "NSPrivacyAccessedAPITypes": [
+        {
+          "NSPrivacyAccessedAPIType": "NSPrivacyAccessedAPICategoryUserDefaults",
+          "NSPrivacyAccessedAPITypeReasons": ["CA92.1"]
+        }
+      ]
     }
   },
   "web": {
@@ -64,6 +73,9 @@
   "extra": {
     "ignite": {
       "version": "11.4.0"
+    },
+    "eas": {
+      "projectId": "2845067d-a192-4e30-8b1b-0a69a349043e"
     }
   }
 }

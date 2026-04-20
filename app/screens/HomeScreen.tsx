@@ -20,9 +20,11 @@ import { Card } from "@/components/Card"
 import { ListItem } from "@/components/ListItem"
 import { Screen } from "@/components/Screen"
 import { Text } from "@/components/Text"
+import { useCategories } from "@/context/CategoriesContext"
 import { useReceipts } from "@/context/ReceiptsContext"
 import { formatCurrency, useSettings } from "@/context/SettingsContext"
 import type { TabScreenProps } from "@/navigators/navigationTypes"
+import { categorizeReceipt } from "@/services/ai/categorizeReceipt"
 import { useAppTheme } from "@/theme/context"
 import { spacing } from "@/theme/spacing"
 import type { ThemedStyle } from "@/theme/types"
@@ -70,7 +72,8 @@ export const HomeScreen: FC<HomeScreenProps> = function HomeScreen({ navigation 
     return () => animation.stop()
   }, [pulseAnim])
 
-  const { receipts, addReceipt } = useReceipts()
+  const { receipts, addReceipt, updateReceipt } = useReceipts()
+  const { categories } = useCategories()
   const { currency } = useSettings()
 
   const monthlySpending = useMemo(() => {
@@ -149,6 +152,17 @@ export const HomeScreen: FC<HomeScreenProps> = function HomeScreen({ navigation 
             date,
             total,
           })
+
+          categorizeReceipt({
+            text,
+            storeName,
+            total,
+            categories: categories.map((c) => ({ id: c.id, label: c.label })),
+          })
+            .then((result) => {
+              if (result?.categoryId) updateReceipt(receiptId, { category: result.categoryId })
+            })
+            .catch(console.error)
         } catch {
           toast.dismiss(loadingToast)
           toast.error("Could not read receipt text.")

@@ -26,6 +26,7 @@ import { useCategories } from "@/context/CategoriesContext"
 import { useReceipts } from "@/context/ReceiptsContext"
 import { formatCurrency, useSettings } from "@/context/SettingsContext"
 import type { AppStackScreenProps } from "@/navigators/navigationTypes"
+import { categorizeReceipt } from "@/services/ai/categorizeReceipt"
 import { useAppTheme } from "@/theme/context"
 import { spacing } from "@/theme/spacing"
 import type { ThemedStyle } from "@/theme/types"
@@ -143,6 +144,40 @@ export const ReceiptDetailScreen: FC<ReceiptDetailScreenProps> = function Receip
     } catch {
       toast.dismiss(loadingToast)
       toast.error("Could not read receipt text.")
+    } finally {
+      setIsProcessing(false)
+    }
+  }
+
+  const handleAutoCategorize = async () => {
+    if (!scannedImages.length && !storeName) {
+      toast.warning("Not enough info to categorize.")
+      return
+    }
+    setIsProcessing(true)
+    const loadingToast = toast.loading("Categorizing…")
+    try {
+      let text = ""
+      if (scannedImages.length) {
+        const result = await recognizeText(scannedImages[0].uri)
+        text = result.text
+      }
+      const aiResult = await categorizeReceipt({
+        text,
+        storeName,
+        total,
+        categories: categories.map((c) => ({ id: c.id, label: c.label })),
+      })
+      toast.dismiss(loadingToast)
+      if (aiResult?.categoryId) {
+        updateReceipt(receiptId, { category: aiResult.categoryId })
+        toast.success("Category updated.")
+      } else {
+        toast.error("Could not categorize receipt.")
+      }
+    } catch {
+      toast.dismiss(loadingToast)
+      toast.error("Could not categorize receipt.")
     } finally {
       setIsProcessing(false)
     }
@@ -323,6 +358,14 @@ export const ReceiptDetailScreen: FC<ReceiptDetailScreenProps> = function Receip
               disabled={isProcessing || !scannedImages.length}
             >
               <MaterialCommunityIcons name="text-recognition" size={22} color={colors.text} />
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={handleAutoCategorize}
+              style={themed($headerActionBtn)}
+              activeOpacity={0.7}
+              disabled={isProcessing}
+            >
+              <MaterialCommunityIcons name="auto-fix" size={22} color={colors.text} />
             </TouchableOpacity>
             <TouchableOpacity
               onPress={handleRescan}

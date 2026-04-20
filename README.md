@@ -67,6 +67,54 @@ const MyComponent = () => {
 };
 ```
 
+## Supabase Edge Functions
+
+### `categorize-receipt`
+
+Classifies a scanned receipt into one of the user's categories using Anthropic Claude via the Vercel AI SDK.
+
+**Location:** [supabase/functions/categorize-receipt/index.ts](supabase/functions/categorize-receipt/index.ts)
+
+**Request body:**
+
+```ts
+{
+  text?: string          // OCR'd receipt text
+  storeName?: string     // Parsed merchant name
+  total?: number         // Parsed total
+  categories: { id: string; label: string }[]  // Allowed category ids
+}
+```
+
+**Response:**
+
+```ts
+{ categoryId: string; confidence: number }
+```
+
+The function uses `generateObject` with a Zod `z.enum(ids)` schema so the model is constrained to return one of the provided category ids.
+
+**Client usage:** [app/services/ai/categorizeReceipt.ts](app/services/ai/categorizeReceipt.ts) wraps `supabase.functions.invoke("categorize-receipt", …)`. It's called automatically after scanning a receipt in [HomeScreen.tsx](app/screens/HomeScreen.tsx), and manually via the magic-wand header action in [ReceiptDetailScreen.tsx](app/screens/ReceiptDetailScreen.tsx).
+
+**Setup:**
+
+```bash
+# Set the Anthropic API key as a function secret (once)
+supabase secrets set ANTHROPIC_API_KEY=sk-ant-...
+
+# Deploy
+supabase functions deploy categorize-receipt
+```
+
+**Local development:**
+
+```bash
+supabase functions serve categorize-receipt --env-file supabase/.env.local
+# .env.local must contain ANTHROPIC_API_KEY=sk-ant-...
+```
+
+**Security note:** by default the function accepts any caller presenting your Supabase anon key (which ships in the app bundle). To restrict to authenticated users, verify the JWT from the `Authorization` header inside the handler with `supabase.auth.getUser()`.
+
 ## Running Maestro end-to-end tests
 
 Follow our [Maestro Setup](https://ignitecookbook.com/docs/recipes/MaestroSetup) recipe.

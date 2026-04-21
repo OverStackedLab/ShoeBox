@@ -4,7 +4,8 @@ interface CategorizeInput {
   text?: string
   storeName?: string
   total?: number
-  categories: { id: string; label: string }[]
+  items?: string[]
+  categories: { id: string; label: string; description?: string }[]
 }
 
 interface CategorizeResult {

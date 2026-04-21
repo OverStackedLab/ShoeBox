@@ -1,5 +1,8 @@
-import { createContext, FC, PropsWithChildren, useCallback, useContext } from "react"
+import { createContext, FC, PropsWithChildren, useCallback, useContext, useEffect } from "react"
 import { useMMKVString } from "react-native-mmkv"
+
+import { useAuth } from "./AuthContext"
+import { fetchUserPreferences, upsertUserPreferences } from "@/services/supabase/preferences"
 
 export type Currency = "USD" | "HUF"
 
@@ -12,10 +15,29 @@ const SettingsContext = createContext<SettingsContextType | null>(null)
 
 export const SettingsProvider: FC<PropsWithChildren> = ({ children }) => {
   const [currencyRaw, setCurrencyRaw] = useMMKVString("SettingsProvider.currency")
+  const { session } = useAuth()
 
   const currency: Currency = currencyRaw === "HUF" ? "HUF" : "USD"
 
-  const setCurrency = useCallback((c: Currency) => setCurrencyRaw(c), [setCurrencyRaw])
+  useEffect(() => {
+    const userId = session?.user?.id
+    if (!userId) return
+
+    fetchUserPreferences(userId).then((prefs) => {
+      if (prefs) setCurrencyRaw(prefs.currency)
+    })
+  }, [session?.user?.id])
+
+  const setCurrency = useCallback(
+    (c: Currency) => {
+      setCurrencyRaw(c)
+      const userId = session?.user?.id
+      if (userId) {
+        upsertUserPreferences(userId, { currency: c })
+      }
+    },
+    [setCurrencyRaw, session?.user?.id],
+  )
 
   return (
     <SettingsContext.Provider value={{ currency, setCurrency }}>

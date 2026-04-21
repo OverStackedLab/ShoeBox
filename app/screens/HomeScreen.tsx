@@ -29,7 +29,7 @@ import { useAppTheme } from "@/theme/context"
 import { spacing } from "@/theme/spacing"
 import type { ThemedStyle } from "@/theme/types"
 import { $tabularNums } from "@/theme/typography"
-import { parseReceiptText } from "@/utils/receiptParser"
+import { parseLineItems, parseReceiptText } from "@/utils/receiptParser"
 import { saveReceiptImage } from "@/utils/receiptStorage"
 
 const SHOEBOX_SCANNER_SVG = `<svg viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg">
@@ -157,7 +157,8 @@ export const HomeScreen: FC<HomeScreenProps> = function HomeScreen({ navigation 
             text,
             storeName,
             total,
-            categories: categories.map((c) => ({ id: c.id, label: c.label })),
+            items: parseLineItems(text),
+            categories: categories.map((c) => ({ id: c.id, label: c.label, description: c.description })),
           })
             .then((result) => {
               if (result?.categoryId) updateReceipt(receiptId, { category: result.categoryId })

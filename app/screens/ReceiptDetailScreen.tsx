@@ -31,7 +31,7 @@ import { useAppTheme } from "@/theme/context"
 import { spacing } from "@/theme/spacing"
 import type { ThemedStyle } from "@/theme/types"
 import { $tabularNums } from "@/theme/typography"
-import { parseReceiptText } from "@/utils/receiptParser"
+import { parseLineItems, parseReceiptText } from "@/utils/receiptParser"
 import { saveReceiptImage } from "@/utils/receiptStorage"
 
 const ACCENT_RED = "#FF3B30"
@@ -166,7 +166,8 @@ export const ReceiptDetailScreen: FC<ReceiptDetailScreenProps> = function Receip
         text,
         storeName,
         total,
-        categories: categories.map((c) => ({ id: c.id, label: c.label })),
+        items: parseLineItems(text),
+        categories: categories.map((c) => ({ id: c.id, label: c.label, description: c.description })),
       })
       toast.dismiss(loadingToast)
       if (aiResult?.categoryId) {

@@ -1,35 +1,15 @@
 /**
  * CategoriesContext
  *
- * Built-in categories come from the `default_categories` table in Supabase
- * (publicly readable, no auth required). The hardcoded RECEIPT_CATEGORIES array
- * is used as an instant offline fallback until Supabase responds.
+ * Built-in categories are fetched from the `default_categories` table in Supabase
+ * (publicly readable, no auth required) and cached in MMKV. The hardcoded
+ * RECEIPT_CATEGORIES array is used as an instant offline fallback.
  *
  * User-created categories are stored in `user_categories` (per-user, RLS-protected)
  * and cached in MMKV for offline use.
  *
  * ─── Supabase setup (run once in SQL editor) ────────────────────────────────
  *
- * -- Default categories (shared, publicly readable)
- * create table default_categories (
- *   id       text primary key,
- *   label    text not null,
- *   color    text not null,
- *   position smallint not null default 0
- * );
- * grant select on default_categories to anon, authenticated;
- *
- * insert into default_categories (id, label, color, position) values
- *   ('food',          'Food & Dining',  '#E8981E', 0),
- *   ('transport',     'Transport',      '#F5B041', 1),
- *   ('shopping',      'Shopping',       '#90C853', 2),
- *   ('entertainment', 'Entertainment',  '#D4780A', 3),
- *   ('health',        'Health',         '#5DADE2', 4),
- *   ('utilities',     'Utilities',      '#A569BD', 5),
- *   ('business',      'Business',       '#F0C060', 6),
- *   ('other',         'Other',          '#B6ACA6', 7);
- *
- * -- User-created categories (private, RLS-protected)
  * create table user_categories (
  *   id         uuid primary key default gen_random_uuid(),
  *   user_id    uuid references auth.users not null,
@@ -64,6 +44,7 @@ export interface Category {
   id: string
   label: string
   color: string
+  description?: string
   isCustom: boolean
 }
 
@@ -83,11 +64,15 @@ export const CATEGORY_COLORS = [
   "#B6ACA6",
 ]
 
-// Hardcoded fallback used instantly while Supabase loads
-const FALLBACK_CATEGORIES: Category[] = RECEIPT_CATEGORIES.map((c) => ({
+const DESCRIPTION_BY_KEY = Object.fromEntries(
+  RECEIPT_CATEGORIES.map((c) => [c.key, c.description]),
+)
+
+const BUILTIN_CATEGORIES: Category[] = RECEIPT_CATEGORIES.map((c) => ({
   id: c.key,
   label: c.label,
   color: c.color,
+  description: c.description,
   isCustom: false,
 }))
 
@@ -113,9 +98,9 @@ export const CategoriesProvider: FC<PropsWithChildren> = ({ children }) => {
 
   const defaultCategories = useMemo<Category[]>(() => {
     try {
-      return defaultCachedJson ? JSON.parse(defaultCachedJson) : FALLBACK_CATEGORIES
+      return defaultCachedJson ? JSON.parse(defaultCachedJson) : BUILTIN_CATEGORIES
     } catch {
-      return FALLBACK_CATEGORIES
+      return BUILTIN_CATEGORIES
     }
   }, [defaultCachedJson])
 
@@ -144,6 +129,7 @@ export const CategoriesProvider: FC<PropsWithChildren> = ({ children }) => {
           id: row.id as string,
           label: row.label as string,
           color: row.color as string,
+          description: DESCRIPTION_BY_KEY[row.id as string],
           isCustom: false,
         }))
         setDefaultCachedJson(JSON.stringify(fetched))

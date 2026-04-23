@@ -317,6 +317,42 @@ export const ReceiptDetailScreen: FC<ReceiptDetailScreenProps> = function Receip
     )
   }
 
+  const handleEditProduct = (index: number) => {
+    const product = products[index]
+    if (!product) return
+
+    Alert.prompt(
+      "Edit Product",
+      "Product name",
+      (nameValue) => {
+        const name = nameValue.trim()
+        if (!name) return
+
+        setTimeout(() => {
+          Alert.prompt(
+            "Edit Product",
+            "Price (leave blank to clear)",
+            (priceValue) => {
+              const trimmed = priceValue.trim()
+              let price: number | null = null
+              if (trimmed) {
+                const n = parseFloat(trimmed.replace(/[^0-9.,]/g, "").replace(",", "."))
+                price = isNaN(n) ? null : n
+              }
+              const next = products.map((p, i) => (i === index ? { ...p, name, price } : p))
+              updateReceipt(receiptId, { products: next })
+            },
+            "plain-text",
+            product.price != null ? String(product.price) : "",
+            "decimal-pad",
+          )
+        }, 350)
+      },
+      "plain-text",
+      product.name,
+    )
+  }
+
   const handleDelete = () => {
     Alert.alert("Delete Receipt", "Are you sure you want to delete this receipt?", [
       { text: "Cancel", style: "cancel" },
@@ -740,19 +776,28 @@ export const ReceiptDetailScreen: FC<ReceiptDetailScreenProps> = function Receip
                     key={`${p.name}-${index}`}
                     height={48}
                     bottomSeparator={index < products.length - 1}
+                    onPress={() => handleEditProduct(index)}
                     LeftComponent={
                       <View style={$itemLeft}>
                         <Text text={p.name} size="sm" />
                       </View>
                     }
                     RightComponent={
-                      p.price != null ? (
-                        <Text
-                          text={formatCurrency(p.price, currency)}
-                          size="sm"
-                          style={[$valueText, themed($dimText)]}
+                      <View style={$editRow}>
+                        {p.price != null && (
+                          <Text
+                            text={formatCurrency(p.price, currency)}
+                            size="sm"
+                            style={[$valueText, themed($dimText)]}
+                          />
+                        )}
+                        <MaterialCommunityIcons
+                          name="pencil-outline"
+                          size={14}
+                          color={colors.textDim}
+                          style={$editIcon}
                         />
-                      ) : undefined
+                      </View>
                     }
                   />
                 ))}

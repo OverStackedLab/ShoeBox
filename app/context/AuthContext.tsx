@@ -9,16 +9,21 @@ import {
 } from "react"
 
 import type { Session } from "@supabase/supabase-js"
+import * as Linking from "expo-linking"
 
 import { supabase } from "@/services/supabase/supabase"
 
 export type AuthContextType = {
   isAuthenticated: boolean
+  isRecovering: boolean
   session: Session | null
   authEmail: string | undefined
   isLoading: boolean
   signIn: (email: string, password: string) => Promise<string | null>
   signUp: (email: string, password: string) => Promise<string | null>
+  resetPassword: (email: string) => Promise<string | null>
+  updatePassword: (password: string) => Promise<string | null>
+  clearRecovery: () => void
   logout: () => void
 }
 
@@ -26,8 +31,11 @@ export const AuthContext = createContext<AuthContextType | null>(null)
 
 export interface AuthProviderProps {}
 
+const RESET_REDIRECT_URL = Linking.createURL("reset-password")
+
 export const AuthProvider: FC<PropsWithChildren<AuthProviderProps>> = ({ children }) => {
   const [session, setSession] = useState<Session | null>(null)
+  const [isRecovering, setIsRecovering] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
@@ -38,11 +46,41 @@ export const AuthProvider: FC<PropsWithChildren<AuthProviderProps>> = ({ childre
 
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, updatedSession) => {
+    } = supabase.auth.onAuthStateChange((event, updatedSession) => {
       setSession(updatedSession)
+      if (event === "PASSWORD_RECOVERY") setIsRecovering(true)
     })
 
     return () => subscription.unsubscribe()
+  }, [])
+
+  // Handle deep links that carry a recovery token (from the password-reset email)
+  useEffect(() => {
+    const handleUrl = async (url: string) => {
+      if (!url) return
+      const parsed = Linking.parse(url)
+      if (parsed.path !== "reset-password") return
+
+      // Supabase appends tokens as a URL fragment (#access_token=…&refresh_token=…&type=recovery)
+      const hashIndex = url.indexOf("#")
+      if (hashIndex === -1) return
+      const fragment = url.slice(hashIndex + 1)
+      const params = new URLSearchParams(fragment)
+      const accessToken = params.get("access_token")
+      const refreshToken = params.get("refresh_token")
+      const type = params.get("type")
+      if (type !== "recovery" || !accessToken || !refreshToken) return
+
+      const { error } = await supabase.auth.setSession({
+        access_token: accessToken,
+        refresh_token: refreshToken,
+      })
+      if (!error) setIsRecovering(true)
+    }
+
+    Linking.getInitialURL().then((url) => url && handleUrl(url))
+    const subscription = Linking.addEventListener("url", ({ url }) => handleUrl(url))
+    return () => subscription.remove()
   }, [])
 
   const signIn = useCallback(async (email: string, password: string): Promise<string | null> => {
@@ -55,17 +93,38 @@ export const AuthProvider: FC<PropsWithChildren<AuthProviderProps>> = ({ childre
     return error?.message ?? null
   }, [])
 
+  const resetPassword = useCallback(async (email: string): Promise<string | null> => {
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: RESET_REDIRECT_URL,
+    })
+    return error?.message ?? null
+  }, [])
+
+  const updatePassword = useCallback(async (password: string): Promise<string | null> => {
+    const { error } = await supabase.auth.updateUser({ password })
+    return error?.message ?? null
+  }, [])
+
+  const clearRecovery = useCallback(() => {
+    setIsRecovering(false)
+  }, [])
+
   const logout = useCallback(() => {
     supabase.auth.signOut()
+    setIsRecovering(false)
   }, [])
 
   const value: AuthContextType = {
     isAuthenticated: !!session,
+    isRecovering,
     session,
     authEmail: session?.user?.email,
     isLoading,
     signIn,
     signUp,
+    resetPassword,
+    updatePassword,
+    clearRecovery,
     logout,
   }
 

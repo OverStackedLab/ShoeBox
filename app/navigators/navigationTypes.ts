@@ -20,6 +20,8 @@ export type AppStackParamList = {
   Welcome: undefined
   Login: undefined
   SignUp: undefined
+  ForgotPassword: undefined
+  UpdatePassword: undefined
   Tabs: NavigatorScreenParams<TabParamList>
   ReceiptDetail: {
     receiptId: string

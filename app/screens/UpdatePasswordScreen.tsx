@@ -8,22 +8,16 @@ import { Screen } from "@/components/Screen"
 import { Text } from "@/components/Text"
 import { TextField, type TextFieldAccessoryProps } from "@/components/TextField"
 import { useAuth } from "@/context/AuthContext"
-import type { AppStackScreenProps } from "@/navigators/navigationTypes"
 import { useAppTheme } from "@/theme/context"
 import type { ThemedStyle } from "@/theme/types"
 
 const logo = require("@assets/images/logo.png")
-
 const logoSource = Image.resolveAssetSource(logo)
 const LOGO_ASPECT_RATIO = logoSource.width / logoSource.height
 
-interface SignUpScreenProps extends AppStackScreenProps<"SignUp"> {}
-
-export const SignUpScreen: FC<SignUpScreenProps> = ({ navigation }) => {
-  const passwordInput = useRef<TextInput>(null)
+export const UpdatePasswordScreen: FC = () => {
   const confirmPasswordInput = useRef<TextInput>(null)
 
-  const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [confirmPassword, setConfirmPassword] = useState("")
   const [isPasswordHidden, setIsPasswordHidden] = useState(true)
@@ -32,29 +26,23 @@ export const SignUpScreen: FC<SignUpScreenProps> = ({ navigation }) => {
   const [isLoading, setIsLoading] = useState(false)
   const [serverError, setServerError] = useState("")
   const [successMessage, setSuccessMessage] = useState("")
-  const { signUp } = useAuth()
 
+  const { updatePassword, clearRecovery, logout } = useAuth()
   const {
     themed,
     theme: { colors },
   } = useAppTheme()
 
-  const emailError = isSubmitted ? validateEmail(email) : ""
   const passwordError = isSubmitted ? validatePassword(password) : ""
   const confirmPasswordError = isSubmitted ? validateConfirmPassword(password, confirmPassword) : ""
 
-  async function handleSignUp() {
+  async function handleUpdate() {
     setIsSubmitted(true)
-    if (
-      validateEmail(email) ||
-      validatePassword(password) ||
-      validateConfirmPassword(password, confirmPassword)
-    )
-      return
+    if (validatePassword(password) || validateConfirmPassword(password, confirmPassword)) return
 
     setIsLoading(true)
     setServerError("")
-    const error = await signUp(email, password)
+    const error = await updatePassword(password)
     setIsLoading(false)
 
     if (error) {
@@ -62,7 +50,7 @@ export const SignUpScreen: FC<SignUpScreenProps> = ({ navigation }) => {
       return
     }
 
-    setSuccessMessage("Check your email to confirm your account.")
+    setSuccessMessage("Your password has been updated.")
   }
 
   const PasswordRightAccessory: ComponentType<TextFieldAccessoryProps> = useMemo(
@@ -107,13 +95,16 @@ export const SignUpScreen: FC<SignUpScreenProps> = ({ navigation }) => {
         <View style={themed($logoSlot)}>
           <Image source={logo} style={$logo} resizeMode="contain" />
         </View>
-        <Text tx="signUpScreen:signUp" preset="heading" style={themed($heading)} />
+        <Text tx="updatePasswordScreen:heading" preset="heading" style={themed($heading)} />
         <Text text={successMessage} preset="subheading" style={themed($subheading)} />
         <Button
           tx="signUpScreen:logIn"
           preset="primary"
-          style={themed($tapButton)}
-          onPress={() => navigation.navigate("Login")}
+          style={themed($primaryButton)}
+          onPress={() => {
+            clearRecovery()
+            logout()
+          }}
         />
       </Screen>
     )
@@ -128,28 +119,12 @@ export const SignUpScreen: FC<SignUpScreenProps> = ({ navigation }) => {
       <View style={themed($logoSlot)}>
         <Image source={logo} style={$logo} resizeMode="contain" />
       </View>
-      <Text tx="signUpScreen:signUp" preset="heading" style={themed($heading)} />
-      <Text tx="signUpScreen:enterDetails" preset="subheading" style={themed($subheading)} />
+      <Text tx="updatePasswordScreen:heading" preset="heading" style={themed($heading)} />
+      <Text tx="updatePasswordScreen:enterDetails" preset="subheading" style={themed($subheading)} />
 
       {!!serverError && <Text text={serverError} size="sm" style={themed($serverError)} />}
 
       <TextField
-        value={email}
-        onChangeText={setEmail}
-        containerStyle={themed($textField)}
-        autoCapitalize="none"
-        autoComplete="email"
-        autoCorrect={false}
-        keyboardType="email-address"
-        labelTx="signUpScreen:emailFieldLabel"
-        placeholderTx="signUpScreen:emailFieldPlaceholder"
-        helper={emailError}
-        status={emailError ? "error" : undefined}
-        onSubmitEditing={() => passwordInput.current?.focus()}
-      />
-
-      <TextField
-        ref={passwordInput}
         value={password}
         onChangeText={setPassword}
         containerStyle={themed($textField)}
@@ -157,8 +132,8 @@ export const SignUpScreen: FC<SignUpScreenProps> = ({ navigation }) => {
         autoComplete="new-password"
         autoCorrect={false}
         secureTextEntry={isPasswordHidden}
-        labelTx="signUpScreen:passwordFieldLabel"
-        placeholderTx="signUpScreen:passwordFieldPlaceholder"
+        labelTx="updatePasswordScreen:passwordFieldLabel"
+        placeholderTx="updatePasswordScreen:passwordFieldPlaceholder"
         helper={passwordError}
         status={passwordError ? "error" : undefined}
         onSubmitEditing={() => confirmPasswordInput.current?.focus()}
@@ -174,36 +149,23 @@ export const SignUpScreen: FC<SignUpScreenProps> = ({ navigation }) => {
         autoComplete="new-password"
         autoCorrect={false}
         secureTextEntry={isConfirmPasswordHidden}
-        labelTx="signUpScreen:confirmPasswordFieldLabel"
-        placeholderTx="signUpScreen:confirmPasswordFieldPlaceholder"
+        labelTx="updatePasswordScreen:confirmPasswordFieldLabel"
+        placeholderTx="updatePasswordScreen:confirmPasswordFieldPlaceholder"
         helper={confirmPasswordError}
         status={confirmPasswordError ? "error" : undefined}
-        onSubmitEditing={handleSignUp}
+        onSubmitEditing={handleUpdate}
         RightAccessory={ConfirmPasswordRightAccessory}
       />
 
       <Button
-        tx="signUpScreen:tapToSignUp"
-        style={themed($tapButton)}
+        tx="updatePasswordScreen:updatePassword"
         preset="primary"
-        onPress={handleSignUp}
+        style={themed($primaryButton)}
+        onPress={handleUpdate}
         disabled={isLoading}
-      />
-
-      <Button
-        tx="signUpScreen:alreadyHaveAccount"
-        preset="default"
-        style={themed($loginButton)}
-        onPress={() => navigation.navigate("Login")}
       />
     </Screen>
   )
-}
-
-function validateEmail(email: string): string {
-  if (!email || email.length === 0) return "can't be blank"
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return "must be a valid email address"
-  return ""
 }
 
 function validatePassword(password: string): string {
@@ -226,7 +188,7 @@ const $screenContentContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
 
 const $logoSlot: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   marginHorizontal: -spacing.lg,
-  marginVertical: spacing.lg,
+  marginBottom: spacing.lg,
 })
 
 const $logo: ImageStyle = {
@@ -252,10 +214,6 @@ const $textField: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   marginBottom: spacing.lg,
 })
 
-const $tapButton: ThemedStyle<ViewStyle> = ({ spacing }) => ({
+const $primaryButton: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   marginTop: spacing.xs,
-})
-
-const $loginButton: ThemedStyle<ViewStyle> = ({ spacing }) => ({
-  marginTop: spacing.sm,
 })

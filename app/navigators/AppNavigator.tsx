@@ -10,9 +10,11 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack"
 import Config from "@/config"
 import { useAuth } from "@/context/AuthContext"
 import { ErrorBoundary } from "@/screens/ErrorScreen/ErrorBoundary"
+import { ForgotPasswordScreen } from "@/screens/ForgotPasswordScreen"
 import { LoginScreen } from "@/screens/LoginScreen"
-import { SignUpScreen } from "@/screens/SignUpScreen"
 import { ReceiptDetailScreen } from "@/screens/ReceiptDetailScreen"
+import { SignUpScreen } from "@/screens/SignUpScreen"
+import { UpdatePasswordScreen } from "@/screens/UpdatePasswordScreen"
 import { WelcomeScreen } from "@/screens/WelcomeScreen"
 import { useAppTheme } from "@/theme/context"
 
@@ -30,13 +32,15 @@ const exitRoutes = Config.exitRoutes
 const Stack = createNativeStackNavigator<AppStackParamList>()
 
 const AppStack = () => {
-  const { isAuthenticated, isLoading } = useAuth()
+  const { isAuthenticated, isLoading, isRecovering } = useAuth()
 
   const {
     theme: { colors },
   } = useAppTheme()
 
   if (isLoading) return null
+
+  const initialRouteName = isRecovering ? "UpdatePassword" : isAuthenticated ? "Tabs" : "Login"
 
   return (
     <Stack.Navigator
@@ -47,9 +51,11 @@ const AppStack = () => {
           backgroundColor: colors.background,
         },
       }}
-      initialRouteName={isAuthenticated ? "Tabs" : "Login"}
+      initialRouteName={initialRouteName}
     >
-      {isAuthenticated ? (
+      {isRecovering ? (
+        <Stack.Screen name="UpdatePassword" component={UpdatePasswordScreen} />
+      ) : isAuthenticated ? (
         <>
           <Stack.Screen name="Welcome" component={WelcomeScreen} />
 
@@ -61,6 +67,7 @@ const AppStack = () => {
         <>
           <Stack.Screen name="Login" component={LoginScreen} />
           <Stack.Screen name="SignUp" component={SignUpScreen} />
+          <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
         </>
       )}
 

@@ -165,7 +165,6 @@ export const HomeScreen: FC<HomeScreenProps> = function HomeScreen({ navigation 
             })),
           })
             .then((result) => {
-              console.log("🚀 ~ :168 ~ handleScanReceipt ~ result:", result)
               if (!result) return
               const updates: Parameters<typeof updateReceipt>[1] = {}
               if (result.categoryId) updates.category = result.categoryId

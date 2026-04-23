@@ -12,6 +12,8 @@ import { useAppTheme } from "@/theme/context"
 import type { ThemedStyle } from "@/theme/types"
 
 const logo = require("@assets/images/logo.png")
+const logoSource = Image.resolveAssetSource(logo)
+const LOGO_ASPECT_RATIO = logoSource.width / logoSource.height
 
 interface LoginScreenProps extends AppStackScreenProps<"Login"> {}
 
@@ -81,7 +83,7 @@ export const LoginScreen: FC<LoginScreenProps> = function LoginScreen({ navigati
       contentContainerStyle={themed($screenContainer)}
       safeAreaEdges={["top", "bottom"]}
     >
-      <View style={$logoSlot}>
+      <View style={themed($logoSlot)}>
         <Image source={logo} style={$logo} resizeMode="contain" />
       </View>
 
@@ -133,6 +135,13 @@ export const LoginScreen: FC<LoginScreenProps> = function LoginScreen({ navigati
           style={themed($createAccountButton)}
           onPress={() => navigation.navigate("SignUp")}
         />
+
+        <Button
+          tx="loginScreen:forgotPassword"
+          preset="default"
+          style={themed($forgotPasswordButton)}
+          onPress={() => navigation.navigate("ForgotPassword")}
+        />
       </View>
     </Screen>
   )
@@ -146,24 +155,27 @@ function validateEmail(email: string): string {
 
 const $screenContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   flex: 1,
+  paddingTop: 0,
   paddingHorizontal: spacing.lg,
   paddingBottom: spacing.xxl,
 })
 
-const $logoSlot: ViewStyle = {
-  flex: 1,
+const $logoSlot: ThemedStyle<ViewStyle> = ({ spacing }) => ({
+  flex: 0.75,
+  marginHorizontal: -spacing.lg,
   alignItems: "center",
   justifyContent: "center",
-}
+})
 
 const $formSlot: ViewStyle = {
-  flex: 1,
+  flex: 1.25,
   justifyContent: "flex-start",
 }
 
 const $logo: ImageStyle = {
   width: "100%",
-  height: "100%",
+  height: undefined,
+  aspectRatio: LOGO_ASPECT_RATIO,
 }
 
 const $serverError: ThemedStyle<TextStyle> = ({ colors, spacing }) => ({
@@ -180,5 +192,9 @@ const $tapButton: ThemedStyle<ViewStyle> = ({ spacing }) => ({
 })
 
 const $createAccountButton: ThemedStyle<ViewStyle> = ({ spacing }) => ({
+  marginTop: spacing.sm,
+})
+
+const $forgotPasswordButton: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   marginTop: spacing.sm,
 })

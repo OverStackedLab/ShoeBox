@@ -140,6 +140,7 @@ const $dateText: ThemedStyle<TextStyle> = ({ colors }) => ({
 const $rightRow: ViewStyle = {
   flexDirection: "row",
   alignItems: "center",
+  alignSelf: "center",
   gap: 12,
 }
 

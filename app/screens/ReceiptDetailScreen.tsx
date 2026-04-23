@@ -17,6 +17,7 @@ import { recognizeText } from "@infinitered/react-native-mlkit-text-recognition"
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context"
 import { toast } from "sonner-native"
 
+import { Button } from "@/components/Button"
 import { Card } from "@/components/Card"
 import { Header } from "@/components/Header"
 import { ListItem } from "@/components/ListItem"
@@ -31,7 +32,7 @@ import { useAppTheme } from "@/theme/context"
 import { spacing } from "@/theme/spacing"
 import type { ThemedStyle } from "@/theme/types"
 import { $tabularNums } from "@/theme/typography"
-import { parseLineItems, parseReceiptText } from "@/utils/receiptParser"
+import { parseReceiptText } from "@/utils/receiptParser"
 import { saveReceiptImage } from "@/utils/receiptStorage"
 
 const ACCENT_RED = "#FF3B30"
@@ -125,6 +126,7 @@ export const ReceiptDetailScreen: FC<ReceiptDetailScreenProps> = function Receip
   const date = stored?.date ?? paramDate
   const total = stored?.total ?? paramTotal
   const category = stored?.category
+  const products = stored?.products ?? []
 
   const handleReread = async () => {
     if (!scannedImages.length) {
@@ -164,15 +166,21 @@ export const ReceiptDetailScreen: FC<ReceiptDetailScreenProps> = function Receip
       }
       const aiResult = await categorizeReceipt({
         text,
-        storeName,
-        total,
-        items: parseLineItems(text),
-        categories: categories.map((c) => ({ id: c.id, label: c.label, description: c.description })),
+        categories: categories.map((c) => ({
+          id: c.id,
+          label: c.label,
+          description: c.description,
+        })),
       })
       toast.dismiss(loadingToast)
       if (aiResult?.categoryId) {
-        updateReceipt(receiptId, { category: aiResult.categoryId })
-        toast.success("Category updated.")
+        const updates: Parameters<typeof updateReceipt>[1] = { category: aiResult.categoryId }
+        if (aiResult.products?.length) updates.products = aiResult.products
+        if (aiResult.storeName) updates.storeName = aiResult.storeName
+        if (aiResult.date) updates.date = aiResult.date
+        if (aiResult.total != null) updates.total = aiResult.total
+        updateReceipt(receiptId, updates)
+        toast.success("Receipt updated.")
       } else {
         toast.error("Could not categorize receipt.")
       }
@@ -251,11 +259,14 @@ export const ReceiptDetailScreen: FC<ReceiptDetailScreenProps> = function Receip
         setIsProcessing(true)
         const loadingToast = toast.loading("Reading receipt…")
 
-        const newImages = result.images.map((img, i) => ({
-          uri: saveReceiptImage(img.uri, receiptId, i),
-          width: img.width,
-          height: img.height,
-        }))
+        const latestImage = result.images[result.images.length - 1]
+        const newImages = [
+          {
+            uri: saveReceiptImage(latestImage.uri, receiptId, 0),
+            width: latestImage.width,
+            height: latestImage.height,
+          },
+        ]
 
         try {
           const { text } = await recognizeText(newImages[0].uri)
@@ -715,6 +726,48 @@ export const ReceiptDetailScreen: FC<ReceiptDetailScreenProps> = function Receip
           </View>
         }
       />
+
+      {/* Products */}
+      {products.length > 0 && (
+        <>
+          <Text text="Products" preset="sectionHeading" style={themed($sectionHeading)} />
+          <Card
+            style={themed($cardBase)}
+            ContentComponent={
+              <View>
+                {products.map((p, index) => (
+                  <ListItem
+                    key={`${p.name}-${index}`}
+                    height={48}
+                    bottomSeparator={index < products.length - 1}
+                    LeftComponent={
+                      <View style={$itemLeft}>
+                        <Text text={p.name} size="sm" />
+                      </View>
+                    }
+                    RightComponent={
+                      p.price != null ? (
+                        <Text
+                          text={formatCurrency(p.price, currency)}
+                          size="sm"
+                          style={[$valueText, themed($dimText)]}
+                        />
+                      ) : undefined
+                    }
+                  />
+                ))}
+              </View>
+            }
+          />
+        </>
+      )}
+
+      <Button
+        text="Delete Receipt"
+        onPress={handleDelete}
+        style={themed($deleteButton)}
+        textStyle={$deleteButtonText}
+      />
     </Screen>
   )
 }
@@ -803,6 +856,16 @@ const $editRow: ViewStyle = {
 
 const $editIcon: ViewStyle = {
   marginLeft: spacing.xxs,
+}
+
+const $deleteButton: ThemedStyle<ViewStyle> = ({ spacing }) => ({
+  marginTop: spacing.lg,
+  backgroundColor: ACCENT_RED,
+  borderColor: ACCENT_RED,
+})
+
+const $deleteButtonText: TextStyle = {
+  color: "#FFFFFF",
 }
 
 const $categoryDot: ViewStyle = {

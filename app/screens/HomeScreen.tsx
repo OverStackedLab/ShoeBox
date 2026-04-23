@@ -29,7 +29,7 @@ import { useAppTheme } from "@/theme/context"
 import { spacing } from "@/theme/spacing"
 import type { ThemedStyle } from "@/theme/types"
 import { $tabularNums } from "@/theme/typography"
-import { parseLineItems, parseReceiptText } from "@/utils/receiptParser"
+import { parseReceiptText } from "@/utils/receiptParser"
 import { saveReceiptImage } from "@/utils/receiptStorage"
 
 const SHOEBOX_SCANNER_SVG = `<svg viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg">
@@ -126,11 +126,14 @@ export const HomeScreen: FC<HomeScreenProps> = function HomeScreen({ navigation 
         const loadingToast = toast.loading("Reading receipt…")
 
         const receiptId = Date.now().toString()
-        const scannedImages = result.images.map((img, i) => ({
-          uri: saveReceiptImage(img.uri, receiptId, i),
-          width: img.width,
-          height: img.height,
-        }))
+        const latestImage = result.images[result.images.length - 1]
+        const scannedImages = [
+          {
+            uri: saveReceiptImage(latestImage.uri, receiptId, 0),
+            width: latestImage.width,
+            height: latestImage.height,
+          },
+        ]
 
         try {
           const { text } = await recognizeText(scannedImages[0].uri)
@@ -155,13 +158,22 @@ export const HomeScreen: FC<HomeScreenProps> = function HomeScreen({ navigation 
 
           categorizeReceipt({
             text,
-            storeName,
-            total,
-            items: parseLineItems(text),
-            categories: categories.map((c) => ({ id: c.id, label: c.label, description: c.description })),
+            categories: categories.map((c) => ({
+              id: c.id,
+              label: c.label,
+              description: c.description,
+            })),
           })
             .then((result) => {
-              if (result?.categoryId) updateReceipt(receiptId, { category: result.categoryId })
+              console.log("🚀 ~ :168 ~ handleScanReceipt ~ result:", result)
+              if (!result) return
+              const updates: Parameters<typeof updateReceipt>[1] = {}
+              if (result.categoryId) updates.category = result.categoryId
+              if (result.products?.length) updates.products = result.products
+              if (result.storeName) updates.storeName = result.storeName
+              if (result.date) updates.date = result.date
+              if (result.total != null) updates.total = result.total
+              if (Object.keys(updates).length) updateReceipt(receiptId, updates)
             })
             .catch(console.error)
         } catch {

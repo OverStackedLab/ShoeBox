@@ -1,16 +1,22 @@
 import { supabase } from "@/services/supabase/supabase"
 
 interface CategorizeInput {
-  text?: string
-  storeName?: string
-  total?: number
-  items?: string[]
+  text: string
   categories: { id: string; label: string; description?: string }[]
 }
 
-interface CategorizeResult {
+export interface CategorizedProduct {
+  name: string
+  price?: number | null
+}
+
+export interface CategorizeResult {
+  storeName?: string
+  date?: string
+  total?: number
   categoryId: string
   confidence: number
+  products: CategorizedProduct[]
 }
 
 export async function categorizeReceipt(input: CategorizeInput): Promise<CategorizeResult | null> {

@@ -6,6 +6,7 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
 } from "react"
 import { useMMKVString } from "react-native-mmkv"
 
@@ -22,12 +23,18 @@ export interface ScannedImage {
   height: number
 }
 
+export interface ReceiptProduct {
+  name: string
+  price?: number | null
+}
+
 export interface Receipt {
   id: string
   storeName?: string
   date?: string
   total?: number
   category?: string
+  products?: ReceiptProduct[]
   scannedImages: ScannedImage[]
   createdAt: number
 }
@@ -54,6 +61,9 @@ export const ReceiptsProvider: FC<PropsWithChildren> = ({ children }) => {
     }
   }, [receiptsJson])
 
+  const receiptsRef = useRef(receipts)
+  receiptsRef.current = receipts
+
   // Fetch from Supabase whenever the logged-in user changes
   useEffect(() => {
     if (!userId) return
@@ -64,30 +74,35 @@ export const ReceiptsProvider: FC<PropsWithChildren> = ({ children }) => {
 
   const addReceipt = useCallback(
     (receipt: Receipt) => {
-      setReceiptsJson(JSON.stringify([receipt, ...receipts]))
+      const next = [receipt, ...receiptsRef.current]
+      receiptsRef.current = next
+      setReceiptsJson(JSON.stringify(next))
       if (userId) upsertReceiptRemote(receipt, userId).catch(console.error)
     },
-    [receipts, setReceiptsJson, userId],
+    [setReceiptsJson, userId],
   )
 
   const removeReceipt = useCallback(
     (id: string) => {
-      setReceiptsJson(JSON.stringify(receipts.filter((r) => r.id !== id)))
+      const next = receiptsRef.current.filter((r) => r.id !== id)
+      receiptsRef.current = next
+      setReceiptsJson(JSON.stringify(next))
       if (userId) deleteReceiptRemote(id).catch(console.error)
     },
-    [receipts, setReceiptsJson, userId],
+    [setReceiptsJson, userId],
   )
 
   const updateReceipt = useCallback(
     (id: string, updates: Partial<Omit<Receipt, "id" | "createdAt">>) => {
-      const updated = receipts.map((r) => (r.id === id ? { ...r, ...updates } : r))
-      setReceiptsJson(JSON.stringify(updated))
+      const next = receiptsRef.current.map((r) => (r.id === id ? { ...r, ...updates } : r))
+      receiptsRef.current = next
+      setReceiptsJson(JSON.stringify(next))
       if (userId) {
-        const receipt = updated.find((r) => r.id === id)
+        const receipt = next.find((r) => r.id === id)
         if (receipt) upsertReceiptRemote(receipt, userId).catch(console.error)
       }
     },
-    [receipts, setReceiptsJson, userId],
+    [setReceiptsJson, userId],
   )
 
   return (

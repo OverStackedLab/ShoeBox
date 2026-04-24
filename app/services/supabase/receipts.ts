@@ -20,6 +20,7 @@ export async function upsertReceiptRemote(receipt: Receipt, userId: string): Pro
     date: receipt.date ?? null,
     total: receipt.total ?? null,
     category: receipt.category ?? null,
+    products: receipt.products ?? null,
     created_at: receipt.createdAt,
   })
   if (error) throw error
@@ -101,6 +102,7 @@ export async function fetchRemoteReceipts(userId: string): Promise<Receipt[]> {
       date: row.date ?? undefined,
       total: row.total ?? undefined,
       category: row.category ?? undefined,
+      products: row.products ?? undefined,
       createdAt: row.created_at,
       scannedImages,
     })

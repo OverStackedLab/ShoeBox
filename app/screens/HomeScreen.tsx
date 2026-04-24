@@ -75,9 +75,54 @@ export const HomeScreen: FC<HomeScreenProps> = function HomeScreen({ navigation 
   const { receipts, addReceipt, updateReceipt } = useReceipts()
   const { categories } = useCategories()
   const { currency } = useSettings()
+  const [viewMode, setViewMode] = useState<"daily" | "weekly" | "monthly">("monthly")
 
-  const monthlySpending = useMemo(() => {
+  const spendingData = useMemo(() => {
     const now = new Date()
+
+    if (viewMode === "daily") {
+      const days = Array.from({ length: 7 }, (_, i) => {
+        const d = new Date(now.getFullYear(), now.getMonth(), now.getDate() - (6 - i))
+        return {
+          label: d.toLocaleString("default", { weekday: "short" }).charAt(0),
+          key: `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`,
+          total: 0,
+        }
+      })
+      for (const receipt of receipts) {
+        if (receipt.total == null) continue
+        const d = new Date(receipt.createdAt)
+        const key = `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`
+        const entry = days.find((x) => x.key === key)
+        if (entry) entry.total += receipt.total
+      }
+      return days
+    }
+
+    if (viewMode === "weekly") {
+      const startOfThisWeek = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+      startOfThisWeek.setDate(startOfThisWeek.getDate() - startOfThisWeek.getDay())
+      const weeks = Array.from({ length: 6 }, (_, i) => {
+        const start = new Date(startOfThisWeek)
+        start.setDate(start.getDate() - (5 - i) * 7)
+        const end = new Date(start)
+        end.setDate(end.getDate() + 7)
+        return {
+          label: `${start.getMonth() + 1}/${start.getDate()}`,
+          start: start.getTime(),
+          end: end.getTime(),
+          total: 0,
+        }
+      })
+      for (const receipt of receipts) {
+        if (receipt.total == null) continue
+        const t = new Date(receipt.createdAt).getTime()
+        const entry = weeks.find((w) => t >= w.start && t < w.end)
+        if (entry) entry.total += receipt.total
+      }
+      return weeks
+    }
+
     const months = Array.from({ length: 6 }, (_, i) => {
       const d = new Date(now.getFullYear(), now.getMonth() - (5 - i), 1)
       return {
@@ -90,17 +135,19 @@ export const HomeScreen: FC<HomeScreenProps> = function HomeScreen({ navigation 
     for (const receipt of receipts) {
       if (receipt.total == null) continue
       const d = new Date(receipt.createdAt)
-      const entry = months.find((m) => m.year === d.getFullYear() && m.month === d.getMonth())
+      const entry = months.find(
+        (m) => "year" in m && m.year === d.getFullYear() && m.month === d.getMonth(),
+      )
       if (entry) entry.total += receipt.total
     }
     return months
-  }, [receipts])
+  }, [receipts, viewMode])
 
-  const hasSpendingData = monthlySpending.some((m) => m.total > 0)
-  const thisMonthTotal = monthlySpending[monthlySpending.length - 1].total
+  const hasSpendingData = spendingData.some((m) => m.total > 0)
+  const currentPeriodTotal = spendingData[spendingData.length - 1].total
   const chartData = {
-    labels: monthlySpending.map((m) => m.label),
-    datasets: [{ data: monthlySpending.map((m) => (m.total > 0 ? m.total : 0)) }],
+    labels: spendingData.map((m) => m.label),
+    datasets: [{ data: spendingData.map((m) => (m.total > 0 ? m.total : 0)) }],
   }
   const yAxisLabel = currency === "HUF" ? "" : "$"
   const yAxisSuffix = currency === "HUF" ? " Ft" : ""
@@ -214,7 +261,7 @@ export const HomeScreen: FC<HomeScreenProps> = function HomeScreen({ navigation 
                 cx={RING_SIZE / 2}
                 cy={RING_SIZE / 2}
                 r={SPINNER_RADIUS}
-                stroke={colors.accent}
+                stroke={colors.palette.neutral500}
                 strokeWidth={SPINNER_STROKE}
                 strokeOpacity={0.15}
                 fill="none"
@@ -321,17 +368,37 @@ export const HomeScreen: FC<HomeScreenProps> = function HomeScreen({ navigation 
         }
       />
 
-      {/* Monthly Spending */}
+      {/* Spending */}
       <View style={themed($sectionRow)}>
-        <Text text="Monthly Spending" preset="sectionHeading" style={themed($sectionHeading)} />
+        <Text text="Spending" preset="sectionHeading" style={themed($sectionHeading)} />
         {hasSpendingData && (
           <Text
-            text={formatCurrency(thisMonthTotal, currency)}
+            text={formatCurrency(currentPeriodTotal, currency)}
             size="sm"
             weight="bold"
             style={$expenseAmount}
           />
         )}
+      </View>
+      <View style={themed($segmentedControl)}>
+        {(["daily", "weekly", "monthly"] as const).map((mode) => {
+          const isActive = viewMode === mode
+          return (
+            <TouchableOpacity
+              key={mode}
+              activeOpacity={0.8}
+              onPress={() => setViewMode(mode)}
+              style={themed(isActive ? $segmentActive : $segment)}
+            >
+              <Text
+                text={mode.charAt(0).toUpperCase() + mode.slice(1)}
+                size="xs"
+                weight={isActive ? "medium" : "normal"}
+                style={isActive ? themed($segmentTextActive) : themed($segmentText)}
+              />
+            </TouchableOpacity>
+          )
+        })}
       </View>
       <Card
         preset="flat"
@@ -432,17 +499,15 @@ const $scanLabel: ThemedStyle<TextStyle> = ({ spacing }) => ({
   marginTop: spacing.xl,
 })
 
-const $sectionHeading: ThemedStyle<TextStyle> = ({ colors, spacing }) => ({
+const $sectionHeading: ThemedStyle<TextStyle> = ({ colors }) => ({
   color: colors.textDim,
-  marginTop: spacing.lg,
-  marginBottom: spacing.xs,
-  marginLeft: spacing.xs,
 })
 
 const $sectionRow: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   flexDirection: "row",
   justifyContent: "space-between",
   alignItems: "center",
+  marginTop: spacing.lg,
   marginBottom: spacing.xs,
 })
 
@@ -487,6 +552,37 @@ const $expenseAmount: TextStyle = {
   alignSelf: "center",
   ...$tabularNums,
 }
+
+const $segmentedControl: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
+  flexDirection: "row",
+  backgroundColor: colors.palette.neutral200,
+  borderRadius: 8,
+  padding: 2,
+  marginBottom: spacing.xs,
+})
+
+const $segment: ThemedStyle<ViewStyle> = ({ spacing }) => ({
+  flex: 1,
+  paddingVertical: spacing.xs,
+  alignItems: "center",
+  borderRadius: 6,
+})
+
+const $segmentActive: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
+  flex: 1,
+  paddingVertical: spacing.xs,
+  alignItems: "center",
+  borderRadius: 6,
+  backgroundColor: colors.background,
+})
+
+const $segmentText: ThemedStyle<TextStyle> = ({ colors }) => ({
+  color: colors.textDim,
+})
+
+const $segmentTextActive: ThemedStyle<TextStyle> = ({ colors }) => ({
+  color: colors.text,
+})
 
 const $chartContainer: ViewStyle = {
   alignItems: "center",

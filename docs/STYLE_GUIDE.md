@@ -2,6 +2,19 @@
 
 A working document for keeping the codebase consistent. Add rules as we discover them — each entry should say what to do, and briefly why.
 
+## Core principle: always reuse before you create
+
+**Always prefer existing styles, components, and typography over new ones.** Before writing any JSX, `StyleSheet`, or `Text` with custom `size`/`weight`, search the codebase for an existing primitive, preset, theme token, or shared style utility that already covers the need. New custom styling is the last resort, not the first instinct.
+
+This applies to:
+
+- **Components** — reach for `Text`, `Button`, `Card`, `ListItem`, `Screen`, `TextField`, `Icon`, `EmptyState`, `Header` before building your own.
+- **Typography** — use a `Text` `preset` before composing `size` + `weight` + `style` yourself.
+- **Colors & spacing** — use `colors.*` and `spacing.*` from the theme; never hardcode.
+- **Style fragments** — check [`app/theme/typography.ts`](../app/theme/typography.ts) and sibling files for helpers like `$tabularNums` before duplicating.
+
+If an existing primitive almost fits, prefer adding a prop to it over forking a new component. See [When a custom component *is* appropriate](#when-a-custom-component-is-appropriate) for the narrow cases where new code is warranted.
+
 ## Prefer existing components and theme over custom styles
 
 **Rule:** Before writing a new component or a new `StyleSheet`, check if the design system already covers it. Only fall back to custom styles when no existing primitive fits.

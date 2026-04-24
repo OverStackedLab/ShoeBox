@@ -7,9 +7,8 @@ import {
   useEffect,
   useState,
 } from "react"
-
-import type { Session } from "@supabase/supabase-js"
 import * as Linking from "expo-linking"
+import type { Session } from "@supabase/supabase-js"
 
 import { supabase } from "@/services/supabase/supabase"
 

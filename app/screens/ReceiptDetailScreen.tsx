@@ -1,5 +1,6 @@
 import { FC, useState } from "react"
 import {
+  ActivityIndicator,
   Alert,
   Image,
   ImageStyle,
@@ -35,7 +36,6 @@ import { $tabularNums } from "@/theme/typography"
 import { parseReceiptText } from "@/utils/receiptParser"
 import { saveReceiptImage } from "@/utils/receiptStorage"
 
-const ACCENT_RED = "#FF3B30"
 const TAX_RATE = 0.0875
 
 interface LineItem {
@@ -102,7 +102,8 @@ export const ReceiptDetailScreen: FC<ReceiptDetailScreenProps> = function Receip
     themed,
     theme: { colors },
   } = useAppTheme()
-  const { receipts, removeReceipt, updateReceipt } = useReceipts()
+  const receiptsCtx = useReceipts()
+  const { receipts, removeReceipt, updateReceipt, categorizingIds, setCategorizing } = receiptsCtx
   const { categories } = useCategories()
   const { currency } = useSettings()
   const {
@@ -127,6 +128,7 @@ export const ReceiptDetailScreen: FC<ReceiptDetailScreenProps> = function Receip
   const total = stored?.total ?? paramTotal
   const category = stored?.category
   const products = stored?.products ?? []
+  const isCategorizing = categorizingIds.has(receiptId)
 
   const handleReread = async () => {
     if (!scannedImages.length) {
@@ -157,6 +159,7 @@ export const ReceiptDetailScreen: FC<ReceiptDetailScreenProps> = function Receip
       return
     }
     setIsProcessing(true)
+    setCategorizing(receiptId, true)
     const loadingToast = toast.loading("Categorizing…")
     try {
       let text = ""
@@ -189,6 +192,7 @@ export const ReceiptDetailScreen: FC<ReceiptDetailScreenProps> = function Receip
       toast.error("Could not categorize receipt.")
     } finally {
       setIsProcessing(false)
+      setCategorizing(receiptId, false)
     }
   }
 
@@ -390,6 +394,7 @@ export const ReceiptDetailScreen: FC<ReceiptDetailScreenProps> = function Receip
         title="Receipt Detail"
         titleMode="flex"
         leftIcon="back"
+        leftIconColor={colors.text}
         onLeftPress={() => navigation.goBack()}
         safeAreaEdges={[]}
         RightActionComponent={
@@ -438,7 +443,7 @@ export const ReceiptDetailScreen: FC<ReceiptDetailScreenProps> = function Receip
               style={themed($headerActionBtn)}
               activeOpacity={0.7}
             >
-              <MaterialCommunityIcons name="delete-outline" size={22} color={ACCENT_RED} />
+              <MaterialCommunityIcons name="delete-outline" size={22} color={colors.error} />
             </TouchableOpacity>
           </View>
         }
@@ -539,28 +544,34 @@ export const ReceiptDetailScreen: FC<ReceiptDetailScreenProps> = function Receip
               }
               RightComponent={
                 <View style={$editRow}>
-                  {category && (
-                    <View
-                      style={[
-                        $categoryDot,
-                        {
-                          backgroundColor: categories.find((c) => c.id === category)?.color,
-                        },
-                      ]}
-                    />
+                  {isCategorizing && !category ? (
+                    <ActivityIndicator size="small" color={colors.textDim} />
+                  ) : (
+                    <>
+                      {category && (
+                        <View
+                          style={[
+                            $categoryDot,
+                            {
+                              backgroundColor: categories.find((c) => c.id === category)?.color,
+                            },
+                          ]}
+                        />
+                      )}
+                      <Text
+                        text={categories.find((c) => c.id === category)?.label ?? "—"}
+                        size="sm"
+                        weight="medium"
+                        style={$valueText}
+                      />
+                      <MaterialCommunityIcons
+                        name="chevron-right"
+                        size={16}
+                        color={colors.textDim}
+                        style={$editIcon}
+                      />
+                    </>
                   )}
-                  <Text
-                    text={categories.find((c) => c.id === category)?.label ?? "—"}
-                    size="sm"
-                    weight="medium"
-                    style={$valueText}
-                  />
-                  <MaterialCommunityIcons
-                    name="chevron-right"
-                    size={16}
-                    color={colors.textDim}
-                    style={$editIcon}
-                  />
                 </View>
               }
             />
@@ -767,43 +778,49 @@ export const ReceiptDetailScreen: FC<ReceiptDetailScreenProps> = function Receip
       />
 
       {/* Products */}
-      {products.length > 0 && (
+      {(products.length > 0 || isCategorizing) && (
         <>
           <Text text="Products" preset="sectionHeading" style={themed($sectionHeading)} />
           <Card
             style={themed($cardBase)}
             ContentComponent={
-              <View>
-                {products.map((p, index) => (
-                  <ListItem
-                    key={`${p.name}-${index}`}
-                    height={48}
-                    bottomSeparator={index < products.length - 1}
-                    LeftComponent={
-                      <TouchableOpacity
-                        onPress={() => handleEditProductName(index)}
-                        activeOpacity={0.6}
-                        style={$itemLeft}
-                      >
-                        <Text text={p.name} size="sm" />
-                      </TouchableOpacity>
-                    }
-                    RightComponent={
-                      <TouchableOpacity
-                        onPress={() => handleEditProductPrice(index)}
-                        activeOpacity={0.6}
-                        style={$editRow}
-                      >
-                        <Text
-                          text={p.price != null ? formatCurrency(p.price, currency) : "—"}
-                          size="sm"
-                          style={[$valueText, themed($dimText)]}
-                        />
-                      </TouchableOpacity>
-                    }
-                  />
-                ))}
-              </View>
+              products.length === 0 && isCategorizing ? (
+                <View style={themed($productsLoader)}>
+                  <ActivityIndicator size="small" color={colors.textDim} />
+                </View>
+              ) : (
+                <View>
+                  {products.map((p, index) => (
+                    <ListItem
+                      key={`${p.name}-${index}`}
+                      height={48}
+                      bottomSeparator={index < products.length - 1}
+                      LeftComponent={
+                        <TouchableOpacity
+                          onPress={() => handleEditProductName(index)}
+                          activeOpacity={0.6}
+                          style={$itemLeft}
+                        >
+                          <Text text={p.name} size="sm" />
+                        </TouchableOpacity>
+                      }
+                      RightComponent={
+                        <TouchableOpacity
+                          onPress={() => handleEditProductPrice(index)}
+                          activeOpacity={0.6}
+                          style={$editRow}
+                        >
+                          <Text
+                            text={p.price != null ? formatCurrency(p.price, currency) : "—"}
+                            size="sm"
+                            style={[$valueText, themed($dimText)]}
+                          />
+                        </TouchableOpacity>
+                      }
+                    />
+                  ))}
+                </View>
+              )
             }
           />
         </>
@@ -905,10 +922,10 @@ const $editIcon: ViewStyle = {
   marginLeft: spacing.xxs,
 }
 
-const $deleteButton: ThemedStyle<ViewStyle> = ({ spacing }) => ({
+const $deleteButton: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
   marginTop: spacing.lg,
-  backgroundColor: ACCENT_RED,
-  borderColor: ACCENT_RED,
+  backgroundColor: colors.error,
+  borderColor: colors.error,
 })
 
 const $deleteButtonText: TextStyle = {
@@ -970,6 +987,11 @@ const $ocrHeader: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
 const $ocrImage: ImageStyle = {
   width: "100%",
 }
+
+const $productsLoader: ThemedStyle<ViewStyle> = ({ spacing }) => ({
+  paddingVertical: spacing.md,
+  alignItems: "center",
+})
 
 const $ocrLineHit: ViewStyle = {
   position: "absolute",

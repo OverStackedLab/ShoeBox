@@ -66,6 +66,8 @@ const $row: ViewStyle = { backgroundColor: "#FFFFFF" }
 
 The palette lives in [`app/theme/colors.ts`](../app/theme/colors.ts) and [`colorsDark.ts`](../app/theme/colorsDark.ts). Prefer semantic names (`colors.text`, `colors.border`, `colors.tint`) over palette entries (`palette.neutral200`).
 
+**Never hardcode color values.** Don't introduce hex/rgb literals or local constants like `const ACCENT_RED = "#E66565"` inside a screen or component. If no existing token fits, pause and ask whether to (a) reuse an existing close match, (b) add a new entry to both `colors.ts` and `colorsDark.ts`, or (c) hardcode as a documented exception — don't decide unilaterally. This keeps dark mode working and the palette auditable in one place.
+
 ### Shared style utilities
 
 Check [`app/theme/typography.ts`](../app/theme/typography.ts) for shared helpers like `$tabularNums` before duplicating style fragments across screens.

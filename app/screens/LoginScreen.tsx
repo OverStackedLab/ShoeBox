@@ -12,6 +12,7 @@ import { useAppTheme } from "@/theme/context"
 import type { ThemedStyle } from "@/theme/types"
 
 const logo = require("@assets/images/logo.png")
+
 const logoSource = Image.resolveAssetSource(logo)
 const LOGO_ASPECT_RATIO = logoSource.width / logoSource.height
 

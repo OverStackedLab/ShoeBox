@@ -47,7 +47,12 @@ export const RECEIPT_CATEGORIES = [
     description: "Office supplies, software, professional services, work travel",
     color: "#F0C060",
   },
-  { key: "other", label: "Other", description: "Anything that doesn't fit the above", color: "#B6ACA6" },
+  {
+    key: "other",
+    label: "Other",
+    description: "Anything that doesn't fit the above",
+    color: "#B6ACA6",
+  },
 ] as const
 
 export type ReceiptCategory = (typeof RECEIPT_CATEGORIES)[number]["key"]

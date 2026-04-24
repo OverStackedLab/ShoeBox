@@ -7,6 +7,7 @@ import {
   useEffect,
   useMemo,
   useRef,
+  useState,
 } from "react"
 import { useMMKVString } from "react-native-mmkv"
 
@@ -44,6 +45,8 @@ interface ReceiptsContextType {
   addReceipt: (receipt: Receipt) => void
   removeReceipt: (id: string) => void
   updateReceipt: (id: string, updates: Partial<Omit<Receipt, "id" | "createdAt">>) => void
+  categorizingIds: Set<string>
+  setCategorizing: (id: string, value: boolean) => void
 }
 
 const ReceiptsContext = createContext<ReceiptsContextType | null>(null)
@@ -63,6 +66,17 @@ export const ReceiptsProvider: FC<PropsWithChildren> = ({ children }) => {
 
   const receiptsRef = useRef(receipts)
   receiptsRef.current = receipts
+
+  const [categorizingIds, setCategorizingIds] = useState<Set<string>>(() => new Set())
+
+  const setCategorizing = useCallback((id: string, value: boolean) => {
+    setCategorizingIds((prev) => {
+      const next = new Set(prev)
+      if (value) next.add(id)
+      else next.delete(id)
+      return next
+    })
+  }, [])
 
   // Fetch from Supabase whenever the logged-in user changes
   useEffect(() => {
@@ -106,7 +120,16 @@ export const ReceiptsProvider: FC<PropsWithChildren> = ({ children }) => {
   )
 
   return (
-    <ReceiptsContext.Provider value={{ receipts, addReceipt, removeReceipt, updateReceipt }}>
+    <ReceiptsContext.Provider
+      value={{
+        receipts,
+        addReceipt,
+        removeReceipt,
+        updateReceipt,
+        categorizingIds,
+        setCategorizing,
+      }}
+    >
       {children}
     </ReceiptsContext.Provider>
   )

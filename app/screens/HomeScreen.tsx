@@ -72,7 +72,7 @@ export const HomeScreen: FC<HomeScreenProps> = function HomeScreen({ navigation 
     return () => animation.stop()
   }, [pulseAnim])
 
-  const { receipts, addReceipt, updateReceipt } = useReceipts()
+  const { receipts, addReceipt, updateReceipt, setCategorizing } = useReceipts()
   const { categories } = useCategories()
   const { currency } = useSettings()
   const [viewMode, setViewMode] = useState<"daily" | "weekly" | "monthly">("monthly")
@@ -203,6 +203,7 @@ export const HomeScreen: FC<HomeScreenProps> = function HomeScreen({ navigation 
             total,
           })
 
+          setCategorizing(receiptId, true)
           categorizeReceipt({
             text,
             categories: categories.map((c) => ({
@@ -222,6 +223,7 @@ export const HomeScreen: FC<HomeScreenProps> = function HomeScreen({ navigation 
               if (Object.keys(updates).length) updateReceipt(receiptId, updates)
             })
             .catch(console.error)
+            .finally(() => setCategorizing(receiptId, false))
         } catch {
           toast.dismiss(loadingToast)
           toast.error("Could not read receipt text.")

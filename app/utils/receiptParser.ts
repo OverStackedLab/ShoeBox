@@ -63,7 +63,8 @@ export function parseReceiptText(raw: string): {
   return { storeName, date, total }
 }
 
-const SKIP_LINE = /total|subtotal|sub-total|tax|vat|áfa|összesen|osszesen|s[tz]esen|change|cash|card|payment|discount|coupon|receipt|thank|welcome|address|phone|tel\.|www\.|http/i
+const SKIP_LINE =
+  /total|subtotal|sub-total|tax|vat|áfa|összesen|osszesen|s[tz]esen|change|cash|card|payment|discount|coupon|receipt|thank|welcome|address|phone|tel\.|www\.|http/i
 const PRICE_SUFFIX = /[\d.,]+\s*(Ft|€|\$|£|USD|EUR)?\s*$/
 
 export function parseLineItems(raw: string): string[] {

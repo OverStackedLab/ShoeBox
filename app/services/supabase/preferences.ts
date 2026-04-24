@@ -1,4 +1,5 @@
 import type { Currency } from "@/context/SettingsContext"
+
 import { supabase } from "./supabase"
 
 export interface UserPreferences {
@@ -22,14 +23,13 @@ export async function fetchUserPreferences(userId: string): Promise<UserPreferen
   return { currency: data.currency === "HUF" ? "HUF" : "USD" }
 }
 
-export async function upsertUserPreferences(
-  userId: string,
-  prefs: UserPreferences,
-): Promise<void> {
-  const { error } = await supabase.from("user_preferences").upsert(
-    { user_id: userId, currency: prefs.currency, updated_at: new Date().toISOString() },
-    { onConflict: "user_id" },
-  )
+export async function upsertUserPreferences(userId: string, prefs: UserPreferences): Promise<void> {
+  const { error } = await supabase
+    .from("user_preferences")
+    .upsert(
+      { user_id: userId, currency: prefs.currency, updated_at: new Date().toISOString() },
+      { onConflict: "user_id" },
+    )
 
   if (error) {
     console.error("upsertUserPreferences error:", error.message)

@@ -1,8 +1,9 @@
 import { createContext, FC, PropsWithChildren, useCallback, useContext, useEffect } from "react"
 import { useMMKVString } from "react-native-mmkv"
 
-import { useAuth } from "./AuthContext"
 import { fetchUserPreferences, upsertUserPreferences } from "@/services/supabase/preferences"
+
+import { useAuth } from "./AuthContext"
 
 export type Currency = "USD" | "HUF"
 

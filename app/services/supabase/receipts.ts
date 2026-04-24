@@ -1,8 +1,9 @@
-import { decode } from "base64-arraybuffer"
 import { File, Directory, Paths } from "expo-file-system"
+import { decode } from "base64-arraybuffer"
+
+import type { Receipt } from "@/context/ReceiptsContext"
 
 import { supabase } from "./supabase"
-import type { Receipt } from "@/context/ReceiptsContext"
 
 const RECEIPTS_DIR = new Directory(Paths.document, "receipts")
 

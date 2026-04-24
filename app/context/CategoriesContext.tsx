@@ -64,9 +64,7 @@ export const CATEGORY_COLORS = [
   "#B6ACA6",
 ]
 
-const DESCRIPTION_BY_KEY = Object.fromEntries(
-  RECEIPT_CATEGORIES.map((c) => [c.key, c.description]),
-)
+const DESCRIPTION_BY_KEY = Object.fromEntries(RECEIPT_CATEGORIES.map((c) => [c.key, c.description]))
 
 const BUILTIN_CATEGORIES: Category[] = RECEIPT_CATEGORIES.map((c) => ({
   id: c.key,

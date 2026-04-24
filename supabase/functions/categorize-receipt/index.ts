@@ -1,6 +1,6 @@
 import { createAnthropic } from "npm:@ai-sdk/anthropic@2.0.0"
-import { generateObject } from "npm:ai@5.0.0"
 import { createClient } from "npm:@supabase/supabase-js@2"
+import { generateObject } from "npm:ai@5.0.0"
 import { z } from "npm:zod@3.24.1"
 
 interface CategoryInput {

@@ -12,6 +12,7 @@ import { useAppTheme } from "@/theme/context"
 import type { ThemedStyle } from "@/theme/types"
 
 const logo = require("@assets/images/logo.png")
+
 const logoSource = Image.resolveAssetSource(logo)
 const LOGO_ASPECT_RATIO = logoSource.width / logoSource.height
 
@@ -120,7 +121,11 @@ export const UpdatePasswordScreen: FC = () => {
         <Image source={logo} style={$logo} resizeMode="contain" />
       </View>
       <Text tx="updatePasswordScreen:heading" preset="heading" style={themed($heading)} />
-      <Text tx="updatePasswordScreen:enterDetails" preset="subheading" style={themed($subheading)} />
+      <Text
+        tx="updatePasswordScreen:enterDetails"
+        preset="subheading"
+        style={themed($subheading)}
+      />
 
       {!!serverError && <Text text={serverError} size="sm" style={themed($serverError)} />}
 

@@ -11,7 +11,7 @@ const palette = {
 
   brandOrange: "#E8981E", // lifted from light-mode #E8981E
   brandGreen: "#90C853", // lifted from #90C853
-  brandRed: "#E66565", // lifted
+  brandRed: "#D64545", // lifted
   errorBg: "#3E1512",
 
   overlay20: "rgba(25, 16, 21, 0.2)",

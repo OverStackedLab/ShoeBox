@@ -9,8 +9,8 @@ const palette = {
   neutral800: "#F5F3ED", // text — warm off-white
   neutral900: "#FFFFFF",
 
-  brandOrange: "#F0A838", // lifted from light-mode #E8981E
-  brandGreen: "#A6D867", // lifted from #90C853
+  brandOrange: "#E8981E", // lifted from light-mode #E8981E
+  brandGreen: "#90C853", // lifted from #90C853
   brandRed: "#E66565", // lifted
   errorBg: "#3E1512",
 

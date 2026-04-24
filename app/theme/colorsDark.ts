@@ -1,39 +1,18 @@
 const palette = {
-  neutral900: "#FFFFFF",
-  neutral800: "#F4F2F1",
-  neutral700: "#959FA9",
-  neutral600: "#6F7C89",
-  neutral500: "#505963",
-  neutral400: "#30363C",
-  neutral300: "#111315",
-  neutral200: "#191015",
   neutral100: "#000000",
+  neutral200: "#1F1E1C", // slightly-elevated surface
+  neutral300: "#141413", // background — warm near-black
+  neutral400: "#2F2E2A", // border
+  neutral500: "#4A4845", // tintInactive
+  neutral600: "#6B6B66",
+  neutral700: "#9B998F", // textDim
+  neutral800: "#F5F3ED", // text — warm off-white
+  neutral900: "#FFFFFF",
 
-  primary600: "#D9F0EE",
-  primary500: "#A8DDD8",
-  primary400: "#6FC2BA",
-  primary300: "#3FA69C",
-  primary200: "#1F857B",
-  primary100: "#0F5E57",
-
-  secondary500: "#DCDDE9",
-  secondary400: "#BCC0D6",
-  secondary300: "#9196B9",
-  secondary200: "#626894",
-  secondary100: "#41476E",
-
-  accent500: "#FFEED4",
-  accent400: "#FFE1B2",
-  accent300: "#FDD495",
-  accent200: "#FBC878",
-  accent100: "#FFBB50",
-
-  angry100: "#F2D6CD",
-  angry500: "#C03403",
-
-  brandOrange: "#E8981E",
-  brandGreen: "#90c853",
-  brandRed: "#FF3B30",
+  brandOrange: "#F0A838", // lifted from light-mode #E8981E
+  brandGreen: "#A6D867", // lifted from #90C853
+  brandRed: "#E66565", // lifted
+  errorBg: "#3E1512",
 
   overlay20: "rgba(25, 16, 21, 0.2)",
   overlay50: "rgba(25, 16, 21, 0.5)",
@@ -43,14 +22,14 @@ export const colors = {
   palette,
   transparent: "rgba(0, 0, 0, 0)",
   text: palette.neutral800,
-  textDim: palette.neutral600,
+  textDim: palette.neutral700, // was neutral600 — fails contrast on dark bg
   background: palette.neutral300,
   border: palette.neutral400,
-  tint: palette.accent300,
-  tintInactive: palette.neutral400,
-  separator: palette.neutral300,
-  error: palette.angry500,
-  errorBackground: palette.angry100,
+  tint: palette.brandOrange, // was accent300 (gold) — now matches light mode
+  tintInactive: palette.neutral500, // was neutral400
+  separator: palette.neutral400, // was neutral300 (invisible — same as bg)
+  error: palette.brandRed,
+  errorBackground: palette.errorBg,
   accent: palette.brandOrange,
   accentAlt: palette.brandGreen,
   destructive: palette.brandRed,

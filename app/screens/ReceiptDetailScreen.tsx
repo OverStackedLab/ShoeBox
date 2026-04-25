@@ -36,60 +36,9 @@ import { $tabularNums } from "@/theme/typography"
 import { parseReceiptText } from "@/utils/receiptParser"
 import { saveReceiptImage } from "@/utils/receiptStorage"
 
-const TAX_RATE = 0.0875
-
-interface LineItem {
-  id: string
-  name: string
-  qty: number
-  price: number
-}
-
 interface OcrLine {
   text: string
   frame: { left: number; top: number; right: number; bottom: number }
-}
-
-const MOCK_LINE_ITEMS: Record<string, LineItem[]> = {
-  "1": [
-    { id: "1", name: "Organic Bananas", qty: 1, price: 1.49 },
-    { id: "2", name: "Whole Milk (1 gal)", qty: 2, price: 4.99 },
-    { id: "3", name: "Sourdough Bread", qty: 1, price: 5.99 },
-    { id: "4", name: "Cage-Free Eggs", qty: 1, price: 7.49 },
-    { id: "5", name: "Greek Yogurt", qty: 3, price: 2.99 },
-  ],
-  "2": [
-    { id: "1", name: "Shampoo", qty: 1, price: 8.99 },
-    { id: "2", name: "Laundry Detergent", qty: 1, price: 14.99 },
-    { id: "3", name: "Paper Towels", qty: 2, price: 12.99 },
-    { id: "4", name: "Dish Soap", qty: 1, price: 3.99 },
-    { id: "5", name: "Toothpaste", qty: 2, price: 4.49 },
-    { id: "6", name: "Batteries AA (8pk)", qty: 1, price: 9.99 },
-  ],
-  "3": [
-    { id: "1", name: "NyQuil Severe", qty: 1, price: 12.99 },
-    { id: "2", name: "Vitamin C 1000mg", qty: 1, price: 9.49 },
-  ],
-  "4": [
-    { id: "1", name: "2x4x8 Lumber", qty: 10, price: 6.98 },
-    { id: "2", name: "Wood Screws (1lb)", qty: 2, price: 8.99 },
-    { id: "3", name: "Sandpaper Set", qty: 1, price: 12.99 },
-    { id: "4", name: "Wood Glue", qty: 1, price: 7.49 },
-  ],
-  "5": [
-    { id: "1", name: "Pasta (assorted)", qty: 3, price: 1.99 },
-    { id: "2", name: "Frozen Waffles", qty: 2, price: 3.49 },
-    { id: "3", name: "Dark Chocolate", qty: 4, price: 2.99 },
-    { id: "4", name: "Sparkling Water", qty: 2, price: 4.99 },
-  ],
-  "6": [
-    { id: "1", name: "Kirkland Coffee", qty: 1, price: 34.99 },
-    { id: "2", name: "Olive Oil (2pk)", qty: 1, price: 19.99 },
-    { id: "3", name: "Mixed Nuts (2.5lb)", qty: 1, price: 17.99 },
-    { id: "4", name: "Paper Plates", qty: 1, price: 14.99 },
-    { id: "5", name: "Bottled Water (40pk)", qty: 1, price: 9.99 },
-    { id: "6", name: "Chicken Breast (6lb)", qty: 1, price: 22.99 },
-  ],
 }
 
 interface ReceiptDetailScreenProps extends AppStackScreenProps<"ReceiptDetail"> {}
@@ -374,16 +323,6 @@ export const ReceiptDetailScreen: FC<ReceiptDetailScreenProps> = function Receip
     ])
   }
 
-  const lineItems = MOCK_LINE_ITEMS[receiptId] ?? []
-  const hasLineItems = lineItems.length > 0
-
-  // Only compute subtotal/tax breakdown for mock line item receipts
-  const subtotal = hasLineItems
-    ? lineItems.reduce((sum, item) => sum + item.qty * item.price, 0)
-    : null
-  const tax = hasLineItems && subtotal != null ? subtotal * TAX_RATE : null
-  const displayTotal = total ?? (subtotal != null && tax != null ? subtotal + tax : null)
-
   return (
     <Screen
       preset="scroll"
@@ -392,62 +331,56 @@ export const ReceiptDetailScreen: FC<ReceiptDetailScreenProps> = function Receip
     >
       <Header
         title="Receipt Detail"
-        titleMode="flex"
+        titleMode="center"
         leftIcon="back"
         leftIconColor={colors.text}
         onLeftPress={() => navigation.goBack()}
         safeAreaEdges={[]}
-        RightActionComponent={
-          <View style={$headerActions}>
-            <TouchableOpacity
-              onPress={handleSelectText}
-              style={themed($headerActionBtn)}
-              activeOpacity={0.7}
-              disabled={isProcessing || !scannedImages.length}
-            >
-              <MaterialCommunityIcons name="cursor-text" size={22} color={colors.text} />
-            </TouchableOpacity>
-            <TouchableOpacity
-              onPress={handleReread}
-              style={themed($headerActionBtn)}
-              activeOpacity={0.7}
-              disabled={isProcessing || !scannedImages.length}
-            >
-              <MaterialCommunityIcons name="text-recognition" size={22} color={colors.text} />
-            </TouchableOpacity>
-            <TouchableOpacity
-              onPress={handleAutoCategorize}
-              style={themed($headerActionBtn)}
-              activeOpacity={0.7}
-              disabled={isProcessing}
-            >
-              <MaterialCommunityIcons name="auto-fix" size={22} color={colors.text} />
-            </TouchableOpacity>
-            <TouchableOpacity
-              onPress={handleRescan}
-              style={themed($headerActionBtn)}
-              activeOpacity={0.7}
-              disabled={isProcessing}
-            >
-              <MaterialCommunityIcons name="camera-retake-outline" size={22} color={colors.text} />
-            </TouchableOpacity>
-            <TouchableOpacity
-              onPress={() => toast.info("Share coming soon.")}
-              style={themed($headerActionBtn)}
-              activeOpacity={0.7}
-            >
-              <MaterialCommunityIcons name="share-variant-outline" size={22} color={colors.text} />
-            </TouchableOpacity>
-            <TouchableOpacity
-              onPress={handleDelete}
-              style={themed($headerActionBtn)}
-              activeOpacity={0.7}
-            >
-              <MaterialCommunityIcons name="delete-outline" size={22} color={colors.error} />
-            </TouchableOpacity>
-          </View>
-        }
       />
+      <View style={themed($actionRow)}>
+        <TouchableOpacity
+          onPress={handleSelectText}
+          style={themed($actionBtn)}
+          activeOpacity={0.7}
+          disabled={isProcessing || !scannedImages.length}
+        >
+          <MaterialCommunityIcons name="cursor-text" size={22} color={colors.text} />
+        </TouchableOpacity>
+        <TouchableOpacity
+          onPress={handleReread}
+          style={themed($actionBtn)}
+          activeOpacity={0.7}
+          disabled={isProcessing || !scannedImages.length}
+        >
+          <MaterialCommunityIcons name="text-recognition" size={22} color={colors.text} />
+        </TouchableOpacity>
+        <TouchableOpacity
+          onPress={handleAutoCategorize}
+          style={themed($actionBtn)}
+          activeOpacity={0.7}
+          disabled={isProcessing}
+        >
+          <MaterialCommunityIcons name="auto-fix" size={22} color={colors.text} />
+        </TouchableOpacity>
+        <TouchableOpacity
+          onPress={handleRescan}
+          style={themed($actionBtn)}
+          activeOpacity={0.7}
+          disabled={isProcessing}
+        >
+          <MaterialCommunityIcons name="camera-retake-outline" size={22} color={colors.text} />
+        </TouchableOpacity>
+        <TouchableOpacity
+          onPress={() => toast.info("Share coming soon.")}
+          style={themed($actionBtn)}
+          activeOpacity={0.7}
+        >
+          <MaterialCommunityIcons name="share-variant-outline" size={22} color={colors.text} />
+        </TouchableOpacity>
+        <TouchableOpacity onPress={handleDelete} style={themed($actionBtn)} activeOpacity={0.7}>
+          <MaterialCommunityIcons name="delete-outline" size={22} color={colors.error} />
+        </TouchableOpacity>
+      </View>
 
       {/* Scanned Images */}
       {scannedImages && scannedImages.length > 0 && (
@@ -485,20 +418,12 @@ export const ReceiptDetailScreen: FC<ReceiptDetailScreenProps> = function Receip
                 </View>
               }
               RightComponent={
-                <View style={$editRow}>
-                  <Text
-                    text={storeName ?? `Receipt #${receiptId}`}
-                    size="sm"
-                    weight="medium"
-                    style={$valueText}
-                  />
-                  <MaterialCommunityIcons
-                    name="pencil-outline"
-                    size={14}
-                    color={colors.textDim}
-                    style={$editIcon}
-                  />
-                </View>
+                <Text
+                  text={storeName ?? `Receipt #${receiptId}`}
+                  size="sm"
+                  weight="medium"
+                  style={$valueText}
+                />
               }
             />
             <ListItem
@@ -517,15 +442,7 @@ export const ReceiptDetailScreen: FC<ReceiptDetailScreenProps> = function Receip
                 </View>
               }
               RightComponent={
-                <View style={$editRow}>
-                  <Text text={date ?? "—"} size="sm" weight="medium" style={$valueText} />
-                  <MaterialCommunityIcons
-                    name="pencil-outline"
-                    size={14}
-                    color={colors.textDim}
-                    style={$editIcon}
-                  />
-                </View>
+                <Text text={date ?? "—"} size="sm" weight="medium" style={$valueText} />
               }
             />
             <ListItem
@@ -674,82 +591,12 @@ export const ReceiptDetailScreen: FC<ReceiptDetailScreenProps> = function Receip
         </View>
       </Modal>
 
-      {/* Line Items */}
-      {hasLineItems && (
-        <>
-          <Text text="Items" preset="sectionHeading" style={themed($sectionHeading)} />
-          <Card
-            style={themed($cardBase)}
-            ContentComponent={
-              <View>
-                {lineItems.map((item, index) => (
-                  <ListItem
-                    key={item.id}
-                    height={52}
-                    bottomSeparator={index < lineItems.length - 1}
-                    LeftComponent={
-                      <View style={$itemLeft}>
-                        <Text text={item.name} size="sm" />
-                        {item.qty > 1 && (
-                          <Text text={`× ${item.qty}`} size="xxs" style={themed($qtyText)} />
-                        )}
-                      </View>
-                    }
-                    RightComponent={
-                      <Text
-                        text={formatCurrency(item.qty * item.price, currency)}
-                        size="sm"
-                        style={[$valueText, themed($dimText)]}
-                      />
-                    }
-                  />
-                ))}
-              </View>
-            }
-          />
-        </>
-      )}
-
       {/* Summary */}
       <Text text="Summary" preset="sectionHeading" style={themed($sectionHeading)} />
       <Card
         style={themed($cardBase)}
         ContentComponent={
           <View>
-            {subtotal != null && (
-              <ListItem
-                height={48}
-                bottomSeparator
-                LeftComponent={<Text text="Subtotal" size="sm" style={themed($dimText)} />}
-                RightComponent={
-                  <Text
-                    text={formatCurrency(subtotal, currency)}
-                    size="sm"
-                    style={[$valueText, themed($dimText)]}
-                  />
-                }
-              />
-            )}
-            {tax != null && (
-              <ListItem
-                height={48}
-                bottomSeparator
-                LeftComponent={
-                  <Text
-                    text={`Tax (${(TAX_RATE * 100).toFixed(2)}%)`}
-                    size="sm"
-                    style={themed($dimText)}
-                  />
-                }
-                RightComponent={
-                  <Text
-                    text={formatCurrency(tax, currency)}
-                    size="sm"
-                    style={[$valueText, themed($dimText)]}
-                  />
-                }
-              />
-            )}
             <ListItem
               height={56}
               onPress={() =>
@@ -757,20 +604,12 @@ export const ReceiptDetailScreen: FC<ReceiptDetailScreenProps> = function Receip
               }
               LeftComponent={<Text text="Total" size="sm" weight="bold" />}
               RightComponent={
-                <View style={$editRow}>
-                  <Text
-                    text={displayTotal != null ? formatCurrency(displayTotal, currency) : "—"}
-                    size="md"
-                    weight="bold"
-                    style={$valueText}
-                  />
-                  <MaterialCommunityIcons
-                    name="pencil-outline"
-                    size={14}
-                    color={colors.textDim}
-                    style={$editIcon}
-                  />
-                </View>
+                <Text
+                  text={total != null ? formatCurrency(total, currency) : "—"}
+                  size="md"
+                  weight="bold"
+                  style={$valueText}
+                />
               }
             />
           </View>
@@ -841,13 +680,16 @@ const $screenContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   paddingBottom: spacing.xl,
 })
 
-const $headerActions: ViewStyle = {
+const $actionRow: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   flexDirection: "row",
   alignItems: "center",
-}
+  paddingHorizontal: spacing.xs,
+  paddingVertical: spacing.xs,
+})
 
-const $headerActionBtn: ThemedStyle<ViewStyle> = ({ spacing }) => ({
-  paddingHorizontal: spacing.sm,
+const $actionBtn: ThemedStyle<ViewStyle> = ({ spacing }) => ({
+  flex: 1,
+  alignItems: "center",
   paddingVertical: spacing.xs,
 })
 
@@ -903,10 +745,6 @@ const $itemLeft: ViewStyle = {
   alignSelf: "center",
   gap: 2,
 }
-
-const $qtyText: ThemedStyle<TextStyle> = ({ colors }) => ({
-  color: colors.textDim,
-})
 
 const $dimText: ThemedStyle<TextStyle> = ({ colors }) => ({
   color: colors.textDim,

@@ -2,7 +2,7 @@
   "name": "ShoeBox",
   "slug": "ShoeBox",
   "scheme": "shoebox",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "orientation": "portrait",
   "userInterfaceStyle": "automatic",
   "icon": "./assets/images/app-icon-all.png",
@@ -11,7 +11,9 @@
   },
   "newArchEnabled": true,
   "jsEngine": "hermes",
-  "assetBundlePatterns": ["**/*"],
+  "assetBundlePatterns": [
+    "**/*"
+  ],
   "android": {
     "icon": "./assets/images/app-icon-android-legacy.png",
     "package": "com.overstacked.shoebox",
@@ -35,7 +37,9 @@
       "NSPrivacyAccessedAPITypes": [
         {
           "NSPrivacyAccessedAPIType": "NSPrivacyAccessedAPICategoryUserDefaults",
-          "NSPrivacyAccessedAPITypeReasons": ["CA92.1"]
+          "NSPrivacyAccessedAPITypeReasons": [
+            "CA92.1"
+          ]
         }
       ]
     }
@@ -75,7 +79,8 @@
       "version": "11.4.0"
     },
     "eas": {
-      "projectId": "2845067d-a192-4e30-8b1b-0a69a349043e"
+      "projectId": "1f99c274-2777-4668-8741-5a843c16a0e8"
     }
-  }
+  },
+  "owner": "jqn"
 }

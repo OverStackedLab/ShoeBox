@@ -139,7 +139,7 @@ export const LoginScreen: FC<LoginScreenProps> = function LoginScreen({ navigati
 
         <Button
           tx="loginScreen:forgotPassword"
-          preset="default"
+          preset="link"
           style={themed($forgotPasswordButton)}
           onPress={() => navigation.navigate("ForgotPassword")}
         />

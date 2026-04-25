@@ -10,6 +10,7 @@ import {
 import * as Linking from "expo-linking"
 import type { Session } from "@supabase/supabase-js"
 
+import { uploadAvatar } from "@/services/supabase/avatar"
 import { supabase } from "@/services/supabase/supabase"
 
 export type AuthContextType = {
@@ -17,6 +18,7 @@ export type AuthContextType = {
   isRecovering: boolean
   session: Session | null
   authEmail: string | undefined
+  avatarUrl: string | undefined
   isLoading: boolean
   signIn: (email: string, password: string) => Promise<string | null>
   signUp: (email: string, password: string) => Promise<string | null>
@@ -24,6 +26,7 @@ export type AuthContextType = {
   updatePassword: (password: string) => Promise<string | null>
   clearRecovery: () => void
   logout: () => void
+  uploadAvatar: (base64: string, mimeType: string) => Promise<string | null>
 }
 
 export const AuthContext = createContext<AuthContextType | null>(null)
@@ -38,7 +41,10 @@ export const AuthProvider: FC<PropsWithChildren<AuthProviderProps>> = ({ childre
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session: initialSession } }) => {
+    supabase.auth.getSession().then(({ data: { session: initialSession }, error }) => {
+      if (error) {
+        supabase.auth.signOut()
+      }
       setSession(initialSession)
       setIsLoading(false)
     })
@@ -77,7 +83,7 @@ export const AuthProvider: FC<PropsWithChildren<AuthProviderProps>> = ({ childre
       if (!error) setIsRecovering(true)
     }
 
-    Linking.getInitialURL().then((url) => url && handleUrl(url))
+    Linking.getInitialURL().then((url) => { if (url) handleUrl(url) })
     const subscription = Linking.addEventListener("url", ({ url }) => handleUrl(url))
     return () => subscription.remove()
   }, [])
@@ -113,11 +119,27 @@ export const AuthProvider: FC<PropsWithChildren<AuthProviderProps>> = ({ childre
     setIsRecovering(false)
   }, [])
 
+  const handleUploadAvatar = useCallback(
+    async (base64: string, mimeType: string): Promise<string | null> => {
+      const userId = session?.user?.id
+      if (!userId) return "Not authenticated"
+      try {
+        const url = await uploadAvatar(userId, base64, mimeType)
+        const { error } = await supabase.auth.updateUser({ data: { avatar_url: url } })
+        return error?.message ?? null
+      } catch (e: any) {
+        return e?.message ?? "Upload failed"
+      }
+    },
+    [session?.user?.id],
+  )
+
   const value: AuthContextType = {
     isAuthenticated: !!session,
     isRecovering,
     session,
     authEmail: session?.user?.email,
+    avatarUrl: session?.user?.user_metadata?.avatar_url,
     isLoading,
     signIn,
     signUp,
@@ -125,6 +147,7 @@ export const AuthProvider: FC<PropsWithChildren<AuthProviderProps>> = ({ childre
     updatePassword,
     clearRecovery,
     logout,
+    uploadAvatar: handleUploadAvatar,
   }
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

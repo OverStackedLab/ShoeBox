@@ -1,6 +1,7 @@
 import { FC, useCallback, useState } from "react"
 import {
   Alert,
+  ImageStyle,
   LayoutAnimation,
   Modal,
   ScrollView,
@@ -10,6 +11,8 @@ import {
   ViewStyle,
 } from "react-native"
 import * as Application from "expo-application"
+import { Image } from "expo-image"
+import * as ImagePicker from "expo-image-picker"
 import { MaterialCommunityIcons } from "@expo/vector-icons"
 
 import { Button } from "@/components/Button"
@@ -35,11 +38,40 @@ export const ProfileScreen: FC<ProfileScreenProps> = function ProfileScreen() {
     setThemeContextOverride,
     themeScheme,
   } = useAppTheme()
-  const { authEmail, logout } = useAuth()
+  const { authEmail, avatarUrl, logout, uploadAvatar } = useAuth()
   const { currency, setCurrency } = useSettings()
   const { categories, addCategory, removeCategory } = useCategories()
 
+  const [isUploadingAvatar, setIsUploadingAvatar] = useState(false)
+  const [localAvatarUrl, setLocalAvatarUrl] = useState<string | undefined>(undefined)
   const [manageCategoriesVisible, setManageCategoriesVisible] = useState(false)
+
+  const displayAvatarUrl = localAvatarUrl ?? avatarUrl
+
+  const handlePickAvatar = useCallback(async () => {
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync()
+    if (status !== "granted") {
+      Alert.alert("Permission required", "Allow photo access to change your avatar.")
+      return
+    }
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: "images",
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.8,
+      base64: true,
+    })
+    if (result.canceled || !result.assets[0].base64) return
+    const asset = result.assets[0]
+    setIsUploadingAvatar(true)
+    const error = await uploadAvatar(asset.base64!, asset.mimeType ?? "image/jpeg")
+    setIsUploadingAvatar(false)
+    if (error) {
+      Alert.alert("Upload failed", error)
+    } else {
+      setLocalAvatarUrl(asset.uri)
+    }
+  }, [uploadAvatar])
   const [newLabel, setNewLabel] = useState("")
   const [newColor, setNewColor] = useState(CATEGORY_COLORS[0])
   const [isSaving, setIsSaving] = useState(false)
@@ -84,9 +116,30 @@ export const ProfileScreen: FC<ProfileScreenProps> = function ProfileScreen() {
         style={[themed($card), themed($userInfoCard)]}
         ContentComponent={
           <View style={$userInfo}>
-            <View style={themed($avatar)}>
-              <MaterialCommunityIcons name="account" size={90} color={colors.palette.neutral100} />
-            </View>
+            <TouchableOpacity
+              onPress={handlePickAvatar}
+              disabled={isUploadingAvatar}
+              style={$avatarWrapper}
+            >
+              <View style={themed($avatar)}>
+                {displayAvatarUrl ? (
+                  <Image source={{ uri: displayAvatarUrl }} style={$avatarImage} contentFit="cover" />
+                ) : (
+                  <MaterialCommunityIcons
+                    name="account"
+                    size={90}
+                    color={colors.palette.neutral100}
+                  />
+                )}
+              </View>
+              <View style={themed($avatarEditBadge)}>
+                <MaterialCommunityIcons
+                  name={isUploadingAvatar ? "loading" : "camera"}
+                  size={14}
+                  color={colors.palette.neutral100}
+                />
+              </View>
+            </TouchableOpacity>
             {authEmail ? (
               <Text text={authEmail} size="sm" style={themed($email)} />
             ) : (
@@ -291,6 +344,11 @@ const $userInfo: ViewStyle = {
   gap: spacing.sm,
 }
 
+const $avatarWrapper: ViewStyle = {
+  width: 120,
+  height: 120,
+}
+
 const $avatar: ThemedStyle<ViewStyle> = ({ colors }) => ({
   width: 120,
   height: 120,
@@ -298,6 +356,27 @@ const $avatar: ThemedStyle<ViewStyle> = ({ colors }) => ({
   alignItems: "center",
   justifyContent: "center",
   backgroundColor: colors.accent,
+  overflow: "hidden",
+})
+
+const $avatarImage: ImageStyle = {
+  width: 120,
+  height: 120,
+  borderRadius: 60,
+}
+
+const $avatarEditBadge: ThemedStyle<ViewStyle> = ({ colors }) => ({
+  position: "absolute",
+  bottom: 0,
+  right: 0,
+  width: 28,
+  height: 28,
+  borderRadius: 14,
+  backgroundColor: colors.accent,
+  alignItems: "center",
+  justifyContent: "center",
+  borderWidth: 2,
+  borderColor: colors.background,
 })
 
 const $email: ThemedStyle<TextStyle> = ({ colors }) => ({

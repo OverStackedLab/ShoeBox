@@ -18,6 +18,7 @@ import { toast } from "sonner-native"
 
 import { Card } from "@/components/Card"
 import { ListItem } from "@/components/ListItem"
+import { ReceiptSkeletonList, SkeletonBlock } from "@/components/ReceiptSkeletonList"
 import { Screen } from "@/components/Screen"
 import { Text } from "@/components/Text"
 import { useCategories } from "@/context/CategoriesContext"
@@ -72,7 +73,7 @@ export const HomeScreen: FC<HomeScreenProps> = function HomeScreen({ navigation 
     return () => animation.stop()
   }, [pulseAnim])
 
-  const { receipts, addReceipt, updateReceipt, setCategorizing } = useReceipts()
+  const { receipts, addReceipt, updateReceipt, setCategorizing, isInitialSyncing } = useReceipts()
   const { categories } = useCategories()
   const { currency } = useSettings()
   const [viewMode, setViewMode] = useState<"daily" | "weekly" | "monthly">("monthly")
@@ -305,7 +306,9 @@ export const HomeScreen: FC<HomeScreenProps> = function HomeScreen({ navigation 
         preset="flat"
         ContentComponent={
           <View>
-            {receipts.length === 0 ? (
+            {receipts.length === 0 && isInitialSyncing ? (
+              <ReceiptSkeletonList count={5} rowHeight={64} />
+            ) : receipts.length === 0 ? (
               <View style={themed($emptyState)}>
                 <View style={[$expenseIconWrapper, { backgroundColor: colors.accent + "20" }]}>
                   <MaterialCommunityIcons name="receipt" size={28} color={colors.accent} />
@@ -405,7 +408,11 @@ export const HomeScreen: FC<HomeScreenProps> = function HomeScreen({ navigation 
       <Card
         preset="flat"
         ContentComponent={
-          hasSpendingData ? (
+          !hasSpendingData && isInitialSyncing ? (
+            <View style={$chartContainer}>
+              <SkeletonBlock width="100%" height={200} borderRadius={8} />
+            </View>
+          ) : hasSpendingData ? (
             <View style={$chartContainer}>
               <BarChart
                 data={chartData}

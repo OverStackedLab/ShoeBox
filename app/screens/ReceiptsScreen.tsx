@@ -5,6 +5,7 @@ import type { NativeStackNavigationProp } from "@react-navigation/native-stack"
 
 import { EmptyState } from "@/components/EmptyState"
 import { ListItem } from "@/components/ListItem"
+import { ReceiptSkeletonList } from "@/components/ReceiptSkeletonList"
 import { Screen } from "@/components/Screen"
 import { Text } from "@/components/Text"
 import { useReceipts } from "@/context/ReceiptsContext"
@@ -25,7 +26,7 @@ export const ReceiptsScreen: FC<ReceiptsScreenProps> = function ReceiptsScreen({
   } = useAppTheme()
 
   const nav = navigation as unknown as NativeStackNavigationProp<AppStackParamList>
-  const { receipts, removeReceipt } = useReceipts()
+  const { receipts, removeReceipt, isInitialSyncing } = useReceipts()
   const { currency } = useSettings()
 
   const handleDelete = (receiptId: string) => {
@@ -44,7 +45,9 @@ export const ReceiptsScreen: FC<ReceiptsScreenProps> = function ReceiptsScreen({
 
   return (
     <Screen preset="scroll" contentContainerStyle={themed($screenContainer)}>
-      {receipts.length === 0 ? (
+      {receipts.length === 0 && isInitialSyncing ? (
+        <ReceiptSkeletonList count={5} />
+      ) : receipts.length === 0 ? (
         <EmptyState
           heading="No Receipts Yet"
           content="Scan your first receipt to get started"

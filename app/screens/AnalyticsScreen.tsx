@@ -6,6 +6,7 @@ import { PieChart } from "react-native-chart-kit"
 import { Card } from "@/components/Card"
 import { EmptyState } from "@/components/EmptyState"
 import { ListItem } from "@/components/ListItem"
+import { ReceiptSkeletonList, SkeletonBlock } from "@/components/ReceiptSkeletonList"
 import { Screen } from "@/components/Screen"
 import { Text } from "@/components/Text"
 import { useCategories } from "@/context/CategoriesContext"
@@ -23,7 +24,7 @@ interface AnalyticsScreenProps extends TabScreenProps<"Analytics"> {}
 
 export const AnalyticsScreen: FC<AnalyticsScreenProps> = function AnalyticsScreen() {
   const { themed } = useAppTheme()
-  const { receipts } = useReceipts()
+  const { receipts, isInitialSyncing } = useReceipts()
   const { categories: allCategories } = useCategories()
   const { currency } = useSettings()
 
@@ -52,7 +53,27 @@ export const AnalyticsScreen: FC<AnalyticsScreenProps> = function AnalyticsScree
 
   return (
     <Screen preset="scroll" contentContainerStyle={themed($screenContainer)}>
-      {hasData ? (
+      {!hasData && isInitialSyncing ? (
+        <>
+          <Card
+            style={themed($chartCard)}
+            ContentComponent={
+              <View style={$chartWrapper}>
+                <SkeletonBlock
+                  width={CHART_SIZE * 0.55}
+                  height={CHART_SIZE * 0.55}
+                  borderRadius={(CHART_SIZE * 0.55) / 2}
+                />
+              </View>
+            }
+          />
+          <Card
+            heading="Top Categories"
+            style={themed($categoriesCard)}
+            ContentComponent={<ReceiptSkeletonList count={4} rowHeight={56} />}
+          />
+        </>
+      ) : hasData ? (
         <>
           {/* Donut Chart */}
           <Card

@@ -47,6 +47,7 @@ interface ReceiptsContextType {
   updateReceipt: (id: string, updates: Partial<Omit<Receipt, "id" | "createdAt">>) => void
   categorizingIds: Set<string>
   setCategorizing: (id: string, value: boolean) => void
+  isInitialSyncing: boolean
 }
 
 const ReceiptsContext = createContext<ReceiptsContextType | null>(null)
@@ -68,6 +69,7 @@ export const ReceiptsProvider: FC<PropsWithChildren> = ({ children }) => {
   receiptsRef.current = receipts
 
   const [categorizingIds, setCategorizingIds] = useState<Set<string>>(() => new Set())
+  const [isInitialSyncing, setIsInitialSyncing] = useState(false)
 
   const setCategorizing = useCallback((id: string, value: boolean) => {
     setCategorizingIds((prev) => {
@@ -80,10 +82,15 @@ export const ReceiptsProvider: FC<PropsWithChildren> = ({ children }) => {
 
   // Fetch from Supabase whenever the logged-in user changes
   useEffect(() => {
-    if (!userId) return
+    if (!userId) {
+      setIsInitialSyncing(false)
+      return
+    }
+    setIsInitialSyncing(true)
     fetchRemoteReceipts(userId)
       .then((remote) => setReceiptsJson(JSON.stringify(remote)))
       .catch(console.error)
+      .finally(() => setIsInitialSyncing(false))
   }, [userId, setReceiptsJson])
 
   const addReceipt = useCallback(
@@ -128,6 +135,7 @@ export const ReceiptsProvider: FC<PropsWithChildren> = ({ children }) => {
         updateReceipt,
         categorizingIds,
         setCategorizing,
+        isInitialSyncing,
       }}
     >
       {children}

@@ -68,6 +68,21 @@ warnings, or weekly spending summaries.
 
 ## Engineering upgrades
 
+### Correctness backlog from recent review
+
+- **Priority: P1** — Migrate legacy unscoped receipt cache before deleting it. Existing local-only receipts
+  can be lost on upgrade if `ReceiptsProvider.receipts` is wiped before being copied into the new
+  signed-out or user-scoped cache key.
+- **Priority: P1** — Migrate legacy unscoped custom category cache before deleting it. Existing custom
+  categories can be lost on upgrade if `CategoriesProvider.customCategories` is wiped before being
+  copied into the new signed-out or user-scoped cache key.
+- **Priority: P1** — Normalize the `createdAt` / `created_at` boundary. The app creates receipts with
+  `Date.now()` epoch millis while Supabase defines `receipts.created_at` as `timestamptz`, and
+  fetched rows come back as strings.
+- **Priority: P2** — Configure iOS photo-library permissions for avatar picking. Add the `expo-image-picker`
+  config plugin with photo permission copy, or add the matching `NSPhotoLibraryUsageDescription`
+  plist entry.
+
 ### Sync status and retry queue
 
 Show whether a receipt is local-only, syncing, synced, or failed. Queue failed uploads and retry

@@ -1,5 +1,7 @@
 import { ReactNode, useRef, useState } from "react"
 import {
+  ImageBackground,
+  ImageStyle,
   KeyboardAvoidingView,
   KeyboardAvoidingViewProps,
   LayoutChangeEvent,
@@ -7,6 +9,7 @@ import {
   ScrollView,
   ScrollViewProps,
   StyleProp,
+  StyleSheet,
   View,
   ViewStyle,
 } from "react-native"
@@ -19,6 +22,8 @@ import { $styles } from "@/theme/styles"
 import { ExtendedEdge, useSafeAreaInsetsStyle } from "@/utils/useSafeAreaInsetsStyle"
 
 export const DEFAULT_BOTTOM_OFFSET = 50
+
+const circuitBackground = require("@assets/images/circuit-background-quiet-thicker.png")
 
 interface BaseScreenProps {
   /**
@@ -253,6 +258,9 @@ export function Screen(props: ScreenProps) {
   } = props
 
   const $containerInsets = useSafeAreaInsetsStyle(safeAreaEdges)
+  const $backgroundImageOpacity: ImageStyle = {
+    opacity: themeContext === "dark" ? 0.03 : 0.1,
+  }
 
   return (
     <View
@@ -262,6 +270,15 @@ export function Screen(props: ScreenProps) {
         $containerInsets,
       ]}
     >
+      <View pointerEvents="none" style={$backgroundImageContainer}>
+        <ImageBackground
+          imageStyle={$backgroundImageOpacity}
+          resizeMode="stretch"
+          source={circuitBackground}
+          style={$backgroundImage}
+        />
+      </View>
+
       <SystemBars
         style={systemBarStyle || (themeContext === "dark" ? "light" : "dark")}
         {...SystemBarsProps}
@@ -287,6 +304,14 @@ const $containerStyle: ViewStyle = {
   flex: 1,
   height: "100%",
   width: "100%",
+}
+
+const $backgroundImage: ViewStyle = {
+  ...StyleSheet.absoluteFillObject,
+}
+
+const $backgroundImageContainer: ViewStyle = {
+  ...StyleSheet.absoluteFillObject,
 }
 
 const $outerStyle: ViewStyle = {

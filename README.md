@@ -9,6 +9,8 @@ This is the boilerplate that [Infinite Red](https://infinite.red) uses as a way 
 
 ## Getting Started
 
+For product ideas and possible next builds, see [docs/ROADMAP.md](docs/ROADMAP.md).
+
 ### Environment Setup
 
 Copy the example env file and fill in your values:
@@ -17,10 +19,10 @@ Copy the example env file and fill in your values:
 cp .env.example .env
 ```
 
-| Variable | Description |
-|---|---|
+| Variable                   | Description                                                 |
+| -------------------------- | ----------------------------------------------------------- |
 | `EXPO_PUBLIC_SUPABASE_URL` | Your Supabase project URL (found in Project Settings → API) |
-| `EXPO_PUBLIC_SUPABASE_KEY` | Your Supabase publishable (anon) key |
+| `EXPO_PUBLIC_SUPABASE_KEY` | Your Supabase publishable (anon) key                        |
 
 ```bash
 yarn install
@@ -89,7 +91,10 @@ Classifies a scanned receipt into one of the user's categories using Anthropic C
 **Response:**
 
 ```ts
-{ categoryId: string; confidence: number }
+{
+  categoryId: string
+  confidence: number
+}
 ```
 
 The function uses `generateObject` with a Zod `z.enum(ids)` schema so the model is constrained to return one of the provided category ids.

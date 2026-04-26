@@ -27,6 +27,7 @@ export const ReceiptsScreen: FC<ReceiptsScreenProps> = function ReceiptsScreen({
   const nav = navigation as unknown as NativeStackNavigationProp<AppStackParamList>
   const { receipts, removeReceipt, isInitialSyncing } = useReceipts()
   const { currency } = useSettings()
+  const isEmpty = receipts.length === 0 && !isInitialSyncing
 
   const handleDelete = (receiptId: string) => {
     Alert.alert("Delete Receipt", "Are you sure you want to delete this receipt?", [
@@ -42,11 +43,19 @@ export const ReceiptsScreen: FC<ReceiptsScreenProps> = function ReceiptsScreen({
   }
 
   return (
-    <Screen preset="scroll" contentContainerStyle={themed($screenContainer)}>
+    <Screen
+      preset="scroll"
+      contentContainerStyle={themed([$screenContainer, isEmpty && $emptyScreen])}
+    >
       {receipts.length === 0 && isInitialSyncing ? (
         <ReceiptSkeletonList count={5} />
       ) : receipts.length === 0 ? (
         <EmptyState
+          IconComponent={
+            <View style={themed($emptyIconWrapper)}>
+              <MaterialCommunityIcons name="receipt-text-outline" size={28} color={colors.accent} />
+            </View>
+          }
           heading="No Receipts Yet"
           content="Scan your first receipt to get started"
           button="Scan Receipt"
@@ -122,6 +131,11 @@ const $screenContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   paddingBottom: spacing.xl,
 })
 
+const $emptyScreen: ThemedStyle<ViewStyle> = () => ({
+  flexGrow: 1,
+  justifyContent: "center",
+})
+
 const $receiptLeftRow: ViewStyle = {
   flexDirection: "row",
   alignItems: "center",
@@ -135,7 +149,16 @@ const $receiptIconWrapper: ThemedStyle<ViewStyle> = ({ colors }) => ({
   alignItems: "center",
   justifyContent: "center",
   marginEnd: spacing.sm,
-  backgroundColor: colors.tint + "20",
+  backgroundColor: colors.accentBackground,
+})
+
+const $emptyIconWrapper: ThemedStyle<ViewStyle> = ({ colors }) => ({
+  width: 56,
+  height: 56,
+  borderRadius: 28,
+  alignItems: "center",
+  justifyContent: "center",
+  backgroundColor: colors.accentBackground,
 })
 
 const $dateText: ThemedStyle<TextStyle> = ({ colors }) => ({

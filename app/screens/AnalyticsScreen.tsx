@@ -45,6 +45,7 @@ export const AnalyticsScreen: FC<AnalyticsScreenProps> = function AnalyticsScree
   }, [receipts, allCategories])
 
   const hasData = categories.length > 0
+  const isEmpty = !hasData && !isInitialSyncing
 
   const chartData = categories.map((cat) => ({
     name: cat.name,
@@ -55,7 +56,10 @@ export const AnalyticsScreen: FC<AnalyticsScreenProps> = function AnalyticsScree
   }))
 
   return (
-    <Screen preset="scroll" contentContainerStyle={themed($screenContainer)}>
+    <Screen
+      preset="scroll"
+      contentContainerStyle={themed([$screenContainer, isEmpty && $emptyScreen])}
+    >
       {!hasData && isInitialSyncing ? (
         <>
           <Card
@@ -143,6 +147,11 @@ export const AnalyticsScreen: FC<AnalyticsScreenProps> = function AnalyticsScree
         </>
       ) : (
         <EmptyState
+          IconComponent={
+            <View style={themed($emptyIconWrapper)}>
+              <MaterialCommunityIcons name="chart-pie" size={28} color={colors.accent} />
+            </View>
+          }
           heading="No Data Yet"
           content="Assign categories to your receipts to see spending breakdowns here"
         />
@@ -155,6 +164,11 @@ const $screenContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   paddingHorizontal: spacing.lg,
   paddingTop: spacing.md,
   paddingBottom: spacing.xl,
+})
+
+const $emptyScreen: ThemedStyle<ViewStyle> = () => ({
+  flexGrow: 1,
+  justifyContent: "center",
 })
 
 const $chartCard: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
@@ -180,6 +194,15 @@ const $donutHole: ThemedStyle<ViewStyle> = ({ colors }) => ({
   height: DONUT_HOLE,
   borderRadius: DONUT_HOLE / 2,
   backgroundColor: colors.background,
+})
+
+const $emptyIconWrapper: ThemedStyle<ViewStyle> = ({ colors }) => ({
+  width: 56,
+  height: 56,
+  borderRadius: 28,
+  alignItems: "center",
+  justifyContent: "center",
+  backgroundColor: colors.accentBackground,
 })
 
 const $legendRow: ViewStyle = {

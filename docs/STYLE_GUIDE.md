@@ -13,7 +13,7 @@ This applies to:
 - **Colors & spacing** — use `colors.*` and `spacing.*` from the theme; never hardcode.
 - **Style fragments** — check [`app/theme/typography.ts`](../app/theme/typography.ts) and sibling files for helpers like `$tabularNums` before duplicating.
 
-If an existing primitive almost fits, prefer adding a prop to it over forking a new component. See [When a custom component *is* appropriate](#when-a-custom-component-is-appropriate) for the narrow cases where new code is warranted.
+If an existing primitive almost fits, prefer adding a prop to it over forking a new component. See [When a custom component _is_ appropriate](#when-a-custom-component-is-appropriate) for the narrow cases where new code is warranted.
 
 ## Prefer existing components and theme over custom styles
 
@@ -23,17 +23,21 @@ If an existing primitive almost fits, prefer adding a prop to it over forking a 
 
 ### Components — use these first
 
-| Need | Use | Not |
-|---|---|---|
-| Any text | [`Text`](../app/components/Text.tsx) with a `preset` | raw `<Text>` from `react-native` |
-| Text input | [`TextField`](../app/components/TextField.tsx) | raw `<TextInput>` |
-| Buttons | [`Button`](../app/components/Button.tsx) | `TouchableOpacity` + styled text |
-| Screen container | [`Screen`](../app/components/Screen.tsx) | `<SafeAreaView>` + `<ScrollView>` |
-| App icons | [`Icon`](../app/components/Icon.tsx) / `PressableIcon` | raw `<Image>` for icon assets |
-| List rows | [`ListItem`](../app/components/ListItem.tsx) | custom row `View` |
-| Empty states | [`EmptyState`](../app/components/EmptyState.tsx) | ad-hoc empty view |
+| Need             | Use                                                    | Not                               |
+| ---------------- | ------------------------------------------------------ | --------------------------------- |
+| Any text         | [`Text`](../app/components/Text.tsx) with a `preset`   | raw `<Text>` from `react-native`  |
+| Text input       | [`TextField`](../app/components/TextField.tsx)         | raw `<TextInput>`                 |
+| Buttons          | [`Button`](../app/components/Button.tsx)               | `TouchableOpacity` + styled text  |
+| Screen container | [`Screen`](../app/components/Screen.tsx)               | `<SafeAreaView>` + `<ScrollView>` |
+| App icons        | [`Icon`](../app/components/Icon.tsx) / `PressableIcon` | raw `<Image>` for icon assets     |
+| List rows        | [`ListItem`](../app/components/ListItem.tsx)           | custom row `View`                 |
+| Empty states     | [`EmptyState`](../app/components/EmptyState.tsx)       | ad-hoc empty view                 |
 
 ESLint enforces the first two via `no-restricted-imports` — `Text`, `Button`, and `TextInput` can't be imported from `react-native`.
+
+When an empty state needs a screen-specific icon, still use `EmptyState` and pass an
+`IconComponent` rather than composing a custom empty-state layout. Keep the icon wrapper
+themed, and use semantic color tokens.
 
 ### Typography — use presets, not raw `size` + `weight`
 
@@ -72,7 +76,7 @@ The palette lives in [`app/theme/colors.ts`](../app/theme/colors.ts) and [`color
 
 Check [`app/theme/typography.ts`](../app/theme/typography.ts) for shared helpers like `$tabularNums` before duplicating style fragments across screens.
 
-## When a custom component *is* appropriate
+## When a custom component _is_ appropriate
 
 Build one when:
 

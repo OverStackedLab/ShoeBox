@@ -49,6 +49,7 @@ ShoeBox is a React Native mobile app built with Expo (SDK 54) using the Ignite C
 - **Import ordering** is enforced: react → react-native → expo → external → `@/` internal → relative.
 - **Themed styling**: Components use function-based styles `(theme) => ({...})` via the `ThemedStyle` type for dark/light mode support.
 - **Prefer component props over style overrides**: Always use existing component props (presets, size, weight, heading, text, LeftComponent, RightComponent, bottomSeparator, etc.) before adding custom styles. Only add style overrides for properties not covered by the component API. For example, `Text` presets already set `color: colors.text`, so don't re-declare it in a style; `Card` has `heading`/`ContentComponent` props; `ListItem` has `text`/`LeftComponent`/`RightComponent`/`bottomSeparator` props.
+- **Empty states**: Use `EmptyState` for no-data UI. If a screen needs a MaterialCommunityIcons or custom visual instead of the default logo, pass it through `IconComponent` with themed colors instead of hand-building the empty-state layout.
 
 ### Formatting
 

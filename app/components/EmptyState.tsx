@@ -1,3 +1,4 @@
+import type { ReactNode } from "react"
 import { Image, ImageProps, ImageStyle, StyleProp, TextStyle, View, ViewStyle } from "react-native"
 
 import { translate } from "@/i18n/translate"
@@ -22,6 +23,10 @@ interface EmptyStateProps {
    * An Image source to be displayed above the heading.
    */
   imageSource?: ImageProps["source"]
+  /**
+   * A custom visual displayed above the heading. Takes precedence over `imageSource`.
+   */
+  IconComponent?: ReactNode
   /**
    * Style overrides for image.
    */
@@ -154,15 +159,22 @@ export function EmptyState(props: EmptyStateProps) {
     ButtonProps,
     ContentTextProps,
     HeadingTextProps,
+    IconComponent,
     ImageProps,
   } = props
 
-  const isImagePresent = !!imageSource
+  const isIconPresent = !!IconComponent
+  const isImagePresent = !!imageSource && !isIconPresent
+  const isVisualPresent = isIconPresent || isImagePresent
   const isHeadingPresent = !!(heading || headingTx)
   const isContentPresent = !!(content || contentTx)
   const isButtonPresent = !!(button || buttonTx)
 
   const $containerStyles = [$containerStyleOverride]
+  const $iconStyles = [
+    $icon,
+    (isHeadingPresent || isContentPresent || isButtonPresent) && { marginBottom: spacing.xxxs },
+  ]
   const $imageStyles = [
     $image,
     (isHeadingPresent || isContentPresent || isButtonPresent) && { marginBottom: spacing.xxxs },
@@ -171,26 +183,28 @@ export function EmptyState(props: EmptyStateProps) {
   ]
   const $headingStyles = [
     themed($heading),
-    isImagePresent && { marginTop: spacing.xxxs },
+    isVisualPresent && { marginTop: spacing.xxxs },
     (isContentPresent || isButtonPresent) && { marginBottom: spacing.xxxs },
     $headingStyleOverride,
     HeadingTextProps?.style,
   ]
   const $contentStyles = [
     themed($content),
-    (isImagePresent || isHeadingPresent) && { marginTop: spacing.xxxs },
+    (isVisualPresent || isHeadingPresent) && { marginTop: spacing.xxxs },
     isButtonPresent && { marginBottom: spacing.xxxs },
     $contentStyleOverride,
     ContentTextProps?.style,
   ]
   const $buttonStyles = [
-    (isImagePresent || isHeadingPresent || isContentPresent) && { marginTop: spacing.xl },
+    (isVisualPresent || isHeadingPresent || isContentPresent) && { marginTop: spacing.xl },
     $buttonStyleOverride,
     ButtonProps?.style,
   ]
 
   return (
     <View style={$containerStyles}>
+      {isIconPresent && <View style={$iconStyles}>{IconComponent}</View>}
+
       {isImagePresent && <Image source={imageSource} {...ImageProps} style={$imageStyles} />}
 
       {isHeadingPresent && (
@@ -235,6 +249,9 @@ const $image: ImageStyle = {
   height: undefined,
   aspectRatio: 1,
   resizeMode: "contain",
+}
+const $icon: ViewStyle = {
+  alignSelf: "center",
 }
 const $heading: ThemedStyle<TextStyle> = ({ spacing }) => ({
   textAlign: "center",

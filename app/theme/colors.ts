@@ -31,6 +31,7 @@ export const colors = {
   error: palette.brandRed, // was angry500
   errorBackground: palette.errorBg, // was angry100
   accent: palette.brandOrange,
+  accentBackground: "#FCEEDB",
   accentAlt: palette.brandGreen,
   destructive: palette.brandRed,
   onAccent: palette.neutral100,

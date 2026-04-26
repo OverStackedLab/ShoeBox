@@ -314,6 +314,11 @@ export const HomeScreen: FC<HomeScreenProps> = function HomeScreen({ navigation 
             ) : receipts.length === 0 ? (
               <EmptyState
                 style={themed($emptyState)}
+                IconComponent={
+                  <View style={themed($emptyIconWrapper)}>
+                    <MaterialCommunityIcons name="receipt" size={28} color={colors.accent} />
+                  </View>
+                }
                 heading="No expenses yet"
                 content="Scan your first receipt to start tracking your spending"
                 button=""
@@ -335,9 +340,7 @@ export const HomeScreen: FC<HomeScreenProps> = function HomeScreen({ navigation 
                   }
                   LeftComponent={
                     <View style={$expenseLeftRow}>
-                      <View
-                        style={[$expenseIconWrapper, { backgroundColor: colors.accent + "20" }]}
-                      >
+                      <View style={themed($expenseIconWrapper)}>
                         <MaterialCommunityIcons name="receipt" size={20} color={colors.accent} />
                       </View>
                       <View>
@@ -442,6 +445,11 @@ export const HomeScreen: FC<HomeScreenProps> = function HomeScreen({ navigation 
           ) : (
             <EmptyState
               style={themed($emptyState)}
+              IconComponent={
+                <View style={themed($emptyIconWrapper)}>
+                  <MaterialCommunityIcons name="chart-bar" size={28} color={colors.accent} />
+                </View>
+              }
               heading="No spending data yet"
               content="Your monthly totals will appear here"
               button=""
@@ -523,18 +531,28 @@ const $expenseLeftRow: ViewStyle = {
   alignSelf: "center",
 }
 
-const $expenseIconWrapper: ViewStyle = {
+const $expenseIconWrapper: ThemedStyle<ViewStyle> = ({ colors }) => ({
   width: 40,
   height: 40,
   borderRadius: 20,
   alignItems: "center",
   justifyContent: "center",
   marginEnd: spacing.sm,
-}
+  backgroundColor: colors.accentBackground,
+})
 
 const $emptyState: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   alignItems: "center",
   paddingVertical: spacing.xl,
+})
+
+const $emptyIconWrapper: ThemedStyle<ViewStyle> = ({ colors }) => ({
+  width: 56,
+  height: 56,
+  borderRadius: 28,
+  alignItems: "center",
+  justifyContent: "center",
+  backgroundColor: colors.accentBackground,
 })
 
 const $expenseDate: ThemedStyle<TextStyle> = ({ colors }) => ({

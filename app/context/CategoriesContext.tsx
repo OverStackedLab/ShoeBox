@@ -39,6 +39,10 @@ import { useMMKVString } from "react-native-mmkv"
 import { RECEIPT_CATEGORIES } from "@/constants/categories"
 import { useAuth } from "@/context/AuthContext"
 import { supabase } from "@/services/supabase/supabase"
+import { storage } from "@/utils/storage"
+
+const LEGACY_CUSTOM_CATEGORIES_KEY = "CategoriesProvider.customCategories"
+const SIGNED_OUT_CUSTOM_CATEGORIES_KEY = "CategoriesProvider.customCategories.__signed_out__"
 
 export interface Category {
   id: string
@@ -86,13 +90,22 @@ const CategoriesContext = createContext<CategoriesContextType | null>(null)
 
 export const CategoriesProvider: FC<PropsWithChildren> = ({ children }) => {
   const { session } = useAuth()
+  const userId = session?.user?.id
   const [defaultCachedJson, setDefaultCachedJson] = useMMKVString(
     "CategoriesProvider.defaultCategories",
   )
-  const [customCachedJson, setCustomCachedJson] = useMMKVString(
-    "CategoriesProvider.customCategories",
-  )
+  const customCacheKey = userId
+    ? `CategoriesProvider.customCategories.${userId}`
+    : SIGNED_OUT_CUSTOM_CATEGORIES_KEY
+  const [customCachedJson, setCustomCachedJson] = useMMKVString(customCacheKey)
   const [isLoading, setIsLoading] = useState(false)
+
+  // One-time wipe of any legacy unscoped cache from earlier app versions.
+  useEffect(() => {
+    if (storage.contains(LEGACY_CUSTOM_CATEGORIES_KEY)) {
+      storage.delete(LEGACY_CUSTOM_CATEGORIES_KEY)
+    }
+  }, [])
 
   const defaultCategories = useMemo<Category[]>(() => {
     try {

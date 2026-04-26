@@ -17,6 +17,11 @@ import {
   fetchRemoteReceipts,
   upsertReceiptRemote,
 } from "@/services/supabase/receipts"
+import { storage } from "@/utils/storage"
+import { deleteReceiptImages } from "@/utils/receiptStorage"
+
+const LEGACY_RECEIPTS_KEY = "ReceiptsProvider.receipts"
+const SIGNED_OUT_RECEIPTS_KEY = "ReceiptsProvider.receipts.__signed_out__"
 
 export interface ScannedImage {
   uri: string
@@ -53,9 +58,17 @@ interface ReceiptsContextType {
 const ReceiptsContext = createContext<ReceiptsContextType | null>(null)
 
 export const ReceiptsProvider: FC<PropsWithChildren> = ({ children }) => {
-  const [receiptsJson, setReceiptsJson] = useMMKVString("ReceiptsProvider.receipts")
   const { session } = useAuth()
   const userId = session?.user?.id
+  const cacheKey = userId
+    ? `ReceiptsProvider.receipts.${userId}`
+    : SIGNED_OUT_RECEIPTS_KEY
+  const [receiptsJson, setReceiptsJson] = useMMKVString(cacheKey)
+
+  // One-time wipe of any legacy unscoped cache from earlier app versions.
+  useEffect(() => {
+    if (storage.contains(LEGACY_RECEIPTS_KEY)) storage.delete(LEGACY_RECEIPTS_KEY)
+  }, [])
 
   const receipts = useMemo<Receipt[]>(() => {
     try {
@@ -108,6 +121,7 @@ export const ReceiptsProvider: FC<PropsWithChildren> = ({ children }) => {
       const next = receiptsRef.current.filter((r) => r.id !== id)
       receiptsRef.current = next
       setReceiptsJson(JSON.stringify(next))
+      deleteReceiptImages(id)
       if (userId) deleteReceiptRemote(id).catch(console.error)
     },
     [setReceiptsJson, userId],

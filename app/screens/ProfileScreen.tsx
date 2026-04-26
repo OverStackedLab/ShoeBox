@@ -1,5 +1,6 @@
 import { FC, useCallback, useState } from "react"
 import {
+  ActivityIndicator,
   Alert,
   ImageStyle,
   LayoutAnimation,
@@ -44,6 +45,7 @@ export const ProfileScreen: FC<ProfileScreenProps> = function ProfileScreen() {
 
   const [isUploadingAvatar, setIsUploadingAvatar] = useState(false)
   const [localAvatarUrl, setLocalAvatarUrl] = useState<string | undefined>(undefined)
+  const [isAvatarLoading, setIsAvatarLoading] = useState(false)
   const [manageCategoriesVisible, setManageCategoriesVisible] = useState(false)
 
   const displayAvatarUrl = localAvatarUrl ?? avatarUrl
@@ -123,7 +125,23 @@ export const ProfileScreen: FC<ProfileScreenProps> = function ProfileScreen() {
             >
               <View style={themed($avatar)}>
                 {displayAvatarUrl ? (
-                  <Image source={{ uri: displayAvatarUrl }} style={$avatarImage} contentFit="cover" />
+                  <>
+                    <Image
+                      source={{ uri: displayAvatarUrl }}
+                      style={$avatarImage}
+                      contentFit="cover"
+                      onLoadStart={() => setIsAvatarLoading(true)}
+                      onLoad={() => setIsAvatarLoading(false)}
+                      onError={() => setIsAvatarLoading(false)}
+                    />
+                    {isAvatarLoading && (
+                      <ActivityIndicator
+                        size="small"
+                        color={colors.palette.neutral100}
+                        style={$avatarLoader}
+                      />
+                    )}
+                  </>
                 ) : (
                   <MaterialCommunityIcons
                     name="account"
@@ -363,6 +381,10 @@ const $avatarImage: ImageStyle = {
   width: 120,
   height: 120,
   borderRadius: 60,
+}
+
+const $avatarLoader: ViewStyle = {
+  position: "absolute",
 }
 
 const $avatarEditBadge: ThemedStyle<ViewStyle> = ({ colors }) => ({

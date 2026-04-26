@@ -61,6 +61,27 @@ const fr: Translations = {
     tapToLogIn: "Appuyez pour vous connecter!",
     hint: "Astuce : vous pouvez utiliser n'importe quelle adresse e-mail et votre mot de passe préféré :)",
     createAccount: "Créer un compte",
+    forgotPassword: "Mot de passe oublié ?",
+  },
+  forgotPasswordScreen: {
+    heading: "Réinitialiser le mot de passe",
+    enterDetails:
+      "Entrez l'adresse e-mail associée à votre compte et nous vous enverrons un lien de réinitialisation.",
+    emailFieldLabel: "E-mail",
+    emailFieldPlaceholder: "Entrez votre adresse e-mail",
+    sendResetLink: "Envoyer le lien",
+    backToLogin: "Retour à la connexion",
+    checkEmail: "Consultez votre boîte mail pour trouver le lien de réinitialisation.",
+  },
+  updatePasswordScreen: {
+    heading: "Nouveau mot de passe",
+    enterDetails: "Choisissez un nouveau mot de passe pour votre compte.",
+    passwordFieldLabel: "Nouveau mot de passe",
+    passwordFieldPlaceholder: "Créez un nouveau mot de passe",
+    confirmPasswordFieldLabel: "Confirmer le mot de passe",
+    confirmPasswordFieldPlaceholder: "Répétez votre nouveau mot de passe",
+    updatePassword: "Mettre à jour le mot de passe",
+    success: "Votre mot de passe a été mis à jour.",
   },
   demoNavigator: {
     componentsTab: "Composants",

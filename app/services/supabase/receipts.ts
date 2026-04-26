@@ -1,3 +1,5 @@
+// Requires the `receipt-images` bucket, `receipts` and `receipt_images` tables,
+// and their RLS policies — see docs/SUPABASE_SETUP.md.
 import { File, Directory, Paths } from "expo-file-system"
 import { decode } from "base64-arraybuffer"
 

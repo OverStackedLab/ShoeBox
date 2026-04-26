@@ -15,7 +15,6 @@ import { useAppTheme } from "@/theme/context"
 import { spacing } from "@/theme/spacing"
 import type { ThemedStyle } from "@/theme/types"
 import { $tabularNums } from "@/theme/typography"
-import { deleteReceiptImages } from "@/utils/receiptStorage"
 
 interface ReceiptsScreenProps extends TabScreenProps<"Receipts"> {}
 
@@ -36,7 +35,6 @@ export const ReceiptsScreen: FC<ReceiptsScreenProps> = function ReceiptsScreen({
         text: "Delete",
         style: "destructive",
         onPress: () => {
-          deleteReceiptImages(receiptId)
           removeReceipt(receiptId)
         },
       },

@@ -41,12 +41,34 @@ export const AuthProvider: FC<PropsWithChildren<AuthProviderProps>> = ({ childre
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session: initialSession }, error }) => {
+    supabase.auth.getSession().then(async ({ data: { session: initialSession }, error }) => {
       if (error) {
         supabase.auth.signOut()
       }
+      console.log(
+        "[auth] initial session avatar_url:",
+        initialSession?.user?.user_metadata?.avatar_url,
+      )
       setSession(initialSession)
       setIsLoading(false)
+
+      // Refresh user metadata from the server — the locally persisted session
+      // can lag behind updates like avatar_url made via updateUser.
+      if (initialSession) {
+        const {
+          data: { user: freshUser },
+          error: getUserError,
+        } = await supabase.auth.getUser()
+        console.log(
+          "[auth] getUser avatar_url:",
+          freshUser?.user_metadata?.avatar_url,
+          "err:",
+          getUserError?.message,
+        )
+        if (freshUser) {
+          setSession((prev) => (prev ? { ...prev, user: freshUser } : prev))
+        }
+      }
     })
 
     const {
@@ -83,7 +105,9 @@ export const AuthProvider: FC<PropsWithChildren<AuthProviderProps>> = ({ childre
       if (!error) setIsRecovering(true)
     }
 
-    Linking.getInitialURL().then((url) => { if (url) handleUrl(url) })
+    Linking.getInitialURL().then((url) => {
+      if (url) handleUrl(url)
+    })
     const subscription = Linking.addEventListener("url", ({ url }) => handleUrl(url))
     return () => subscription.remove()
   }, [])

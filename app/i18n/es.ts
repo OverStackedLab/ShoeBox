@@ -61,6 +61,27 @@ const es: Translations = {
     tapToLogIn: "¡Presiona acá para iniciar sesión!",
     hint: "Consejo: puedes usar cualquier email y tu contraseña preferida :)",
     createAccount: "Crear una cuenta",
+    forgotPassword: "¿Olvidaste tu contraseña?",
+  },
+  forgotPasswordScreen: {
+    heading: "Restablecer contraseña",
+    enterDetails:
+      "Ingresa el correo asociado a tu cuenta y te enviaremos un enlace para restablecerla.",
+    emailFieldLabel: "Email",
+    emailFieldPlaceholder: "Ingresa tu email",
+    sendResetLink: "Enviar enlace",
+    backToLogin: "Volver al inicio de sesión",
+    checkEmail: "Revisa tu correo para encontrar el enlace de restablecimiento.",
+  },
+  updatePasswordScreen: {
+    heading: "Nueva contraseña",
+    enterDetails: "Elige una nueva contraseña para tu cuenta.",
+    passwordFieldLabel: "Nueva contraseña",
+    passwordFieldPlaceholder: "Crea una nueva contraseña",
+    confirmPasswordFieldLabel: "Confirmar contraseña",
+    confirmPasswordFieldPlaceholder: "Repite tu nueva contraseña",
+    updatePassword: "Actualizar contraseña",
+    success: "Tu contraseña ha sido actualizada.",
   },
   demoNavigator: {
     componentsTab: "Componentes",

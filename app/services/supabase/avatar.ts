@@ -1,3 +1,4 @@
+// Requires the `avatars` storage bucket and RLS policies — see docs/SUPABASE_SETUP.md.
 import { decode } from "base64-arraybuffer"
 
 import { supabase } from "./supabase"

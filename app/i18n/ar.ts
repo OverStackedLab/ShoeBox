@@ -60,6 +60,27 @@ const ar: Translations = {
     tapToLogIn: "انقر لتسجيل الدخول!",
     hint: "(: تلميح: يمكنك استخدام اي عنوان بريد الكتروني وكلمة السر المفضلة لديك",
     createAccount: "إنشاء حساب",
+    forgotPassword: "هل نسيت كلمة السر؟",
+  },
+  forgotPasswordScreen: {
+    heading: "إعادة تعيين كلمة السر",
+    enterDetails:
+      "أدخل البريد الإلكتروني المرتبط بحسابك وسنرسل لك رابط إعادة التعيين.",
+    emailFieldLabel: "البريد الإلكتروني",
+    emailFieldPlaceholder: "ادخل بريدك الإلكتروني",
+    sendResetLink: "إرسال رابط إعادة التعيين",
+    backToLogin: "العودة لتسجيل الدخول",
+    checkEmail: "تحقق من بريدك الإلكتروني للعثور على رابط إعادة تعيين كلمة السر.",
+  },
+  updatePasswordScreen: {
+    heading: "كلمة سر جديدة",
+    enterDetails: "اختر كلمة سر جديدة لحسابك.",
+    passwordFieldLabel: "كلمة السر الجديدة",
+    passwordFieldPlaceholder: "أنشئ كلمة سر جديدة",
+    confirmPasswordFieldLabel: "تأكيد كلمة السر",
+    confirmPasswordFieldPlaceholder: "كرر كلمة السر الجديدة",
+    updatePassword: "تحديث كلمة السر",
+    success: "تم تحديث كلمة السر الخاصة بك.",
   },
   demoNavigator: {
     componentsTab: "عناصر",

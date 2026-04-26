@@ -60,6 +60,27 @@ const hi: Translations = {
     tapToLogIn: "लॉग इन करने के लिए टैप करें!",
     hint: "संकेत: आप किसी भी ईमेल पते और अपने पसंदीदा पासवर्ड का उपयोग कर सकते हैं :)",
     createAccount: "खाता बनाएं",
+    forgotPassword: "पासवर्ड भूल गए?",
+  },
+  forgotPasswordScreen: {
+    heading: "पासवर्ड रीसेट करें",
+    enterDetails:
+      "अपने अकाउंट से जुड़ा ईमेल दर्ज करें और हम आपको एक रीसेट लिंक भेजेंगे।",
+    emailFieldLabel: "ईमेल",
+    emailFieldPlaceholder: "अपना ईमेल पता दर्ज करें",
+    sendResetLink: "रीसेट लिंक भेजें",
+    backToLogin: "लॉगिन पर वापस जाएं",
+    checkEmail: "पासवर्ड रीसेट करने के लिए अपना ईमेल देखें।",
+  },
+  updatePasswordScreen: {
+    heading: "नया पासवर्ड",
+    enterDetails: "अपने अकाउंट के लिए एक नया पासवर्ड चुनें।",
+    passwordFieldLabel: "नया पासवर्ड",
+    passwordFieldPlaceholder: "एक नया पासवर्ड बनाएं",
+    confirmPasswordFieldLabel: "पासवर्ड की पुष्टि करें",
+    confirmPasswordFieldPlaceholder: "अपना नया पासवर्ड दोहराएं",
+    updatePassword: "पासवर्ड अपडेट करें",
+    success: "आपका पासवर्ड अपडेट कर दिया गया है।",
   },
   demoNavigator: {
     componentsTab: "कंपोनेंट्स",

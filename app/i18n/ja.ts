@@ -61,6 +61,27 @@ const ja: Translations = {
     tapToLogIn: "タップしてログインしよう！",
     hint: "ヒント: お好みのメールアドレスとパスワードを使ってください :)",
     createAccount: "アカウントを作成する",
+    forgotPassword: "パスワードをお忘れですか？",
+  },
+  forgotPasswordScreen: {
+    heading: "パスワードのリセット",
+    enterDetails:
+      "アカウントに登録されているメールアドレスを入力すると、リセットリンクをお送りします。",
+    emailFieldLabel: "メール",
+    emailFieldPlaceholder: "メールアドレスを入力",
+    sendResetLink: "リセットリンクを送信",
+    backToLogin: "ログインに戻る",
+    checkEmail: "メールに届いたリンクからパスワードをリセットしてください。",
+  },
+  updatePasswordScreen: {
+    heading: "新しいパスワード",
+    enterDetails: "アカウントの新しいパスワードを選んでください。",
+    passwordFieldLabel: "新しいパスワード",
+    passwordFieldPlaceholder: "新しいパスワードを作成",
+    confirmPasswordFieldLabel: "パスワードの確認",
+    confirmPasswordFieldPlaceholder: "新しいパスワードをもう一度入力",
+    updatePassword: "パスワードを更新",
+    success: "パスワードが更新されました。",
   },
   demoNavigator: {
     componentsTab: "コンポーネント",

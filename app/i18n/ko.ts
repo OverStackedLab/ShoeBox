@@ -60,6 +60,27 @@ const ko: Translations = {
     tapToLogIn: "눌러서 로그인 하기!",
     hint: "힌트: 가장 좋아하는 암호와 아무런 아무 이메일 주소나 사용할 수 있어요 :)",
     createAccount: "계정 만들기",
+    forgotPassword: "비밀번호를 잊으셨나요?",
+  },
+  forgotPasswordScreen: {
+    heading: "비밀번호 재설정",
+    enterDetails:
+      "계정에 등록된 이메일을 입력하면 재설정 링크를 보내드립니다.",
+    emailFieldLabel: "이메일",
+    emailFieldPlaceholder: "이메일 주소를 입력하세요",
+    sendResetLink: "재설정 링크 보내기",
+    backToLogin: "로그인으로 돌아가기",
+    checkEmail: "이메일에서 비밀번호 재설정 링크를 확인하세요.",
+  },
+  updatePasswordScreen: {
+    heading: "새 비밀번호",
+    enterDetails: "계정의 새 비밀번호를 선택하세요.",
+    passwordFieldLabel: "새 비밀번호",
+    passwordFieldPlaceholder: "새 비밀번호 만들기",
+    confirmPasswordFieldLabel: "비밀번호 확인",
+    confirmPasswordFieldPlaceholder: "새 비밀번호를 다시 입력",
+    updatePassword: "비밀번호 업데이트",
+    success: "비밀번호가 업데이트되었습니다.",
   },
   demoNavigator: {
     componentsTab: "컴포넌트",

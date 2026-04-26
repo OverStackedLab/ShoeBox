@@ -1,6 +1,5 @@
-import { ComponentType, FC, useMemo, useRef, useState } from "react"
-// eslint-disable-next-line no-restricted-imports
-import { Image, ImageStyle, TextInput, TextStyle, View, ViewStyle } from "react-native"
+import { ComponentRef, ComponentType, FC, useMemo, useRef, useState } from "react"
+import { Image, ImageStyle, TextStyle, View, ViewStyle } from "react-native"
 
 import { Button } from "@/components/Button"
 import { PressableIcon } from "@/components/Icon"
@@ -20,8 +19,8 @@ const LOGO_ASPECT_RATIO = logoSource.width / logoSource.height
 interface SignUpScreenProps extends AppStackScreenProps<"SignUp"> {}
 
 export const SignUpScreen: FC<SignUpScreenProps> = ({ navigation }) => {
-  const passwordInput = useRef<TextInput>(null)
-  const confirmPasswordInput = useRef<TextInput>(null)
+  const passwordInput = useRef<ComponentRef<typeof TextField>>(null)
+  const confirmPasswordInput = useRef<ComponentRef<typeof TextField>>(null)
 
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")

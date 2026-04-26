@@ -258,7 +258,7 @@ export const ProfileScreen: FC<ProfileScreenProps> = function ProfileScreen() {
         onRequestClose={() => setManageCategoriesVisible(false)}
       >
         <TouchableOpacity
-          style={$modalOverlay}
+          style={themed($modalOverlay)}
           activeOpacity={1}
           onPress={() => setManageCategoriesVisible(false)}
         />
@@ -318,7 +318,7 @@ export const ProfileScreen: FC<ProfileScreenProps> = function ProfileScreen() {
                     style={[$swatch, { backgroundColor: color }]}
                   >
                     {newColor === color && (
-                      <MaterialCommunityIcons name="check" size={14} color="#fff" />
+                      <MaterialCommunityIcons name="check" size={14} color={colors.onAccent} />
                     )}
                   </TouchableOpacity>
                 ))}
@@ -435,10 +435,10 @@ const $sectionHeading: ThemedStyle<TextStyle> = ({ colors, spacing }) => ({
   marginLeft: spacing.xs,
 })
 
-const $modalOverlay: ViewStyle = {
+const $modalOverlay: ThemedStyle<ViewStyle> = ({ colors }) => ({
   flex: 1,
-  backgroundColor: "rgba(0,0,0,0.4)",
-}
+  backgroundColor: colors.palette.overlay50,
+})
 
 const $modalSheet: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
   backgroundColor: colors.background,

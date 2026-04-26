@@ -70,7 +70,11 @@ export const ReceiptsScreen: FC<ReceiptsScreenProps> = function ReceiptsScreen({
             LeftComponent={
               <View style={$receiptLeftRow}>
                 <View style={themed($receiptIconWrapper)}>
-                  <MaterialCommunityIcons name="receipt-text-outline" size={20} color={"#E8981E"} />
+                  <MaterialCommunityIcons
+                    name="receipt-text-outline"
+                    size={20}
+                    color={colors.accent}
+                  />
                 </View>
                 <View>
                   <Text

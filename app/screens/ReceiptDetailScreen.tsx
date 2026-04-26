@@ -1,4 +1,4 @@
-import { FC, useState } from "react"
+import { ComponentProps, FC, useState } from "react"
 import {
   ActivityIndicator,
   Alert,
@@ -42,6 +42,42 @@ interface OcrLine {
 }
 
 interface ReceiptDetailScreenProps extends AppStackScreenProps<"ReceiptDetail"> {}
+
+interface ReceiptActionButtonProps {
+  accessibilityLabel: string
+  color?: string
+  disabled?: boolean
+  name: ComponentProps<typeof MaterialCommunityIcons>["name"]
+  onPress: () => void
+}
+
+function ReceiptActionButton({
+  accessibilityLabel,
+  color,
+  disabled,
+  name,
+  onPress,
+}: ReceiptActionButtonProps) {
+  const {
+    themed,
+    theme: { colors },
+  } = useAppTheme()
+  const iconColor = disabled ? colors.textDim : (color ?? colors.text)
+
+  return (
+    <TouchableOpacity
+      accessibilityLabel={accessibilityLabel}
+      accessibilityRole="button"
+      accessibilityState={{ disabled }}
+      activeOpacity={0.7}
+      disabled={disabled}
+      onPress={onPress}
+      style={themed($actionBtn)}
+    >
+      <MaterialCommunityIcons name={name} size={22} color={iconColor} />
+    </TouchableOpacity>
+  )
+}
 
 export const ReceiptDetailScreen: FC<ReceiptDetailScreenProps> = function ReceiptDetailScreen({
   route,
@@ -338,48 +374,41 @@ export const ReceiptDetailScreen: FC<ReceiptDetailScreenProps> = function Receip
         safeAreaEdges={[]}
       />
       <View style={themed($actionRow)}>
-        <TouchableOpacity
+        <ReceiptActionButton
+          accessibilityLabel="Select receipt text"
+          disabled={isProcessing || !scannedImages.length}
+          name="cursor-text"
           onPress={handleSelectText}
-          style={themed($actionBtn)}
-          activeOpacity={0.7}
+        />
+        <ReceiptActionButton
+          accessibilityLabel="Re-read receipt text"
           disabled={isProcessing || !scannedImages.length}
-        >
-          <MaterialCommunityIcons name="cursor-text" size={22} color={colors.text} />
-        </TouchableOpacity>
-        <TouchableOpacity
+          name="text-recognition"
           onPress={handleReread}
-          style={themed($actionBtn)}
-          activeOpacity={0.7}
-          disabled={isProcessing || !scannedImages.length}
-        >
-          <MaterialCommunityIcons name="text-recognition" size={22} color={colors.text} />
-        </TouchableOpacity>
-        <TouchableOpacity
+        />
+        <ReceiptActionButton
+          accessibilityLabel="Auto-categorize receipt"
+          disabled={isProcessing}
+          name="auto-fix"
           onPress={handleAutoCategorize}
-          style={themed($actionBtn)}
-          activeOpacity={0.7}
+        />
+        <ReceiptActionButton
+          accessibilityLabel="Rescan receipt"
           disabled={isProcessing}
-        >
-          <MaterialCommunityIcons name="auto-fix" size={22} color={colors.text} />
-        </TouchableOpacity>
-        <TouchableOpacity
+          name="camera-retake-outline"
           onPress={handleRescan}
-          style={themed($actionBtn)}
-          activeOpacity={0.7}
-          disabled={isProcessing}
-        >
-          <MaterialCommunityIcons name="camera-retake-outline" size={22} color={colors.text} />
-        </TouchableOpacity>
-        <TouchableOpacity
+        />
+        <ReceiptActionButton
+          accessibilityLabel="Share receipt"
+          name="share-variant-outline"
           onPress={() => toast.info("Share coming soon.")}
-          style={themed($actionBtn)}
-          activeOpacity={0.7}
-        >
-          <MaterialCommunityIcons name="share-variant-outline" size={22} color={colors.text} />
-        </TouchableOpacity>
-        <TouchableOpacity onPress={handleDelete} style={themed($actionBtn)} activeOpacity={0.7}>
-          <MaterialCommunityIcons name="delete-outline" size={22} color={colors.error} />
-        </TouchableOpacity>
+        />
+        <ReceiptActionButton
+          accessibilityLabel="Delete receipt"
+          color={colors.error}
+          name="delete-outline"
+          onPress={handleDelete}
+        />
       </View>
 
       {/* Scanned Images */}
@@ -502,7 +531,7 @@ export const ReceiptDetailScreen: FC<ReceiptDetailScreenProps> = function Receip
         animationType="slide"
         onRequestClose={() => setOcrOverlayVisible(false)}
       >
-        <SafeAreaView style={$ocrSafeArea} edges={["bottom"]}>
+        <SafeAreaView style={themed($ocrSafeArea)} edges={["bottom"]}>
           <View style={[themed($ocrHeader), { paddingTop: insets.top }]}>
             <Text text="Tap text to use it" size="sm" weight="medium" />
             <TouchableOpacity onPress={() => setOcrOverlayVisible(false)} activeOpacity={0.7}>
@@ -532,7 +561,7 @@ export const ReceiptDetailScreen: FC<ReceiptDetailScreenProps> = function Receip
                           key={i}
                           activeOpacity={0.5}
                           style={[
-                            $ocrLineHit,
+                            themed($ocrLineHit),
                             {
                               left: line.frame.left * scale,
                               top: line.frame.top * scale,
@@ -559,7 +588,7 @@ export const ReceiptDetailScreen: FC<ReceiptDetailScreenProps> = function Receip
         onRequestClose={() => setCategoryModalVisible(false)}
       >
         <TouchableOpacity
-          style={$modalOverlay}
+          style={themed($modalOverlay)}
           activeOpacity={1}
           onPress={() => setCategoryModalVisible(false)}
         />
@@ -669,7 +698,7 @@ export const ReceiptDetailScreen: FC<ReceiptDetailScreenProps> = function Receip
         text="Delete Receipt"
         onPress={handleDelete}
         style={themed($deleteButton)}
-        textStyle={$deleteButtonText}
+        textStyle={themed($deleteButtonText)}
       />
     </Screen>
   )
@@ -766,9 +795,9 @@ const $deleteButton: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
   borderColor: colors.error,
 })
 
-const $deleteButtonText: TextStyle = {
-  color: "#FFFFFF",
-}
+const $deleteButtonText: ThemedStyle<TextStyle> = ({ colors }) => ({
+  color: colors.onDestructive,
+})
 
 const $categoryDot: ViewStyle = {
   width: 10,
@@ -777,10 +806,10 @@ const $categoryDot: ViewStyle = {
   marginRight: spacing.xs,
 }
 
-const $modalOverlay: ViewStyle = {
+const $modalOverlay: ThemedStyle<ViewStyle> = ({ colors }) => ({
   flex: 1,
-  backgroundColor: "rgba(0,0,0,0.4)",
-}
+  backgroundColor: colors.palette.overlay50,
+})
 
 const $modalSheet: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
   backgroundColor: colors.background,
@@ -804,10 +833,10 @@ const $modalTitle: ThemedStyle<TextStyle> = ({ spacing }) => ({
   marginBottom: spacing.sm,
 })
 
-const $ocrSafeArea: ViewStyle = {
+const $ocrSafeArea: ThemedStyle<ViewStyle> = ({ colors }) => ({
   flex: 1,
-  backgroundColor: "#000",
-}
+  backgroundColor: colors.imageBackdrop,
+})
 
 const $ocrScrollView: ViewStyle = {
   flex: 1,
@@ -831,9 +860,9 @@ const $productsLoader: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   alignItems: "center",
 })
 
-const $ocrLineHit: ViewStyle = {
+const $ocrLineHit: ThemedStyle<ViewStyle> = ({ colors }) => ({
   position: "absolute",
   borderWidth: 1,
-  borderColor: "rgba(232, 152, 30, 0.6)",
-  backgroundColor: "rgba(232, 152, 30, 0.15)",
-}
+  borderColor: `${colors.accent}99`,
+  backgroundColor: `${colors.accent}26`,
+})

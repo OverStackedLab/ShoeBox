@@ -23,7 +23,10 @@ const DONUT_HOLE = CHART_SIZE * 0.3
 interface AnalyticsScreenProps extends TabScreenProps<"Analytics"> {}
 
 export const AnalyticsScreen: FC<AnalyticsScreenProps> = function AnalyticsScreen() {
-  const { themed } = useAppTheme()
+  const {
+    themed,
+    theme: { colors },
+  } = useAppTheme()
   const { receipts, isInitialSyncing } = useReceipts()
   const { categories: allCategories } = useCategories()
   const { currency } = useSettings()
@@ -47,7 +50,7 @@ export const AnalyticsScreen: FC<AnalyticsScreenProps> = function AnalyticsScree
     name: cat.name,
     population: cat.amount,
     color: cat.color,
-    legendFontColor: "#999",
+    legendFontColor: colors.textDim,
     legendFontSize: 0,
   }))
 
@@ -86,7 +89,7 @@ export const AnalyticsScreen: FC<AnalyticsScreenProps> = function AnalyticsScree
                     width={CHART_SIZE}
                     height={CHART_SIZE * 0.7}
                     chartConfig={{
-                      color: () => "#FFF",
+                      color: () => colors.text,
                     }}
                     accessor="population"
                     backgroundColor="transparent"

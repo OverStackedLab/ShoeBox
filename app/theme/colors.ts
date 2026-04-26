@@ -33,4 +33,7 @@ export const colors = {
   accent: palette.brandOrange,
   accentAlt: palette.brandGreen,
   destructive: palette.brandRed,
+  onAccent: palette.neutral100,
+  onDestructive: palette.neutral100,
+  imageBackdrop: palette.neutral900,
 } as const

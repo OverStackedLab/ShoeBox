@@ -17,6 +17,7 @@ import { Circle, Svg, SvgXml } from "react-native-svg"
 import { toast } from "sonner-native"
 
 import { Card } from "@/components/Card"
+import { EmptyState } from "@/components/EmptyState"
 import { ListItem } from "@/components/ListItem"
 import { ReceiptSkeletonList, SkeletonBlock } from "@/components/ReceiptSkeletonList"
 import { Screen } from "@/components/Screen"
@@ -33,17 +34,19 @@ import { $tabularNums } from "@/theme/typography"
 import { parseReceiptText } from "@/utils/receiptParser"
 import { saveReceiptImage } from "@/utils/receiptStorage"
 
-const SHOEBOX_SCANNER_SVG = `<svg viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg">
-  <rect x="23" y="15" width="34" height="50" rx="3" fill="none" stroke="#FFFFFF" stroke-width="2" />
-  <rect x="29" y="23" width="22" height="3" rx="1.5" fill="#FFFFFF" />
-  <rect x="29" y="30" width="16" height="2" rx="1" fill="#FFFFFF" opacity="0.5" />
-  <rect x="29" y="36" width="19" height="2" rx="1" fill="#FFFFFF" opacity="0.5" />
-  <rect x="29" y="42" width="13" height="2" rx="1" fill="#FFFFFF" opacity="0.5" />
-  <rect x="29" y="48" width="17" height="2" rx="1" fill="#FFFFFF" opacity="0.4" />
-  <path d="M4 18 L4 4 L18 4" fill="none" stroke="#FFFFFF" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" />
-  <path d="M62 4 L76 4 L76 18" fill="none" stroke="#FFFFFF" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" />
-  <path d="M4 62 L4 76 L18 76" fill="none" stroke="#FFFFFF" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" />
-  <path d="M76 62 L76 76 L62 76" fill="none" stroke="#FFFFFF" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" />
+const getShoeboxScannerSvg = (
+  iconColor: string,
+) => `<svg viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg">
+  <rect x="23" y="15" width="34" height="50" rx="3" fill="none" stroke="${iconColor}" stroke-width="2" />
+  <rect x="29" y="23" width="22" height="3" rx="1.5" fill="${iconColor}" />
+  <rect x="29" y="30" width="16" height="2" rx="1" fill="${iconColor}" opacity="0.5" />
+  <rect x="29" y="36" width="19" height="2" rx="1" fill="${iconColor}" opacity="0.5" />
+  <rect x="29" y="42" width="13" height="2" rx="1" fill="${iconColor}" opacity="0.5" />
+  <rect x="29" y="48" width="17" height="2" rx="1" fill="${iconColor}" opacity="0.4" />
+  <path d="M4 18 L4 4 L18 4" fill="none" stroke="${iconColor}" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" />
+  <path d="M62 4 L76 4 L76 18" fill="none" stroke="${iconColor}" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" />
+  <path d="M4 62 L4 76 L18 76" fill="none" stroke="${iconColor}" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" />
+  <path d="M76 62 L76 76 L62 76" fill="none" stroke="${iconColor}" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" />
 </svg>`
 
 const SCREEN_PADDING = 24
@@ -288,7 +291,7 @@ export const HomeScreen: FC<HomeScreenProps> = function HomeScreen({ navigation 
               onPress={handleScanReceipt}
               disabled={isProcessing}
             >
-              <SvgXml xml={SHOEBOX_SCANNER_SVG} width={100} height={100} />
+              <SvgXml xml={getShoeboxScannerSvg(colors.onAccent)} width={100} height={100} />
             </TouchableOpacity>
           </View>
         </View>
@@ -309,17 +312,12 @@ export const HomeScreen: FC<HomeScreenProps> = function HomeScreen({ navigation 
             {receipts.length === 0 && isInitialSyncing ? (
               <ReceiptSkeletonList count={5} rowHeight={64} />
             ) : receipts.length === 0 ? (
-              <View style={themed($emptyState)}>
-                <View style={[$expenseIconWrapper, { backgroundColor: colors.accent + "20" }]}>
-                  <MaterialCommunityIcons name="receipt" size={28} color={colors.accent} />
-                </View>
-                <Text text="No expenses yet" preset="formLabel" style={themed($emptyTitle)} />
-                <Text
-                  text="Scan your first receipt to start tracking your spending"
-                  size="xs"
-                  style={themed($emptySubtitle)}
-                />
-              </View>
+              <EmptyState
+                style={themed($emptyState)}
+                heading="No expenses yet"
+                content="Scan your first receipt to start tracking your spending"
+                button=""
+              />
             ) : (
               receipts.slice(0, 5).map((receipt, index, arr) => (
                 <ListItem
@@ -442,17 +440,12 @@ export const HomeScreen: FC<HomeScreenProps> = function HomeScreen({ navigation 
               />
             </View>
           ) : (
-            <View style={themed($emptyState)}>
-              <View style={[$expenseIconWrapper, { backgroundColor: colors.accent + "20" }]}>
-                <MaterialCommunityIcons name="chart-bar" size={28} color={colors.accent} />
-              </View>
-              <Text text="No spending data yet" preset="formLabel" style={themed($emptyTitle)} />
-              <Text
-                text="Your monthly totals will appear here"
-                size="xs"
-                style={themed($emptySubtitle)}
-              />
-            </View>
+            <EmptyState
+              style={themed($emptyState)}
+              heading="No spending data yet"
+              content="Your monthly totals will appear here"
+              button=""
+            />
           )
         }
       />
@@ -542,15 +535,6 @@ const $expenseIconWrapper: ViewStyle = {
 const $emptyState: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   alignItems: "center",
   paddingVertical: spacing.xl,
-  gap: spacing.xs,
-})
-
-const $emptyTitle: ThemedStyle<TextStyle> = ({ spacing }) => ({
-  marginTop: spacing.xxs,
-})
-
-const $emptySubtitle: ThemedStyle<TextStyle> = ({ colors }) => ({
-  color: colors.textDim,
 })
 
 const $expenseDate: ThemedStyle<TextStyle> = ({ colors }) => ({

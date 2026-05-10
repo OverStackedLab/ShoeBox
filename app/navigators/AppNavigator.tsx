@@ -13,6 +13,7 @@ import { ErrorBoundary } from "@/screens/ErrorScreen/ErrorBoundary"
 import { ForgotPasswordScreen } from "@/screens/ForgotPasswordScreen"
 import { LoginScreen } from "@/screens/LoginScreen"
 import { ReceiptDetailScreen } from "@/screens/ReceiptDetailScreen"
+import { ReceiptImageScreen } from "@/screens/ReceiptImageScreen"
 import { SignUpScreen } from "@/screens/SignUpScreen"
 import { UpdatePasswordScreen } from "@/screens/UpdatePasswordScreen"
 import { WelcomeScreen } from "@/screens/WelcomeScreen"
@@ -62,6 +63,7 @@ const AppStack = () => {
           <Stack.Screen name="Tabs" component={TabNavigator} />
 
           <Stack.Screen name="ReceiptDetail" component={ReceiptDetailScreen} />
+          <Stack.Screen name="ReceiptImage" component={ReceiptImageScreen} />
         </>
       ) : (
         <>

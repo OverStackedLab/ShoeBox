@@ -64,8 +64,7 @@ const hi: Translations = {
   },
   forgotPasswordScreen: {
     heading: "पासवर्ड रीसेट करें",
-    enterDetails:
-      "अपने अकाउंट से जुड़ा ईमेल दर्ज करें और हम आपको एक रीसेट लिंक भेजेंगे।",
+    enterDetails: "अपने अकाउंट से जुड़ा ईमेल दर्ज करें और हम आपको एक रीसेट लिंक भेजेंगे।",
     emailFieldLabel: "ईमेल",
     emailFieldPlaceholder: "अपना ईमेल पता दर्ज करें",
     sendResetLink: "रीसेट लिंक भेजें",

@@ -20,6 +20,7 @@ export async function upsertReceiptRemote(receipt: Receipt, userId: string): Pro
     id: receipt.id,
     user_id: userId,
     store_name: receipt.storeName ?? null,
+    address: receipt.address ?? null,
     date: receipt.date ?? null,
     total: receipt.total ?? null,
     category: receipt.category ?? null,
@@ -102,6 +103,7 @@ export async function fetchRemoteReceipts(userId: string): Promise<Receipt[]> {
     receipts.push({
       id: row.id,
       storeName: row.store_name ?? undefined,
+      address: row.address ?? undefined,
       date: row.date ?? undefined,
       total: row.total ?? undefined,
       category: row.category ?? undefined,

@@ -3,7 +3,11 @@ import { decode } from "base64-arraybuffer"
 
 import { supabase } from "./supabase"
 
-export async function uploadAvatar(userId: string, base64: string, mimeType: string): Promise<string> {
+export async function uploadAvatar(
+  userId: string,
+  base64: string,
+  mimeType: string,
+): Promise<string> {
   const ext = mimeType === "image/png" ? "png" : "jpg"
   const path = `${userId}/avatar.${ext}`
 

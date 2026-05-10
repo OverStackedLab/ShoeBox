@@ -30,6 +30,9 @@ export type AppStackParamList = {
     total?: number
     scannedImages?: Array<{ uri: string; width: number; height: number }>
   }
+  ReceiptImage: {
+    receiptId: string
+  }
   // 🔥 Your screens go here
   // IGNITE_GENERATOR_ANCHOR_APP_STACK_PARAM_LIST
 }

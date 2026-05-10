@@ -64,8 +64,7 @@ const ar: Translations = {
   },
   forgotPasswordScreen: {
     heading: "إعادة تعيين كلمة السر",
-    enterDetails:
-      "أدخل البريد الإلكتروني المرتبط بحسابك وسنرسل لك رابط إعادة التعيين.",
+    enterDetails: "أدخل البريد الإلكتروني المرتبط بحسابك وسنرسل لك رابط إعادة التعيين.",
     emailFieldLabel: "البريد الإلكتروني",
     emailFieldPlaceholder: "ادخل بريدك الإلكتروني",
     sendResetLink: "إرسال رابط إعادة التعيين",

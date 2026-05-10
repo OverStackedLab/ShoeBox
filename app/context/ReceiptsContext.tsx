@@ -17,8 +17,8 @@ import {
   fetchRemoteReceipts,
   upsertReceiptRemote,
 } from "@/services/supabase/receipts"
-import { storage } from "@/utils/storage"
 import { deleteReceiptImages } from "@/utils/receiptStorage"
+import { storage } from "@/utils/storage"
 
 const LEGACY_RECEIPTS_KEY = "ReceiptsProvider.receipts"
 const SIGNED_OUT_RECEIPTS_KEY = "ReceiptsProvider.receipts.__signed_out__"
@@ -37,6 +37,7 @@ export interface ReceiptProduct {
 export interface Receipt {
   id: string
   storeName?: string
+  address?: string
   date?: string
   total?: number
   category?: string
@@ -60,9 +61,7 @@ const ReceiptsContext = createContext<ReceiptsContextType | null>(null)
 export const ReceiptsProvider: FC<PropsWithChildren> = ({ children }) => {
   const { session } = useAuth()
   const userId = session?.user?.id
-  const cacheKey = userId
-    ? `ReceiptsProvider.receipts.${userId}`
-    : SIGNED_OUT_RECEIPTS_KEY
+  const cacheKey = userId ? `ReceiptsProvider.receipts.${userId}` : SIGNED_OUT_RECEIPTS_KEY
   const [receiptsJson, setReceiptsJson] = useMMKVString(cacheKey)
 
   // One-time wipe of any legacy unscoped cache from earlier app versions.

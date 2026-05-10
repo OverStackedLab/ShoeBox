@@ -62,6 +62,23 @@ export const LoginScreen: FC<LoginScreenProps> = function LoginScreen({ navigati
     setAuthPassword("")
   }
 
+  const EmailRightAccessory: ComponentType<TextFieldAccessoryProps> = useMemo(
+    () =>
+      function EmailRightAccessory(props: TextFieldAccessoryProps) {
+        if (!authEmail) return null
+        return (
+          <PressableIcon
+            icon="x"
+            color={colors.text}
+            containerStyle={props.style}
+            size={20}
+            onPress={() => setAuthEmail("")}
+          />
+        )
+      },
+    [authEmail, colors.text],
+  )
+
   const PasswordRightAccessory: ComponentType<TextFieldAccessoryProps> = useMemo(
     () =>
       function PasswordRightAccessory(props: TextFieldAccessoryProps) {
@@ -104,6 +121,7 @@ export const LoginScreen: FC<LoginScreenProps> = function LoginScreen({ navigati
           helper={emailError}
           status={emailError ? "error" : undefined}
           onSubmitEditing={() => authPasswordInput.current?.focus()}
+          RightAccessory={EmailRightAccessory}
         />
 
         <TextField

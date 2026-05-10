@@ -2,10 +2,7 @@ import { ComponentProps, FC, useState } from "react"
 import {
   ActivityIndicator,
   Alert,
-  Image,
-  ImageStyle,
   Modal,
-  ScrollView,
   TouchableOpacity,
   View,
   ViewStyle,
@@ -15,7 +12,6 @@ import * as Device from "expo-device"
 import { launchScanner } from "@dariyd/react-native-document-scanner"
 import { MaterialCommunityIcons } from "@expo/vector-icons"
 import { recognizeText } from "@infinitered/react-native-mlkit-text-recognition"
-import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context"
 import { toast } from "sonner-native"
 
 import { Button } from "@/components/Button"
@@ -32,14 +28,9 @@ import { categorizeReceipt } from "@/services/ai/categorizeReceipt"
 import { useAppTheme } from "@/theme/context"
 import { spacing } from "@/theme/spacing"
 import type { ThemedStyle } from "@/theme/types"
-import { $tabularNums } from "@/theme/typography"
+import { $tabularNums, typography } from "@/theme/typography"
 import { parseReceiptText } from "@/utils/receiptParser"
 import { saveReceiptImage } from "@/utils/receiptStorage"
-
-interface OcrLine {
-  text: string
-  frame: { left: number; top: number; right: number; bottom: number }
-}
 
 interface ReceiptDetailScreenProps extends AppStackScreenProps<"ReceiptDetail"> {}
 
@@ -98,17 +89,14 @@ export const ReceiptDetailScreen: FC<ReceiptDetailScreenProps> = function Receip
     date: paramDate,
     total: paramTotal,
   } = route.params
-  const insets = useSafeAreaInsets()
   const [isProcessing, setIsProcessing] = useState(false)
   const [categoryModalVisible, setCategoryModalVisible] = useState(false)
-  const [ocrOverlayVisible, setOcrOverlayVisible] = useState(false)
-  const [ocrLines, setOcrLines] = useState<OcrLine[]>([])
-  const [imageContainerWidth, setImageContainerWidth] = useState(0)
 
   // Always prefer context (reflects live edits) over stale route params
   const stored = receipts.find((r) => r.id === receiptId)
   const scannedImages = stored?.scannedImages ?? paramImages ?? []
   const storeName = stored?.storeName ?? paramStoreName
+  const address = stored?.address
   const date = stored?.date ?? paramDate
   const total = stored?.total ?? paramTotal
   const category = stored?.category
@@ -181,51 +169,9 @@ export const ReceiptDetailScreen: FC<ReceiptDetailScreenProps> = function Receip
     }
   }
 
-  const handleSelectText = async () => {
+  const handleViewImage = () => {
     if (!scannedImages.length) return
-    setIsProcessing(true)
-    try {
-      const result = await recognizeText(scannedImages[0].uri)
-      const lines: OcrLine[] = result.blocks.flatMap((b) => b.lines)
-      setOcrLines(lines)
-      setOcrOverlayVisible(true)
-    } catch {
-      toast.error("Could not read receipt text.")
-    } finally {
-      setIsProcessing(false)
-    }
-  }
-
-  const handleLineTap = (text: string) => {
-    Alert.alert(text, "Apply as:", [
-      {
-        text: "Merchant",
-        onPress: () => {
-          updateReceipt(receiptId, { storeName: text })
-          setOcrOverlayVisible(false)
-        },
-      },
-      {
-        text: "Date",
-        onPress: () => {
-          updateReceipt(receiptId, { date: text })
-          setOcrOverlayVisible(false)
-        },
-      },
-      {
-        text: "Total",
-        onPress: () => {
-          const n = parseFloat(text.replace(/[^0-9.]/g, ""))
-          if (!isNaN(n)) {
-            updateReceipt(receiptId, { total: n })
-            setOcrOverlayVisible(false)
-          } else {
-            Alert.alert("Invalid", `"${text}" is not a valid amount.`)
-          }
-        },
-      },
-      { text: "Cancel", style: "cancel" },
-    ])
+    navigation.navigate("ReceiptImage", { receiptId })
   }
 
   const handleRescan = async () => {
@@ -282,7 +228,7 @@ export const ReceiptDetailScreen: FC<ReceiptDetailScreenProps> = function Receip
   }
 
   const handleEditField = (
-    field: "storeName" | "date" | "total",
+    field: "storeName" | "address" | "date" | "total",
     title: string,
     current: string,
     keyboardType: "default" | "decimal-pad" = "default",
@@ -378,7 +324,7 @@ export const ReceiptDetailScreen: FC<ReceiptDetailScreenProps> = function Receip
           accessibilityLabel="Select receipt text"
           disabled={isProcessing || !scannedImages.length}
           name="cursor-text"
-          onPress={handleSelectText}
+          onPress={handleViewImage}
         />
         <ReceiptActionButton
           accessibilityLabel="Re-read receipt text"
@@ -411,19 +357,41 @@ export const ReceiptDetailScreen: FC<ReceiptDetailScreenProps> = function Receip
         />
       </View>
 
-      {/* Scanned Images */}
-      {scannedImages && scannedImages.length > 0 && (
-        <View style={themed($imageSection)}>
-          {scannedImages.map((img, index) => (
-            <Image
-              key={`${receiptId}-${index}`}
-              source={{ uri: img.uri }}
-              style={[$scannedImage, { aspectRatio: img.width / img.height }]}
-              resizeMode="contain"
-            />
-          ))}
+      {/* Stylized paper receipt — tap to view the original photo */}
+      <TouchableOpacity
+        activeOpacity={scannedImages.length ? 0.85 : 1}
+        onPress={scannedImages.length ? handleViewImage : undefined}
+        style={themed($paperReceipt)}
+      >
+        <Text
+          text={(storeName ?? `RECEIPT #${receiptId}`).toUpperCase()}
+          style={themed($paperHeading)}
+        />
+        {address ? <Text text={address} style={themed($paperAddress)} /> : null}
+        <View style={themed($paperDivider)} />
+        {products.length > 0 ? (
+          products.map((p, index) => (
+            <View key={`${p.name}-${index}`} style={$paperRow}>
+              <Text text={p.name.toUpperCase()} style={themed($paperItemText)} numberOfLines={1} />
+              <Text
+                text={p.price != null ? formatCurrency(p.price, currency) : "—"}
+                style={[themed($paperItemText), $tabularNums]}
+              />
+            </View>
+          ))
+        ) : (
+          <Text text="No items" style={themed($paperEmpty)} />
+        )}
+        <View style={themed($paperDivider)} />
+        <View style={$paperRow}>
+          <Text text="TOTAL" style={[themed($paperItemText), $paperBold]} />
+          <Text
+            text={total != null ? formatCurrency(total, currency) : "—"}
+            style={[themed($paperItemText), $paperBold, $tabularNums]}
+          />
         </View>
-      )}
+        {date ? <Text text={date} style={themed($paperDate)} /> : null}
+      </TouchableOpacity>
 
       {/* Receipt Info */}
       <Text text="Details" preset="sectionHeading" style={themed($sectionHeading)} />
@@ -452,6 +420,31 @@ export const ReceiptDetailScreen: FC<ReceiptDetailScreenProps> = function Receip
                   size="sm"
                   weight="medium"
                   style={$valueText}
+                />
+              }
+            />
+            <ListItem
+              height={52}
+              bottomSeparator
+              onPress={() => handleEditField("address", "Edit Address", address ?? "")}
+              LeftComponent={
+                <View style={$rowLeft}>
+                  <MaterialCommunityIcons
+                    name="map-marker-outline"
+                    size={16}
+                    color={colors.textDim}
+                    style={$rowIcon}
+                  />
+                  <Text text="Address" size="sm" style={themed($labelText)} />
+                </View>
+              }
+              RightComponent={
+                <Text
+                  text={address ?? "—"}
+                  size="sm"
+                  weight="medium"
+                  style={$valueText}
+                  numberOfLines={1}
                 />
               }
             />
@@ -525,61 +518,6 @@ export const ReceiptDetailScreen: FC<ReceiptDetailScreenProps> = function Receip
         }
       />
 
-      {/* OCR Text Selection Overlay */}
-      <Modal
-        visible={ocrOverlayVisible}
-        animationType="slide"
-        onRequestClose={() => setOcrOverlayVisible(false)}
-      >
-        <SafeAreaView style={themed($ocrSafeArea)} edges={["bottom"]}>
-          <View style={[themed($ocrHeader), { paddingTop: insets.top }]}>
-            <Text text="Tap text to use it" size="sm" weight="medium" />
-            <TouchableOpacity onPress={() => setOcrOverlayVisible(false)} activeOpacity={0.7}>
-              <MaterialCommunityIcons name="close" size={22} color={colors.text} />
-            </TouchableOpacity>
-          </View>
-          <ScrollView style={$ocrScrollView}>
-            <View onLayout={(e) => setImageContainerWidth(e.nativeEvent.layout.width)}>
-              {scannedImages.length > 0 && (
-                <>
-                  <Image
-                    source={{ uri: scannedImages[0].uri }}
-                    style={[
-                      $ocrImage,
-                      {
-                        aspectRatio: (scannedImages[0].width ?? 1) / (scannedImages[0].height ?? 1),
-                      },
-                    ]}
-                    resizeMode="contain"
-                  />
-                  {imageContainerWidth > 0 &&
-                    ocrLines.map((line, i) => {
-                      const scale =
-                        imageContainerWidth / (scannedImages[0].width ?? imageContainerWidth)
-                      return (
-                        <TouchableOpacity
-                          key={i}
-                          activeOpacity={0.5}
-                          style={[
-                            themed($ocrLineHit),
-                            {
-                              left: line.frame.left * scale,
-                              top: line.frame.top * scale,
-                              width: (line.frame.right - line.frame.left) * scale,
-                              height: Math.max((line.frame.bottom - line.frame.top) * scale, 20),
-                            },
-                          ]}
-                          onPress={() => handleLineTap(line.text)}
-                        />
-                      )
-                    })}
-                </>
-              )}
-            </View>
-          </ScrollView>
-        </SafeAreaView>
-      </Modal>
-
       {/* Category Picker Modal */}
       <Modal
         visible={categoryModalVisible}
@@ -631,7 +569,7 @@ export const ReceiptDetailScreen: FC<ReceiptDetailScreenProps> = function Receip
               onPress={() =>
                 handleEditField("total", "Edit Total", total?.toString() ?? "", "decimal-pad")
               }
-              LeftComponent={<Text text="Total" size="sm" weight="bold" />}
+              LeftComponent={<Text text="Total" size="sm" weight="bold" style={$centeredText} />}
               RightComponent={
                 <Text
                   text={total != null ? formatCurrency(total, currency) : "—"}
@@ -669,7 +607,7 @@ export const ReceiptDetailScreen: FC<ReceiptDetailScreenProps> = function Receip
                           activeOpacity={0.6}
                           style={$itemLeft}
                         >
-                          <Text text={p.name} size="sm" />
+                          <Text text={p.name} size="sm" numberOfLines={1} />
                         </TouchableOpacity>
                       }
                       RightComponent={
@@ -722,15 +660,74 @@ const $actionBtn: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   paddingVertical: spacing.xs,
 })
 
-const $imageSection: ThemedStyle<ViewStyle> = ({ spacing }) => ({
-  gap: spacing.md,
+const $paperReceipt: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
+  backgroundColor: colors.palette.neutral100,
+  borderRadius: 8,
+  borderWidth: 1,
+  borderColor: colors.border,
+  paddingHorizontal: spacing.lg,
+  paddingTop: spacing.lg,
+  paddingBottom: spacing.md,
+  marginTop: spacing.xs,
   marginBottom: spacing.xs,
 })
 
-const $scannedImage: ImageStyle = {
-  width: "100%",
-  borderRadius: 12,
+const $paperHeading: ThemedStyle<TextStyle> = ({ colors }) => ({
+  fontFamily: typography.code?.normal,
+  fontSize: 18,
+  fontWeight: "700",
+  color: colors.text,
+  textAlign: "center",
+  letterSpacing: 1,
+})
+
+const $paperAddress: ThemedStyle<TextStyle> = ({ colors, spacing }) => ({
+  fontFamily: typography.code?.normal,
+  fontSize: 12,
+  color: colors.textDim,
+  textAlign: "center",
+  marginTop: spacing.xs,
+})
+
+const $paperDivider: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
+  borderBottomWidth: 1,
+  borderBottomColor: colors.border,
+  borderStyle: "dashed",
+  marginVertical: spacing.sm,
+})
+
+const $paperRow: ViewStyle = {
+  flexDirection: "row",
+  justifyContent: "space-between",
+  alignItems: "center",
+  paddingVertical: 3,
+  gap: spacing.md,
 }
+
+const $paperItemText: ThemedStyle<TextStyle> = ({ colors }) => ({
+  fontFamily: typography.code?.normal,
+  fontSize: 13,
+  color: colors.text,
+  flexShrink: 1,
+})
+
+const $paperBold: TextStyle = { fontWeight: "700" }
+
+const $paperEmpty: ThemedStyle<TextStyle> = ({ colors, spacing }) => ({
+  fontFamily: typography.code?.normal,
+  fontSize: 12,
+  color: colors.textDim,
+  textAlign: "center",
+  paddingVertical: spacing.xs,
+})
+
+const $paperDate: ThemedStyle<TextStyle> = ({ colors, spacing }) => ({
+  fontFamily: typography.code?.normal,
+  fontSize: 12,
+  color: colors.textDim,
+  textAlign: "center",
+  marginTop: spacing.sm,
+})
 
 const $sectionHeading: ThemedStyle<TextStyle> = ({ colors, spacing }) => ({
   color: colors.textDim,
@@ -770,9 +767,15 @@ const $valueText: TextStyle = {
   ...$tabularNums,
 }
 
+const $centeredText: TextStyle = {
+  alignSelf: "center",
+}
+
 const $itemLeft: ViewStyle = {
+  flex: 1,
   alignSelf: "center",
   gap: 2,
+  paddingRight: spacing.sm,
 }
 
 const $dimText: ThemedStyle<TextStyle> = ({ colors }) => ({
@@ -833,36 +836,7 @@ const $modalTitle: ThemedStyle<TextStyle> = ({ spacing }) => ({
   marginBottom: spacing.sm,
 })
 
-const $ocrSafeArea: ThemedStyle<ViewStyle> = ({ colors }) => ({
-  flex: 1,
-  backgroundColor: colors.imageBackdrop,
-})
-
-const $ocrScrollView: ViewStyle = {
-  flex: 1,
-}
-
-const $ocrHeader: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
-  flexDirection: "row",
-  justifyContent: "space-between",
-  alignItems: "center",
-  paddingHorizontal: spacing.lg,
-  paddingVertical: spacing.sm,
-  backgroundColor: colors.background,
-})
-
-const $ocrImage: ImageStyle = {
-  width: "100%",
-}
-
 const $productsLoader: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   paddingVertical: spacing.md,
   alignItems: "center",
-})
-
-const $ocrLineHit: ThemedStyle<ViewStyle> = ({ colors }) => ({
-  position: "absolute",
-  borderWidth: 1,
-  borderColor: `${colors.accent}99`,
-  backgroundColor: `${colors.accent}26`,
 })

@@ -141,6 +141,48 @@ Columns used by `upsertReceiptRemote` / `fetchRemoteReceipts`:
 
 Both tables need RLS enabled with policies restricting access to `auth.uid() = user_id`.
 
+## Running migrations
+
+Schema changes live in [supabase/migrations/](../supabase/migrations/). To apply pending migrations to the linked remote project:
+
+```bash
+supabase db push
+```
+
+### Authenticating the CLI
+
+Newer CLI versions try to provision a temporary `cli_login_postgres` role and fail on hosted projects with `permission denied to alter role`. Work around it by passing the database password directly. Get it from Dashboard → **Project Settings → Database → Database password** (reset it there if you don't have it).
+
+The CLI does **not** read the project's `.env`, so the password has to be in the shell environment when `supabase` runs. Pick one:
+
+```bash
+# One-off: load .env into the current shell, then push
+set -a; source .env; set +a; supabase db push
+
+# Or pass it inline
+supabase db push --password "$SUPABASE_DB_PASSWORD"
+
+# Or use direnv (brew install direnv) with .envrc → `dotenv .env`
+```
+
+Add the variable to `.env` (gitignored) — keep the name unprefixed so it isn't bundled into the Expo client:
+
+```
+SUPABASE_DB_PASSWORD=your-db-password-here
+```
+
+### "relation already exists" when pushing
+
+If `supabase db push` errors with `relation "X" already exists (SQLSTATE 42P07)`, the table was created out-of-band (e.g. pasted into the SQL editor) before migrations were tracked. Mark the affected migrations as applied without re-running them:
+
+```bash
+supabase migration list                                              # see local vs remote state
+supabase migration repair --status applied <timestamp> [<timestamp>...]
+supabase db push                                                     # now only runs truly-new migrations
+```
+
+Only repair migrations whose schema actually exists on remote — repairing one whose tables aren't there will cause `db push` to silently skip it forever.
+
 ## Troubleshooting
 
 ### Avatar doesn't load after relaunch

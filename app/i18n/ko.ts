@@ -64,8 +64,7 @@ const ko: Translations = {
   },
   forgotPasswordScreen: {
     heading: "비밀번호 재설정",
-    enterDetails:
-      "계정에 등록된 이메일을 입력하면 재설정 링크를 보내드립니다.",
+    enterDetails: "계정에 등록된 이메일을 입력하면 재설정 링크를 보내드립니다.",
     emailFieldLabel: "이메일",
     emailFieldPlaceholder: "이메일 주소를 입력하세요",
     sendResetLink: "재설정 링크 보내기",

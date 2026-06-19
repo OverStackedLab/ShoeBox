@@ -22,6 +22,7 @@ import { ListItem } from "@/components/ListItem"
 import { Screen } from "@/components/Screen"
 import { Text } from "@/components/Text"
 import { TextField } from "@/components/TextField"
+import { Switch } from "@/components/Toggle/Switch"
 import { useAuth } from "@/context/AuthContext"
 import { CATEGORY_COLORS, useCategories } from "@/context/CategoriesContext"
 import { useSettings } from "@/context/SettingsContext"
@@ -40,7 +41,7 @@ export const ProfileScreen: FC<ProfileScreenProps> = function ProfileScreen() {
     themeScheme,
   } = useAppTheme()
   const { authEmail, avatarUrl, logout, uploadAvatar } = useAuth()
-  const { currency, setCurrency } = useSettings()
+  const { currency, setCurrency, aiReceiptReading, setAiReceiptReading } = useSettings()
   const { categories, addCategory, removeCategory } = useCategories()
 
   const [isUploadingAvatar, setIsUploadingAvatar] = useState(false)
@@ -198,6 +199,15 @@ export const ProfileScreen: FC<ProfileScreenProps> = function ProfileScreen() {
                     style={themed($rightText)}
                   />
                   <MaterialCommunityIcons name="chevron-right" size={20} color={colors.textDim} />
+                </View>
+              }
+            />
+            <ListItem
+              text="AI Receipt Reading"
+              bottomSeparator
+              RightComponent={
+                <View style={$rightRow}>
+                  <Switch value={aiReceiptReading} onValueChange={setAiReceiptReading} />
                 </View>
               }
             />

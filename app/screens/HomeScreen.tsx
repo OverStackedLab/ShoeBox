@@ -78,7 +78,7 @@ export const HomeScreen: FC<HomeScreenProps> = function HomeScreen({ navigation 
 
   const { receipts, addReceipt, updateReceipt, setCategorizing, isInitialSyncing } = useReceipts()
   const { categories } = useCategories()
-  const { currency } = useSettings()
+  const { currency, aiReceiptReading } = useSettings()
   const [viewMode, setViewMode] = useState<"daily" | "weekly" | "monthly">("monthly")
 
   const spendingData = useMemo(() => {
@@ -188,7 +188,10 @@ export const HomeScreen: FC<HomeScreenProps> = function HomeScreen({ navigation 
 
         try {
           const { text } = await recognizeText(scannedImages[0].uri)
-          const { storeName, date, total } = parseReceiptText(text)
+          // In AI-only mode, leave fields empty and let categorizeReceipt populate them.
+          const { storeName, date, total }: ReturnType<typeof parseReceiptText> = aiReceiptReading
+            ? {}
+            : parseReceiptText(text)
           toast.dismiss(loadingToast)
 
           addReceipt({

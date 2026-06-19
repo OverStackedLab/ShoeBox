@@ -81,7 +81,7 @@ export const ReceiptDetailScreen: FC<ReceiptDetailScreenProps> = function Receip
   const receiptsCtx = useReceipts()
   const { receipts, removeReceipt, updateReceipt, categorizingIds, setCategorizing } = receiptsCtx
   const { categories } = useCategories()
-  const { currency } = useSettings()
+  const { currency, aiReceiptReading } = useSettings()
   const {
     receiptId,
     scannedImages: paramImages,
@@ -205,19 +205,51 @@ export const ReceiptDetailScreen: FC<ReceiptDetailScreenProps> = function Receip
 
         try {
           const { text } = await recognizeText(newImages[0].uri)
-          const { storeName: newStoreName, date: newDate, total: newTotal } = parseReceiptText(text)
-          toast.dismiss(loadingToast)
-          updateReceipt(receiptId, {
-            scannedImages: newImages,
-            storeName: newStoreName,
-            date: newDate,
-            total: newTotal,
-          })
-          toast.success("Receipt updated.")
+
+          if (aiReceiptReading) {
+            // AI-only mode: save the image, then let categorizeReceipt populate the fields.
+            updateReceipt(receiptId, { scannedImages: newImages })
+            setCategorizing(receiptId, true)
+            const aiResult = await categorizeReceipt({
+              text,
+              categories: categories.map((c) => ({
+                id: c.id,
+                label: c.label,
+                description: c.description,
+              })),
+            })
+            toast.dismiss(loadingToast)
+            if (aiResult) {
+              const updates: Parameters<typeof updateReceipt>[1] = {}
+              if (aiResult.categoryId) updates.category = aiResult.categoryId
+              if (aiResult.products?.length) updates.products = aiResult.products
+              if (aiResult.storeName) updates.storeName = aiResult.storeName
+              if (aiResult.date) updates.date = aiResult.date
+              if (aiResult.total != null) updates.total = aiResult.total
+              if (Object.keys(updates).length) updateReceipt(receiptId, updates)
+            }
+            setCategorizing(receiptId, false)
+            toast.success("Receipt updated.")
+          } else {
+            const {
+              storeName: newStoreName,
+              date: newDate,
+              total: newTotal,
+            } = parseReceiptText(text)
+            toast.dismiss(loadingToast)
+            updateReceipt(receiptId, {
+              scannedImages: newImages,
+              storeName: newStoreName,
+              date: newDate,
+              total: newTotal,
+            })
+            toast.success("Receipt updated.")
+          }
         } catch {
           toast.dismiss(loadingToast)
           toast.error("Could not read receipt text.")
           updateReceipt(receiptId, { scannedImages: newImages })
+          setCategorizing(receiptId, false)
         } finally {
           setIsProcessing(false)
         }

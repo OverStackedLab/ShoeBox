@@ -1,5 +1,5 @@
 import { createContext, FC, PropsWithChildren, useCallback, useContext, useEffect } from "react"
-import { useMMKVString } from "react-native-mmkv"
+import { useMMKVBoolean, useMMKVString } from "react-native-mmkv"
 
 import { fetchUserPreferences, upsertUserPreferences } from "@/services/supabase/preferences"
 
@@ -10,22 +10,32 @@ export type Currency = "USD" | "HUF"
 interface SettingsContextType {
   currency: Currency
   setCurrency: (currency: Currency) => void
+  /** When true, receipt fields are populated only by AI, skipping the local regex parser. */
+  aiReceiptReading: boolean
+  setAiReceiptReading: (enabled: boolean) => void
 }
 
 const SettingsContext = createContext<SettingsContextType | null>(null)
 
 export const SettingsProvider: FC<PropsWithChildren> = ({ children }) => {
   const [currencyRaw, setCurrencyRaw] = useMMKVString("SettingsProvider.currency")
+  const [aiReceiptReadingRaw, setAiReceiptReadingRaw] = useMMKVBoolean(
+    "SettingsProvider.aiReceiptReading",
+  )
   const { session } = useAuth()
 
   const currency: Currency = currencyRaw === "HUF" ? "HUF" : "USD"
+  const aiReceiptReading = aiReceiptReadingRaw === true
 
   useEffect(() => {
     const userId = session?.user?.id
     if (!userId) return
 
     fetchUserPreferences(userId).then((prefs) => {
-      if (prefs) setCurrencyRaw(prefs.currency)
+      if (prefs) {
+        setCurrencyRaw(prefs.currency)
+        setAiReceiptReadingRaw(prefs.aiReceiptReading)
+      }
     })
   }, [session?.user?.id])
 
@@ -40,8 +50,21 @@ export const SettingsProvider: FC<PropsWithChildren> = ({ children }) => {
     [setCurrencyRaw, session?.user?.id],
   )
 
+  const setAiReceiptReading = useCallback(
+    (enabled: boolean) => {
+      setAiReceiptReadingRaw(enabled)
+      const userId = session?.user?.id
+      if (userId) {
+        upsertUserPreferences(userId, { aiReceiptReading: enabled })
+      }
+    },
+    [setAiReceiptReadingRaw, session?.user?.id],
+  )
+
   return (
-    <SettingsContext.Provider value={{ currency, setCurrency }}>
+    <SettingsContext.Provider
+      value={{ currency, setCurrency, aiReceiptReading, setAiReceiptReading }}
+    >
       {children}
     </SettingsContext.Provider>
   )
